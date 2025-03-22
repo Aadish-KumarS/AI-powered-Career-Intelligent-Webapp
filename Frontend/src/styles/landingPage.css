@@ -1,0 +1,9 @@
+/* General styles */
+.landing-page {
+  transition: background-color 0.3s, color 0.3s;
+  font-family: Arial, sans-serif;
+}
+.landing-page.dark {
+  background-color: #121212;
+  color: white;
+}

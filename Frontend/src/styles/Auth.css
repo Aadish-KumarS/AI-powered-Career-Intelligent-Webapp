@@ -1,0 +1,249 @@
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(to right, #ff7e5f, #feb47b);
+}
+
+.auth-card {
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.auth-title {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.auth-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.auth-container input:focus {
+  border-color: #ff7e5f;
+  outline: none;
+}
+
+.auth-container .authForm-btn {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signup-btn,
+.login-btn,
+.verify-btn,
+.send-resend-btn,
+.reset-pass-btn {
+  background: linear-gradient(45deg, #ff6f61, #ffcc00);
+  color: white;
+  font-weight: 200;
+  transition: background-position 0.25s ease-in-out;
+  background-size: 200% 200%; 
+  background-position: 0% 50%; 
+}
+
+.signup-btn:hover,
+.login-btn:hover,
+.verify-btn:hover,
+.send-resend-btn:hover,
+.reset-pass-btn:hover {
+  background-position: 100% 50%; 
+}
+
+.btn-google {
+  background-color: #db4437;
+  color: white;
+  font-weight: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-google:hover {
+  background-color: #c1351d;
+}
+
+.btn-google svg {
+  margin-right: 10px;
+}
+
+.error-text {
+  color: #ff3b3b;
+  font-size: 0.9rem;
+  margin: 10px 0;
+}
+
+.success-text {
+  color: #28a745;
+  font-size: 1rem;
+  margin: 10px 0;
+}
+
+.auth-footer {
+  margin-top: 15px;
+  font-size: 1rem;
+  color: #555;
+}
+
+.auth-footer a {
+  color: #ff7e5f;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Password visibility inside input field */
+.password-container {
+  position: relative;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+/* Password Strength Bar */
+.password-strength-bar-container {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.password-strength-bar{
+  width: 100%;
+  height: 8px;
+  border-radius: 1rem !important;
+  background-color: #ddd;
+  overflow: hidden;
+}
+
+.password-strength-bar::-webkit-progress-bar {
+  background-color: #ddd;
+}
+
+.password-strength-bar::-webkit-progress-value {
+  background-color: #ff3b3b; /* Default to red for weak */
+}
+
+.password-strength-bar::-moz-progress-bar {
+  background-color: #ff3b3b; /* Default to red for weak */
+}
+
+.password-strength-bar[value="30"]::-webkit-progress-value {
+  background-color: #ff3b3b; /* Red */
+}
+
+.password-strength-bar[value="30"]::-moz-progress-bar {
+  background-color: #ff3b3b; /* Red */
+}
+
+.password-strength-bar[value="60"]::-webkit-progress-value {
+  background-color: #ff7e5f; /* Orange */
+}
+
+.password-strength-bar[value="60"]::-moz-progress-bar {
+  background-color: #ff7e5f; /* Orange */
+}
+
+.password-strength-bar[value="100"]::-webkit-progress-value {
+  background-color: #28a745; /* Green */
+}
+
+.password-strength-bar[value="100"]::-moz-progress-bar {
+  background-color: #28a745; /* Green */
+}
+
+.password-strength-text {
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.password-strength-text.weak {
+  color: #ff3b3b; /* Red */
+}
+
+.password-strength-text.medium {
+  color: #ff7e5f; /* Orange */
+}
+
+.password-strength-text.strong {
+  color: #28a745; /* Green */
+}
+
+.back-btn {
+  font-weight: 200;
+  background-color: #FFFFFF;
+  border-radius: .25rem;
+  color: #111827;
+  font-size: .875rem;
+  padding: .5rem 1.15rem;
+  text-align: center;
+  text-decoration: none #D1D5DB solid;
+  text-decoration-thickness: auto;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  position: absolute;
+  top: 2%;
+  left: 2%;
+  cursor: pointer;
+  border: none;
+}
+
+.back-btn:hover {
+  background-color: rgb(249,250,251);
+}
+
+.back-btn:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.back-btn:focus-visible {
+  box-shadow: none;
+}
+
+
+
+/* Email verificaition */
+.auth-text {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.resend-code {
+  color: #2a5298;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.resend-code:hover {
+  text-decoration: underline;
+}
+
+/* Forgot password page */
