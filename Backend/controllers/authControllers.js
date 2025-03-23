@@ -89,21 +89,30 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     if (!user.isVerified) {
       return res.status(400).json({ message: "Please verify your email before logging in." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
     res.json({ token, user });
 
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
+    console.error("Error during login:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 

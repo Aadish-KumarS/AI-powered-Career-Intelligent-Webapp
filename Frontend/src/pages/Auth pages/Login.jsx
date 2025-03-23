@@ -1,8 +1,8 @@
 import {Link, useNavigate } from 'react-router-dom';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa'; 
 import axios from 'axios';
-import { useAuthForm } from '../hooks/useAuthForm'; 
-import '../styles/Auth.css';
+import { useAuthForm } from '../../hooks/useAuthForm'; 
+import '../../styles/Auth.css';
 
 export default function Login() {
   const { 
@@ -34,7 +34,7 @@ export default function Login() {
 
       if (response.data) {
         sessionStorage.setItem('authToken', response.data.token); 
-        navigate('/dashboard');
+        navigate('/profile');
       } else {
         setError(response.data.message);
       }

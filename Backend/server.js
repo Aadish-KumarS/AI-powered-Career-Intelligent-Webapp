@@ -5,6 +5,7 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import resetRoutes from './routes/resetRoutes.js'
 import otpRoutes from './routes/otpRoutes.js'
+import userRoutes from './routes/userRoutes.js'
 import passport from 'passport';
 import cookieParser from "cookie-parser";
 import session from "express-session";
@@ -34,16 +35,16 @@ app.use(passport.session());
 
 
 
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use("/api/auth", resetRoutes);
 app.use('/otp', otpRoutes);
+app.use("/api/users", userRoutes);
 
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/' }), 
   (req, res) => {
-    res.redirect('http://localhost:5173/profile');
+    res.redirect('http://localhost:5173/profile/create-user-profile');
   }
 );
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../styles/Auth.css';
+import '../../styles/Auth.css';
 
 export default function EmailVerification() {
   const [verificationCode, setVerificationCode] = useState('');

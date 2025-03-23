@@ -62,7 +62,7 @@ body {
   filter: blur(100px);
 }
 
-.shape1 { width: 200px; height: 200px; background: #ff007f; top: 10%; left: 5%; }
+.shape1 { width: 200px; height: 200px; background: #ff6200; top: 10%; left: 5%; }
 .shape2 { width: 300px; height: 300px; background: #007bff; bottom: 10%; right: 10%; }
 .shape3 { width: 250px; height: 250px; background: #32cd32; top: 40%; left: 50%; transform: translateX(-50%); }
 

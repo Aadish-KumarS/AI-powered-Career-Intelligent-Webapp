@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import {  useEffect } from 'react';
-import '../../styles/Navbar.css';
+import '../../styles/Landingpage Styles/Navbar.css';
 import { FaRegUser } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 

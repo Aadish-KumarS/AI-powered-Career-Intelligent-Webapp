@@ -1,0 +1,198 @@
+.view-profile-container{
+  display: flex;
+  min-height: 100vh;
+  justify-content: space-between;
+  padding: 20px;
+  background: linear-gradient(to right, #ff7e5f, #feb47b);
+  overflow: hidden;
+  position: relative;
+  /* z-index: 1; */
+}
+
+.left-form,
+.right-content {
+  transition: transform 0.5s ease-out;
+}
+
+.left-form {
+  width: 35%;
+  background-color: #fff;
+  padding: 4rem;
+  border-radius: 15px;
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.346);
+  border: 1px solid #ececec;
+  z-index: 1;
+  position: relative;
+}
+
+.left-form h2 {
+  color: #373737;
+  font-size: 2rem;
+  font-family: 'poppins', sans-serif;
+  margin-bottom: 3rem;
+  font-size: 4rem;
+  font-weight: 300 ;
+  line-height: 4.5rem;
+}
+
+.view-profile-container form{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.left-form input,
+.left-form textarea,
+.left-form button {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  font-family: 'poppins', sans-serif;
+}
+
+.left-form input[type="file"] {
+  padding: 5px;
+  border: 1px solid #ddd;
+}
+
+.left-form .profile-preview {
+  margin-top: 15px;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.left-form .error-text {
+  color: #e74c3c;
+  font-size: 1rem;
+  margin-top: -10px;
+}
+
+.left-form .btn-primary {
+  background-color: #373737;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+}
+
+.left-form .btn-primary:hover {
+  background-color: #2f1a14;
+}
+
+.right-content {
+  width: 60%;
+  padding: 20px;
+  z-index: 1;
+  position: relative;
+}
+
+.right-content .welcome-text {
+  margin-bottom: 30px;
+}
+
+.right-content h2 {
+  font-weight: 200;
+  font-family: "poppins";
+  color: #373737;
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  font-size: 4rem;
+}
+
+.right-content p {
+  color: #4b4b4b;
+  font-size: 1.5rem;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  max-width: 650px;
+}
+
+.view-profile-container .cards-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  margin-top: 4rem;
+}
+
+.view-profile-container .card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.265);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.view-profile-container .card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.view-profile-container .card h3 {
+  color: #373737;
+  font-size: 1.4rem;
+  margin-top: 15px;
+  font-weight: 300;
+}
+
+.view-profile-container .card p {
+  color: #6a6a6a;
+  font-size: 1rem;
+  margin-top: 10px;
+  text-align:center;
+}
+
+.view-profile-container .card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.1);
+}
+
+.bg-text{
+  position: absolute;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-family: "poppins";
+  font-size: 18rem;
+  top:55%;
+  left: 40%;
+  transform: rotate(90deg);
+  color: #3737375e;
+}
+
+.view-profile-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1.5px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.view-profile-container input:focus,
+.view-profile-container textarea:focus  {
+  border-color: #ff7e5f;
+  outline: none;
+}
+
+.view-profile-container button {
+  background: linear-gradient(45deg, #ff6f61, #ffcc00);
+  color: white;
+  font-weight: 200;
+  transition: background-position 0.25s ease-in-out;
+  background-size: 200% 200%; 
+  background-position: 0% 50%; 
+}
+
+.view-profile-container button:hover {
+  background-position: 100% 50%; 
+}

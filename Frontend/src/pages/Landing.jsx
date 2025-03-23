@@ -4,7 +4,7 @@ import Features from '../components/LandingPageComponents/Features';
 import About from '../components/LandingPageComponents/About';
 // import HowItWorks from '../components/HowItWorks';
 import Footer from '../components/LandingPageComponents/Footer';
-import '../styles/landingPage.css';
+import '../styles/Landingpage Styles/LandingPage.css';
 
 export default function LandingPage() {
 

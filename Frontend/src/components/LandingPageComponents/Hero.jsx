@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import gsap from 'gsap';
-import '../../styles/HeroSection.css';
+import '../../styles/Landingpage Styles/HeroSection.css';
 import { FaArrowRight } from 'react-icons/fa';
 import RocketIcon from '../../assets/rocket.svg?react';
 import BrainIcon from '../../assets/brain.svg?react';

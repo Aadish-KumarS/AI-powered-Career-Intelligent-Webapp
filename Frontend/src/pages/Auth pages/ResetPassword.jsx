@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import '../styles/Auth.css';
-import { useAuthForm } from '../hooks/useAuthForm';
+import '../../styles/Auth.css';
+import { useAuthForm } from '../../hooks/useAuthForm';
 
 export default function ResetPassword() {
   const [error, setError] = useState('');

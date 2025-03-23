@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import InnovationIcon from '../../assets/innovation.svg?react';
 import GrowthIcon from '../../assets/growth.svg?react';
-import '../../styles/About.css';
+import '../../styles/Landingpage Styles/About.css';
 import aboutImg from '../../assets/about-img.png'
 
 export default function About() {

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
-import '../styles/Auth.css';
-import { useAuthForm } from '../hooks/useAuthForm';
+import '../../styles/Auth.css';
+import { useAuthForm } from '../../hooks/useAuthForm';
 
 export default function Signup() {
   const [success, setSuccess] = useState('');

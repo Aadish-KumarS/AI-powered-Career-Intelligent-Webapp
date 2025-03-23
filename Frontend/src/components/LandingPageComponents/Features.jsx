@@ -1,6 +1,6 @@
 import { useState } from "react";
 import gsap from "gsap";
-import "../../styles/Features.css";
+import "../../styles/Landingpage Styles/Features.css";
 import { FaExpand } from 'react-icons/fa';
 import { RiCollapseDiagonal2Line } from "react-icons/ri";
 import featuresData from "../../constants/featureConstants";
