@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/Auth.css';
 import { useAuthForm } from '../../hooks/useAuthForm';
+import axios from 'axios';
+
 
 export default function ResetPassword() {
   const [error, setError] = useState('');
@@ -11,7 +13,6 @@ export default function ResetPassword() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const navigate = useNavigate();
   
-  const email = JSON.parse(sessionStorage.getItem('email'));
 
   const { 
     formData, 
@@ -37,15 +38,13 @@ export default function ResetPassword() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: formData.password }),
+      const response = await axios.post('http://localhost:5000/api/auth/reset-password', {
+        password: formData.password
       });
 
-      const data = await response.json();
+      const data = await response.data;
 
-      if (response.ok) {
+      if (response.status == 200) {
         setSuccess('Password reset successfully. Redirecting to login...');
         setTimeout(() => navigate('/login'), 2000);
       } else {

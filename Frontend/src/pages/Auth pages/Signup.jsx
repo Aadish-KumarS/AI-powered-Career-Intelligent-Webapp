@@ -4,13 +4,12 @@ import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import '../../styles/Auth.css';
 import { useAuthForm } from '../../hooks/useAuthForm';
-
+axios.defaults.withCredentials = true;
 export default function Signup() {
   const [success, setSuccess] = useState('');
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
 
   const { 
     formData, 
@@ -58,7 +57,7 @@ export default function Signup() {
         setSuccess('Account created successfully! Please verify your email.');
         navigate('/verify-email',{ state: { purpose: "signup" } });
 
-        sessionStorage.setItem('email', JSON.stringify(formData.email));
+        // sessionStorage.setItem('email', JSON.stringify(formData.email));
 
         setError('');
       } else {

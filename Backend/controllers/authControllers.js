@@ -35,7 +35,14 @@ export const register = async (req, res) => {
       const otpEntry = new OTP({ email, otp, expiration: otpExpiration });
       await otpEntry.save();
     }
-
+    
+    res.cookie('email', email, {
+      httpOnly: true,
+      secure: false, 
+      maxAge: 60 * 60 * 1000,
+      path: '/' 
+    });
+    
     const otpMessage = `Your OTP for email verification is: ${otp}. It will expire in 10 minutes.`;
     await sendEmail(email, "Verify Your Email", otpMessage);
 
@@ -55,25 +62,8 @@ export const register = async (req, res) => {
   }
 };
 
-// EMAIL VERIFICATION
-export const verifyEmail = async (req, res) => {
-  try {
-    const { token } = req.params;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findOne({ email: decoded.email });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    user.isVerified = true;
-    user.verificationToken = null;
-    await user.save();
-
-    res.json({ message: "Email verified successfully!" });
-  } catch (error) {
-    res.status(500).json({ message: "Invalid or expired token." });
-  }
-};
-
+//LOGOUT
 export const logout = (req, res) => {
   try {
     res.clearCookie("token");

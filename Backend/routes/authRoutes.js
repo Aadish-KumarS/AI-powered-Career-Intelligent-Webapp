@@ -1,12 +1,11 @@
 import express from 'express';
 import passport from "passport";
-import { register, verifyEmail, googleLogin,login,googleAuthCallback,logout } from '../controllers/authControllers.js';
+import { register, googleLogin,login,googleAuthCallback,logout } from '../controllers/authControllers.js';
 import { authenticateUser } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.post('/register', register);
-router.get('/verify-email/:token', verifyEmail);
 router.post('/google-login', googleLogin);
 
 router.post('/login', login);

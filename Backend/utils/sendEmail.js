@@ -73,8 +73,6 @@ const sendEmail = async (to, subject, otp) => {
       otp,
       html: htmlContent,
     });
-
-    console.log(`📧 OTP sent to ${to}`);
   } catch (error) {
     console.error('❌ Email Sending Failed:', error);
   }

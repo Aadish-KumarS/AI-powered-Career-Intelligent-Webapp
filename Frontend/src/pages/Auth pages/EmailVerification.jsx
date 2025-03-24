@@ -23,16 +23,15 @@ export default function EmailVerification() {
       return;
     }
   
-    const email = JSON.parse(sessionStorage.getItem('email'));
+    // const email = JSON.parse(sessionStorage.getItem('email'));
 
-    if (!email) {
-      setError('Email not found');
-      return;
-    }
+    // if (!email) {
+    //   setError('Email not found');
+    //   return;
+    // }
   
     try {
       const response = await axios.post('http://localhost:5000/otp/verify-otp', {
-        email,
         otp: verificationCode,
       });
   

@@ -69,7 +69,6 @@ export default function Profile() {
       <div className="profile-header">
         <div className="profile-setting">
           <div className="profile-image-container">
-            {console.log(userData)}
               <img 
                 src={userData.profileImage} 
                 alt="Profile" 

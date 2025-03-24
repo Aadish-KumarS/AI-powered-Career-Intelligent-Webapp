@@ -6,7 +6,13 @@ import OTP from "../models/Otp.js";
 
 //FORGOT PASSWORD
 export const forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const email = req.body.email
+  res.cookie('email', email, {
+    httpOnly: true,
+    secure: false, 
+    maxAge: 60 * 60 * 1000,
+    path: '/' 
+  });  
   
   try {
     const user = await User.findOne({ email });
@@ -37,19 +43,27 @@ export const forgotPassword = async (req, res) => {
 
 //RESET PASSWORD
 export const resetPassword = async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = req.cookies.email;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email not provided in cookies' });
+  }
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
     await user.save();
+    return res.status(200).json({ message: 'Password reset successfully' });
 
-    res.json({ message: 'Password reset successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error, try again later' });
+    console.error(error); 
+    return res.status(500).json({ message: 'Server error, try again later' });
   }
 };

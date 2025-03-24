@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+axios.defaults.withCredentials = true;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -20,22 +23,17 @@ export default function ForgotPassword() {
       return;
     }
 
-    sessionStorage.setItem('email', JSON.stringify(email)); // Store email in session storage
-
     try {
-      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+      const response = await axios.post('http://localhost:5000/api/auth/forgot-password', {
+        email : email
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      const data = await response.data;
+      if (response.status == 200) {
         setSuccess('A verification code has been sent to your email.');
         setTimeout(() => {
           navigate('/verify-email', { state: { purpose: 'forgot-password' } });
-        }, 2000);
+        }, 1000);
       } else {
         setError(data.message || 'Something went wrong.');
       }
