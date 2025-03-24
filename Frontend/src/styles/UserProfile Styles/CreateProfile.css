@@ -1,4 +1,4 @@
-.view-profile-container{
+.create-profile-container{
   display: flex;
   min-height: 100vh;
   justify-content: space-between;
@@ -35,7 +35,7 @@
   line-height: 4.5rem;
 }
 
-.view-profile-container form{
+.create-profile-container form{
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -113,14 +113,14 @@
   max-width: 650px;
 }
 
-.view-profile-container .cards-container {
+.create-profile-container .cards-container {
   display: flex;
   gap: 2rem;
   justify-content: space-between;
   margin-top: 4rem;
 }
 
-.view-profile-container .card {
+.create-profile-container .card {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.265);
@@ -131,27 +131,27 @@
   overflow: hidden;
 }
 
-.view-profile-container .card img {
+.create-profile-container .card img {
   width: 100%;
   height: 180px;
   object-fit: cover;
 }
 
-.view-profile-container .card h3 {
+.create-profile-container .card h3 {
   color: #373737;
   font-size: 1.4rem;
   margin-top: 15px;
   font-weight: 300;
 }
 
-.view-profile-container .card p {
+.create-profile-container .card p {
   color: #6a6a6a;
   font-size: 1rem;
   margin-top: 10px;
   text-align:center;
 }
 
-.view-profile-container .card:hover {
+.create-profile-container .card:hover {
   transform: translateY(-10px);
   box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.1);
 }
@@ -168,7 +168,7 @@
   color: #3737375e;
 }
 
-.view-profile-container input {
+.create-profile-container input {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
@@ -178,13 +178,13 @@
   transition: all 0.3s ease;
 }
 
-.view-profile-container input:focus,
-.view-profile-container textarea:focus  {
+.create-profile-container input:focus,
+.create-profile-container textarea:focus  {
   border-color: #ff7e5f;
   outline: none;
 }
 
-.view-profile-container button {
+.create-profile-container button {
   background: linear-gradient(45deg, #ff6f61, #ffcc00);
   color: white;
   font-weight: 200;
@@ -193,6 +193,103 @@
   background-position: 0% 50%; 
 }
 
-.view-profile-container button:hover {
+.create-profile-container button:hover {
   background-position: 100% 50%; 
+}
+
+/* Multi-step form styles */
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.step-indicator {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  font-family: "Doto";
+}
+
+.step-indicator.active {
+  background-color: #ff6f61;
+  color: white;
+}
+
+.indicator-line {
+  flex-grow: 1;
+  height: 2px;
+  background-color: #e0e0e0;
+}
+
+.form-step {
+  width: 100%;
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 1rem;
+}
+
+.create-profile-back-btn, .next-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.create-profile-back-btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.create-profile-back-btn:hover, .next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Map and location styles */
+#map {
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.location-container, .education-container {
+  margin-bottom: 20px;
+}
+
+/* Interests grid */
+.interests-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.interest-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.file-upload {
+  margin-bottom: 15px;
+}
+
+.profile-preview {
+  max-width: 100px;
+  max-height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 10px 0;
 }

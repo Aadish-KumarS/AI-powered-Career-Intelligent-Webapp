@@ -19,25 +19,31 @@ export default function Signup() {
     handleChange, 
     setError, 
     passwordStrength,
-    setPasswordVisible
+    setPasswordVisible,
+    setLoading,
+    loading
   } = useAuthForm({  name: '', email: '', password: '', confirmPassword: ''  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     // Password length validation
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long.');
+      setLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
       return;
     }
 
     if (!validateEmail(formData.email)) {
       setError('Invalid email format');
+      setLoading(false);
       return;
     }
 
@@ -70,6 +76,8 @@ export default function Signup() {
       } else {
         setError('An error occurred. Please check your network connection.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -158,7 +166,7 @@ export default function Signup() {
           {success && <p className="success-text">{success}</p>}
 
           <button type="submit" className="signup-btn authForm-btn">
-            Sign Up
+            {loading ? 'Signing Up ...' : 'Sign Up '}
           </button>
           <button className="btn-google authForm-btn" onClick={handleGoogleAuth}>
             <FaGoogle /> Sign up with Google

@@ -10,6 +10,7 @@ import passport from 'passport';
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import './config/passport.js'
+import OpenAI from "openai";
 
 dotenv.config(); 
 
@@ -47,6 +48,27 @@ app.get('/auth/google/callback',
     res.redirect('http://localhost:5173/profile/create-user-profile');
   }
 );
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+app.post("/get-suggestions", async (req, res) => {
+  const { input } = req.body;
+
+  try {
+    const completion = await openai.completions.create({
+      model: "gpt-3.5-turbo",
+      prompt: `Suggest relevant interests based on: ${input}`,
+      max_tokens: 50,
+      temperature: 0.7,
+    });
+
+    res.json({ suggestions: completion.choices[0].text.trim().split(", ") });
+  } catch (error) {
+    console.error("OpenAI API Error:", error);
+    res.status(500).json({ error: "Failed to fetch suggestions" });
+  }
+});
+
 
 // Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;

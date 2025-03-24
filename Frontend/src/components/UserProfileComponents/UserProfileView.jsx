@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import "../../styles/UserProfile Styles/UserProfile.css";
+import "../../styles/UserProfile Styles/UserProfile.css"
 
 export default function Profile() {
   const [currentFeature, setCurrentFeature] = useState(0);
   const [activeTab, setActiveTab] = useState("profile");
+
+  
   
   const userData = {
     name: "John Doe",
@@ -62,11 +64,12 @@ export default function Profile() {
 
   
   return (
-    <div className="profile-container">
+    <div className="view-profile-container">
 
       <div className="profile-header">
         <div className="profile-setting">
           <div className="profile-image-container">
+            {console.log(userData)}
               <img 
                 src={userData.profileImage} 
                 alt="Profile" 

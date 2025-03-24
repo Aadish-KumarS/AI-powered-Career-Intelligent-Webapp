@@ -34,12 +34,12 @@ export default function Login() {
 
       if (response.data) {
         sessionStorage.setItem('authToken', response.data.token); 
-        navigate('/profile');
+        navigate('/profile/create-user-profile');
       } else {
         setError(response.data.message);
       }
     } catch (err) {
-      setError('Invalid email or password');
+      setError('Invalid email or password',err);
     } finally {
       setLoading(false); 
     }

@@ -9,7 +9,7 @@ const ProtectedAuthRoute = ({ children }) => {
   useEffect(() => {
     
     if (isAuthenticated) {
-      navigate('/profile');
+      navigate('/profile/user-profile');
     }
   }, [isAuthenticated, navigate]); 
 
