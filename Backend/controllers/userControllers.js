@@ -12,22 +12,38 @@ export const getUserProfile = async (req, res) => {
 };
 
 export const updateUserProfile = async (req, res) => {
-  
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const { name, email, profilePicture } = req.body;
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (profilePicture) user.profilePicture = profilePicture;
+    const allowedFields = [
+      "name",
+      "email",
+      "profilePicture",
+      "bio",
+      "location",
+      "latitude",
+      "longitude",
+      "interests",
+      "education",
+    ];
 
+    const updates = Object.fromEntries(
+      Object.entries(req.body).filter(([key, value]) => 
+        allowedFields.includes(key) && value !== undefined
+      )
+    );
+
+    Object.assign(user, updates);
     const updatedUser = await user.save();
-    res.json({ message: "Profile updated", user: updatedUser });
+
+    return res.json({ message: "Profile updated", user: updatedUser });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 export const deleteUserAccount = async (req, res) => {
   try {

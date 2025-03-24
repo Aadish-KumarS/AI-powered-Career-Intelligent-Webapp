@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/UserProfile Styles/CreateProfile.css";
 import gsap from "gsap";
+import axios from "axios";
 
 import img1 from "../../assets/img1.jpg";
 import img2 from "../../assets/img2.jpg";
@@ -48,23 +49,8 @@ export default function CreateProfile() {
     }
   };
 
-  // Handle interest selection (multiple interests can be selected)
-  const handleInterestChange = (e) => {
-    const interest = e.target.value;
-    if (e.target.checked) {
-      setProfileData({
-        ...profileData,
-        interests: [...profileData.interests, interest],
-      });
-    } else {
-      setProfileData({
-        ...profileData,
-        interests: profileData.interests.filter((item) => item !== interest),
-      });
-    }
-  };
-
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  
   // Load Google Maps API script asynchronously
   useEffect(() => {
     if (step === 2 && !scriptLoaded) {
@@ -73,9 +59,8 @@ export default function CreateProfile() {
       googleMapScript.async = true;
       googleMapScript.defer = true;
 
-      // When the script is loaded, set the flag and initialize the map
       googleMapScript.onload = () => {
-        setScriptLoaded(true); // Mark that the script has loaded
+        setScriptLoaded(true);
       };
 
       window.document.body.appendChild(googleMapScript);
@@ -89,8 +74,7 @@ export default function CreateProfile() {
   // Initialize Google Maps when script is loaded and step is 2
   useEffect(() => {
     if (step === 2 && scriptLoaded && !map && window.google) {
-      const defaultLocation = { lat: 40.7128, lng: -74.0060 }; // Default to NYC
-      
+      const defaultLocation = { lat: 40.7128, lng: -74.0060 };
       const newMap = new window.google.maps.Map(mapRef.current, {
         center: defaultLocation,
         zoom: 12,
@@ -112,7 +96,6 @@ export default function CreateProfile() {
           longitude: lng,
         });
 
-        // Get address from coordinates (reverse geocoding)
         const geocoder = new window.google.maps.Geocoder();
         geocoder.geocode({ location: event.latLng }, (results, status) => {
           if (status === "OK" && results[0]) {
@@ -252,18 +235,18 @@ export default function CreateProfile() {
     setError("");
 
     try {
-      const response = await fetch(`${BASE_URL}/api/users/create-profile`, {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(profileData),
-      });
-      const data = await response.json();
+      const response = await axios.put(
+        `${BASE_URL}/api/users/create-profile`, 
+        profileData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      if (response.ok) {
-        // Animate success
+      if (response.status === 200) {
         gsap.to(formRef.current, {
           scale: 1.05,
           duration: 0.3,
@@ -274,12 +257,12 @@ export default function CreateProfile() {
               opacity: 0,
               duration: 0.5,
               ease: "power2.in",
-              onComplete: () => navigate("/profile/user-profile")
+              onComplete: () => navigate("/profile/user-profile"),
             });
-          }
+          },
         });
       } else {
-        setError(data.message);
+        setError(response.data.message);
       }
     } catch (err) {
       setError("Something went wrong. Please try again.");
@@ -363,37 +346,12 @@ export default function CreateProfile() {
         
       case 3:
         return (
-          // <div className="form-step" ref={formRef}>
-          //   <h3>Your Interests</h3>
-          //   <div className="interests-container">
-          //     <label>Select your interests</label>
-          //     <div className="interests-grid">
-          //       {["Technology", "Art", "Music", "Sports", "Travel", "Food", 
-          //         "Photography", "Fashion", "Science", "Literature", "Movies", "Health"].map((interest) => (
-          //         <div className="interest-item" key={interest}>
-          //           <input
-          //             type="checkbox"
-          //             id={interest}
-          //             value={interest}
-          //             onChange={handleInterestChange}
-          //             checked={profileData.interests.includes(interest)}
-          //           />
-          //           <label htmlFor={interest}>{interest}</label>
-          //         </div>
-          //       ))}
-          //     </div>
-          //   </div>
-          //   {error && <p className="error-text">{error}</p>}
-          //   <div className="buttons-container">
-          //     <button type="button" className="create-profile-back-btn" onClick={prevStep}>
-          //       <i className="fas fa-arrow-left"></i> Back
-          //     </button>
-          //     <button type="submit" className="create-btn" onClick={handleSubmit}>
-          //       Create Profile
-          //     </button>
-          //   </div>
-          // </div>
-          <InterestSelection profileData setProfileData prevStep handleSubmit  />
+          <InterestSelection 
+            profileData={profileData} 
+            setProfileData={setProfileData} 
+            prevStep={prevStep} 
+            handleSubmit={handleSubmit} 
+          />
         );
         
       default:
