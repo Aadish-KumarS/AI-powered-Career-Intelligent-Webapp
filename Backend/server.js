@@ -5,12 +5,12 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import resetRoutes from './routes/resetRoutes.js'
 import otpRoutes from './routes/otpRoutes.js'
+import location from './routes/location.js'
 import userRoutes from './routes/userRoutes.js'
 import passport from 'passport';
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import './config/passport.js'
-import OpenAI from "openai";
 
 dotenv.config(); 
 
@@ -34,13 +34,13 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use("/api/auth", resetRoutes);
 app.use('/otp', otpRoutes);
 app.use("/api/users", userRoutes);
+
+app.use("/api",location)
 
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/' }), 
@@ -49,25 +49,7 @@ app.get('/auth/google/callback',
   }
 );
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-app.post("/get-suggestions", async (req, res) => {
-  const { input } = req.body;
-
-  try {
-    const completion = await openai.completions.create({
-      model: "gpt-3.5-turbo",
-      prompt: `Suggest relevant interests based on: ${input}`,
-      max_tokens: 50,
-      temperature: 0.7,
-    });
-
-    res.json({ suggestions: completion.choices[0].text.trim().split(", ") });
-  } catch (error) {
-    console.error("OpenAI API Error:", error);
-    res.status(500).json({ error: "Failed to fetch suggestions" });
-  }
-});
 
 
 // Connect to MongoDB and start server

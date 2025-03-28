@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { handleSubmitForgotPassword } from '../../utils/formHanderls';
 
 axios.defaults.withCredentials = true;
 
@@ -12,36 +13,7 @@ export default function ForgotPassword() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true); 
-
-    if (!email.trim()) {
-      setError('Please enter your email');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/forgot-password', {
-        email : email
-      });
-
-      const data = await response.data;
-      if (response.status == 200) {
-        setSuccess('A verification code has been sent to your email.');
-        setTimeout(() => {
-          navigate('/verify-email', { state: { purpose: 'forgot-password' } });
-        }, 1000);
-      } else {
-        setError(data.message || 'Something went wrong.');
-      }
-    } catch (error) {
-      setError('Server error. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
+    handleSubmitForgotPassword(e,setError,setSuccess,setLoading,email,navigate)
   };
 
   return (

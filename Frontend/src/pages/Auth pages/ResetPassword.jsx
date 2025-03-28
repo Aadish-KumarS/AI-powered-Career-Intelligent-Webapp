@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import '../../styles/Auth.css';
+import '../../styles/Auth styles/Auth.css';
 import { useAuthForm } from '../../hooks/useAuthForm';
-import axios from 'axios';
+import { handleSubmitResetPassword } from '../../utils/formHanderls';
 
 
 export default function ResetPassword() {
@@ -23,36 +23,7 @@ export default function ResetPassword() {
   } = useAuthForm({ password: '', confirmPassword: '' });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long.');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/reset-password', {
-        password: formData.password
-      });
-
-      const data = await response.data;
-
-      if (response.status == 200) {
-        setSuccess('Password reset successfully. Redirecting to login...');
-        setTimeout(() => navigate('/login'), 2000);
-      } else {
-        setError(data.message || 'Something went wrong.');
-      }
-    } catch (error) {
-      setError('Server error. Please try again later.');
-    }
+    handleSubmitResetPassword(e,setError,setSuccess,formData,navigate)
   };
 
   return (

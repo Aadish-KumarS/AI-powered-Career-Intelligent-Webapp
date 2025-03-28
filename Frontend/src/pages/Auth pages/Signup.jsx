@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
-import '../../styles/Auth.css';
+import '../../styles/Auth styles/Auth.css';
 import { useAuthForm } from '../../hooks/useAuthForm';
+import { handleSubmitSignup } from '../../utils/formHanderls';
 axios.defaults.withCredentials = true;
+
 export default function Signup() {
   const [success, setSuccess] = useState('');
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -24,60 +26,7 @@ export default function Signup() {
   } = useAuthForm({  name: '', email: '', password: '', confirmPassword: ''  });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    // Password length validation
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long.');
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (!validateEmail(formData.email)) {
-      setError('Invalid email format');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      });
-
-      if (response.data) {
-        setSuccess('Account created successfully! Please verify your email.');
-        navigate('/verify-email',{ state: { purpose: "signup" } });
-
-        // sessionStorage.setItem('email', JSON.stringify(formData.email));
-
-        setError('');
-      } else {
-        setError(response.data.message);
-      }
-    } catch (err) {
-      if (err.response && err.response.data) {
-        if (err.response.data.message === 'User already exists') {
-          setError('User already exists. Please use a different email.');
-        } else if (err.response.data.message === 'Invalid input') {
-          setError('Invalid input data. Please check your form.');
-        } else {
-          setError('Signup failed. Please try again.');
-        }
-      } else {
-        setError('An error occurred. Please check your network connection.');
-      }
-    } finally {
-      setLoading(false);
-    }
+    handleSubmitSignup(e,setLoading,formData,setError,validateEmail,setSuccess,navigate)
   };
 
   const validateEmail = (email) => {
@@ -91,6 +40,8 @@ export default function Signup() {
 
   return (
     <div className="auth-container">
+      <div>
+      </div>
       <button className='back-btn' onClick={() => window.history.back()}>Back</button>
       <div className="auth-card">
         <h2 className="auth-title">Create an Account</h2>
@@ -109,6 +60,7 @@ export default function Signup() {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
+            autoComplete="email"
             required
           />
           {error && formData.email && !validateEmail(formData.email) && (

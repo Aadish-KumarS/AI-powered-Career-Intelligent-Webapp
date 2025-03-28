@@ -32,7 +32,6 @@ const otpController = {
 
       sendEmail(email, 'Your OTP for Verification', `Your OTP is: ${otp}. It will expire in 10 minutes.`)
         .then(() => {
-          res.clearCookie('email');
           res.json({ success: true, message: 'OTP sent to your email.' });
         })
         .catch((err) => {
@@ -76,7 +75,6 @@ const otpController = {
           await user.save();
           await OTP.deleteOne({ email });
 
-          res.clearCookie('email');
           res.json({ success: true, message: 'OTP verified successfully! Your email is now verified.' });
         }else{
           await OTP.deleteOne({ email });

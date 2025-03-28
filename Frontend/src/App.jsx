@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingPage from './pages/Landing';
+import LandingPage from './pages/Public pages/Landing';
 
 import Signup from './pages/Auth pages/Signup';
 import Login from './pages/Auth pages/Login';
@@ -10,7 +10,7 @@ import ResetPassword from './pages/Auth pages/ResetPassword';
 import ProtectedAuthRoute from './components/ProtectedRoute';  // Ensure correct import
 
 import Dashboard from './pages/Dashboard'; 
-import Profile from './pages/Profile'; 
+import Profile from './pages/User profile pages/Profile'; 
 
 function App() {
   return (

@@ -19,16 +19,21 @@ export default function Navbar() {
     <nav className="navbar fade-in">
       <h1 className="logo">Right Track</h1>
       <ul className="nav-links">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#how-it-works">How It Works</a></li>
-        <li><a href="#target-users">Users</a></li>
+        <li><a href="/#features">Features</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#how-it-works">How It Works</a></li>
+        <li><a href="/#target-users">Users</a></li>
       </ul>
-      <Link to="/Signup"> 
-        <div className='user-profile center'>
-          <FaRegUser />
-        </div>
-      </Link>
+      <div className='center'>
+        <Link to="/signup"> 
+          <div className='user-profile center'>
+            <FaRegUser />
+          </div>
+        </Link>
+        <button className="settings-btn">
+          <span className="settings-icon"></span>
+        </button>
+      </div>
     </nav>
   );
 }

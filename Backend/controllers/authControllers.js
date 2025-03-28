@@ -89,6 +89,13 @@ export const login = async (req, res) => {
     }
 
     if (!user.isVerified) {
+      res.cookie('email', email, {
+        httpOnly: true,
+        secure: false, 
+        maxAge: 60 * 60 * 1000,
+        path: '/' 
+      });
+      
       return res.status(400).json({ message: "Please verify your email before logging in." });
     }
 

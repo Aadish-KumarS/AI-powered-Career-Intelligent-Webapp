@@ -1,0 +1,109 @@
+/* General Styles */
+.form-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: auto;
+}
+
+.form-step h3 {
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Selected Interests */
+.selected-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
+.selected-interest-tag {
+  background: #007bff;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.selected-interest-tag:hover {
+  background: #0056b3;
+}
+
+/* Interest Input */
+.interest-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.interest-input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.interest-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Suggestions Dropdown */
+.interests-dropdown {
+  position: absolute;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  margin-top: 5px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.interests-dropdown li {
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.interests-dropdown li:hover {
+  background: #f0f0f0;
+}
+
+/* Loading & Error Messages */
+.loading-text, .error-text {
+  font-size: 0.9rem;
+  color: #ff0000;
+  margin-top: 5px;
+}
+
+/* Navigation Buttons */
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.create-profile-back-btn, .create-btn {
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+  border: none;
+}

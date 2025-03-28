@@ -212,9 +212,9 @@
 }
 
 .shape2 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #b0b0b0, #007bff);
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, #b0b0b0, #007bff66);
   bottom: 10%;
   right: 10%;
   opacity: 0.8;
@@ -233,7 +233,7 @@
 .shape4 {
   width: 180px;
   height: 180px;
-  background: linear-gradient(135deg, #d1d1d1, #ffcc00);
+  background: linear-gradient(135deg, #d1d1d1, #a92ecf);
   bottom: 30%;
   left: 20%;
   opacity: 0.8;
@@ -248,21 +248,6 @@
   opacity: 0.8;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-}
-
 .shape1, .shape2, .shape3, .shape4, .shape5 {
   position: absolute;
   border-radius: 50%;
@@ -271,8 +256,8 @@
 
 /* Pulse Animation for Shapes */
 @keyframes pulse {
-  from { transform: scale(1); opacity: 0.2; }
-  to { transform: scale(1.2); opacity: 0.3; }
+  from { transform: scale(1); opacity: 0.3; }
+  to { transform: scale(1.2); opacity: 0.4; }
 }
 
 /* Responsive */

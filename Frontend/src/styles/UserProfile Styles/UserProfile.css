@@ -1,8 +1,9 @@
 
 /* Main Container */
 .view-profile-container {
+  margin-top: 3rem;
   display: flex;
-  min-height: 100vh;
+  min-height: 95vh;
   justify-content: space-between;
   padding: 20px;
   background: linear-gradient(to right, #ff7e5f, #feb47b);
@@ -14,7 +15,27 @@
 .profile-header {
   background-color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  border-radius: 1rem;
+  width: 35%;
+  height: 89vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.bg-gif{
+  width: 100%;
+  position: absolute;
+  background-blend-mode: multiply; 
+  bottom: 53%;
+  transform: translateY(50%);
+  left: 0;
+  z-index: -1;
+  scale: 2;
+}
+
+.bg-gif img{
+  width: 100%;
 }
 
 .profile-header-content {
@@ -31,23 +52,29 @@
   }
 }
 
-.profile-setting{
-  margin-bottom: 2rem;
-}
-
 .profile-image-container {
   position: relative;
   width: 100%;
   display: flex;
   justify-content: space-between;
+  padding: 2rem;
+  padding-bottom: 0;
+  background-color: #fff;
 }
 
 .profile-image {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #f0f0f0;
+  background: linear-gradient(45deg, #ff6f61, #ffcc00);
+}
+
+.user-initial{
+  color: white;
+  font-family: "poppins";
+  font-weight: 600;
 }
 
 .profile-edit-button {
@@ -65,15 +92,6 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.settings-icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.43-2.53c.04-.32.07-.65.07-.97 0-.32-.03-.65-.07-.97l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65c-.03-.24-.24-.42-.49-.42h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.63c-.04.32-.07.65-.07.97 0 .32.03.65.07.97l-2.11 1.63c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.63z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
 .profile-info {
   flex: 1;
   text-align: center;
@@ -86,10 +104,19 @@
 }
 
 .profile-name {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #333;
+  font-size: 3rem;
+  font-weight: 400;
+  color: #373737;
   margin-bottom: 0.25rem;
+  background-color: #fff;
+  padding: 2rem;
+  padding-bottom: 1rem;
+  font-family: "Roboto";
+}
+
+.edit-btn{
+  margin: 2rem;
+  margin-top: 0;
 }
 
 .profile-title {
@@ -172,9 +199,7 @@
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  margin-top: 3rem;
+  margin-top: 1rem;
 }
 
 .tabs-container {
@@ -233,7 +258,7 @@
   flex-direction: column;
   gap: 1.5rem;
   padding: 2rem;
-  width: 100%;
+  width: 60%;
 }
 
 @media (min-width: 992px) {

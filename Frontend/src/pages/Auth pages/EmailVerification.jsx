@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import '../../styles/Auth.css';
+import '../../styles/Auth styles/Auth.css';
+import { handleSubmitEmailVerification } from '../../utils/formHanderls';
+import { resendOTP } from '../../utils/helper';
 
 export default function EmailVerification() {
   const [verificationCode, setVerificationCode] = useState('');
@@ -16,67 +17,9 @@ export default function EmailVerification() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    if (verificationCode.length !== 6) {
-      setError('Invalid verification code');
-      return;
-    }
-  
-    // const email = JSON.parse(sessionStorage.getItem('email'));
-
-    // if (!email) {
-    //   setError('Email not found');
-    //   return;
-    // }
-  
-    try {
-      const response = await axios.post('http://localhost:5000/otp/verify-otp', {
-        otp: verificationCode,
-      });
-  
-      if (response.data.success) {
-        if(location.state.purpose == 'forgot-password'){
-          alert('Email verified successfully!');
-          navigate('/reset-password')
-        } else{
-          alert('Email verified successfully!');
-          navigate('/login');
-        }
-      } else {
-        setError(response.data.message || 'Verification failed');
-      }
-    } catch (err) {
-      console.error('Error during OTP verification:', err.response ? err.response.data : err);
-      setError('An error occurred. Please try again later.');
-    }
+    handleSubmitEmailVerification(e,verificationCode,setError,navigate,location)
   };
   
-  
-
-  const resendOTP = async () => {
-    const email = JSON.parse(sessionStorage.getItem('email'));
-
-    if (!email) {
-      alert('No email found');
-      return;
-    }
-  
-    try {
-      const response = await axios.post('http://localhost:5000/otp/request-otp', { email });
-  
-      if (response.data.success) {
-        alert('OTP sent to your email.');
-      } else {
-        alert('Failed to send OTP. Please try again.');
-      }
-    } catch (err) {
-      alert('Error sending OTP. Please try again later.');
-      console.error(err);
-    }
-  };
-  
-
   return (
     <div className="auth-container">
       <div className="auth-card">

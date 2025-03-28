@@ -26,6 +26,7 @@ export const updateUserProfile = async (req, res) => {
       "longitude",
       "interests",
       "education",
+      "isFirstTime"
     ];
 
     const updates = Object.fromEntries(

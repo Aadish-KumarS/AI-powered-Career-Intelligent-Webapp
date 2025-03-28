@@ -12,6 +12,8 @@
   "dependencies": {
     "axios": "^1.8.4",
     "gsap": "^3.12.7",
+    "ipapi.co": "^0.3.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.483.0",
     "openai": "^4.89.0",
     "react": "^19.0.0",

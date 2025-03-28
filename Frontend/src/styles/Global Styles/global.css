@@ -9,7 +9,7 @@
 
 /* Light & Dark Theme */
 body {
-  background-color: #ffffff;
+  background:white;
   color: #333;
   transition: background-color 0.3s, color 0.3s;
 }
