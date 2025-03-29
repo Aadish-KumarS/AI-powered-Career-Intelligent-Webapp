@@ -6,7 +6,7 @@ import gsap from "gsap";
 import img1 from "../../assets/img1.jpg";
 import img2 from "../../assets/img2.jpg";
 import img3 from "../../assets/img3.jpg";
-import { getUserName, handleCreateUserFileChange, handleStepChange } from "../../utils/helper";
+import { getUserData, handleCreateUserFileChange, handleStepChange } from "../../utils/helper";
 import { handleSubmitCreateProfile } from "../../utils/formHanderls";
 import FormStep from "./BasicInfoStep";
 
@@ -21,7 +21,7 @@ export default function CreateProfile() {
     longitude: null,
     education: "",
     interests: [],
-    isFirstTime: null
+    isFirstTime: null,
   });
   const [error, setError] = useState("");
   const BASE_URL = "http://localhost:5000";
@@ -30,7 +30,7 @@ export default function CreateProfile() {
 
   
   useEffect(() => {
-    getUserName(BASE_URL,token,setProfileData,profileData)
+    getUserData(BASE_URL,token,setProfileData,profileData)
 
     gsap.fromTo(".left-form", 
       {
@@ -128,7 +128,7 @@ export default function CreateProfile() {
           <FormStep
             step={step}
             profileData={profileData}
-            handleChange={(e) => setProfileData({ ...profileData, [e.target.name]: e.target.value })}
+            setProfileData={setProfileData}
             handleFileChange={(e) =>  handleCreateUserFileChange(e,setProfileData,profileData)}
             nextStep={() => handleStepChange(formRef, setStep, step, "next", setError, profileData)}
             prevStep={() => handleStepChange(formRef, setStep, step, "prev")}

@@ -40,8 +40,6 @@ const InterestSelection = ({
     }
   };
   
-  console.log(profileData);
-  
 
   // Debounce function to limit API calls
   const debounce = (func, delay) => {
@@ -111,21 +109,7 @@ const InterestSelection = ({
   return (
     <div className="form-step">
       <h3>Professional Interests</h3>
-      
-      {/* Selected Interests */}
-      <div className="selected-interests">
-        {profileData.interests.map(interest => (
-          <span 
-            key={interest} 
-            className="selected-interest-tag"
-            onClick={() => removeInterest(interest)}
-          >
-            {interest} ✕
-          </span>
-        ))}
-      </div>
 
-      {/* Interest Input */}
       <div className="interest-input-wrapper" ref={dropdownRef}>
         <input
           type="text"
@@ -135,7 +119,6 @@ const InterestSelection = ({
           className="interest-input"
         />
 
-        {/* Suggestions Dropdown */}
         {inputValue && suggestions.length > 0 && (
           <ul className="interests-dropdown">
             {suggestions.slice(0, 10).map((suggestion, index) => (
@@ -149,12 +132,22 @@ const InterestSelection = ({
           </ul>
         )}
 
-        {/* Loading and Error States */}
         {loading && <p className="loading-text">Finding suggestions...</p>}
         {error && <p className="error-text">{error}</p>}
       </div>
 
-      {/* Navigation Buttons */}
+      <div className="selected-interests">
+        <h3>Selected Interests</h3>
+        {profileData.interests.map(interest => (
+          <span 
+            key={interest} 
+            className="selected-interest-tag"
+          >
+            {interest} <span  onClick={() => removeInterest(interest)}>✕</span> 
+          </span>
+        ))}
+      </div>
+
       <div className="buttons-container">
         <button 
           type="button" 

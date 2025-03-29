@@ -21,7 +21,7 @@ export const resendOTP = async () => {
 
 //USER PROFILE 
 // create profile component helper functions 
-export async function getUserName(BASE_URL,token,setProfileData,profileData) {
+export async function getUserData(BASE_URL,token,setProfileData,profileData) {
     try {
       const response = await axios.get(
         `${BASE_URL}/api/users/profile`, 
@@ -31,7 +31,7 @@ export async function getUserName(BASE_URL,token,setProfileData,profileData) {
           },
         }
       );
-      setProfileData({...profileData, name: response.data.name})
+      setProfileData({...profileData, name: response.data.name, education:response.data.education })
       
     } catch (error) {
       console.error('Error fetching the data',error);
@@ -61,7 +61,7 @@ export async function getUserDetail(token,navigate,BASE_URL,setUserData) {
       education: response.data.education || "",
       email: response.data.email || "",
       profileImage: response.data.profilePicture || "",
-      skills: response.data.skills || [],
+      interests: response.data.interests || [],
       isFirstTime: response.data.isFirstTime || true,
     });
   } catch (error) {

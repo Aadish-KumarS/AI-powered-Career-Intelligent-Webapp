@@ -33,7 +33,7 @@ export default function Profile() {
     education: "",
     email: "",
     profileImage: "",
-    skills: []
+    interests: []
   });
   
 
@@ -106,6 +106,11 @@ export default function Profile() {
     );
   }, []);
 
+
+  const handleEditClick = () => {
+    navigate("/profile/edit-profile"); 
+  };
+
   return (
     <div className="view-profile-container">
       <Navbar />
@@ -129,12 +134,12 @@ export default function Profile() {
             <h1 className="profile-name">Welcome! <br /> {userData.name}</h1>
             <p className="profile-title">{userData.title}</p>
             <div className="skill-tags">
-              {userData.skills.map((skill, index) => (
+              {userData.interests.map((skill, index) => (
                 <span key={index} className="skill-tag">{skill}</span>
               ))}
             </div>
             <div className="profile-actions">
-              <button className="primary-button edit-btn">Edit Profile</button>
+              <button className="primary-button edit-btn" onClick={handleEditClick}>Edit Profile</button>
             </div>
           </div>
         </div>

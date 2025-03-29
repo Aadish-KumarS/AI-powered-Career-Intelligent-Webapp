@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     googleId: { type: String, unique: true, sparse: true },
     profilePicture: { type: String, default: '' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    location: { type: String, maxlength: 100 },
+    location: { type: String},
     latitude: { type: Number },
     longitude: { type: Number },
     provider: { type: String, enum: ['email', 'google'], default: 'email' },
@@ -19,8 +19,6 @@ const userSchema = new mongoose.Schema(
     interests: [
       {
         type: String,
-        required: true,
-        enum: ['Technology', 'Science', 'Art', 'Music', 'Sports', 'Literature', 'Traveling'],
       }
     ],
     education: { type: String },

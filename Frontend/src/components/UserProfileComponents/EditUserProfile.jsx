@@ -29,8 +29,6 @@ export default function EditProfile() {
     newPassword: '',
     confirmPassword: ''
   });
-  const [locationSearch, setLocationSearch] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [locationAccessStatus, setLocationAccessStatus] = useState('pending');
@@ -139,29 +137,6 @@ export default function EditProfile() {
     };
   }, [userData.latitude, userData.longitude]);
 
-  // Handle location search using OpenStreetMap Nominatim API
-  const handleLocationSearch = async () => {
-    try {
-      const response = await axios.get(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${locationSearch}`
-      );
-      setSearchResults(response.data);
-    } catch (err) {
-      setError('Failed to search locations',err);
-    }
-  };
-
-  const selectLocation = (location) => {
-    setUserData({
-      ...userData,
-      location: location.display_name,
-      latitude: parseFloat(location.lat),
-      longitude: parseFloat(location.lon)
-    });
-    setLocationSearch('');
-    setSearchResults([]);
-  };
-
 
   // Update profile
   const updateProfile = async (e) => {
@@ -261,42 +236,10 @@ export default function EditProfile() {
           <div className="form-group location-search">
             <label>Location</label>
             <div className="search-container">
-              <input
-                type="text"
-                value={locationSearch}
-                onChange={(e) => setLocationSearch(e.target.value)}
-                placeholder="Search location"
-              />
-              <button 
-                type="button" 
-                onClick={handleLocationSearch}
-                className="search-btn"
-              >
-                Search
-              </button>
             </div>
-            {searchResults.length > 0 && (
-              <div className="search-results">
-                {searchResults.map((location, index) => (
-                  <div 
-                    key={index} 
-                    onClick={() => selectLocation(location)}
-                    className="search-result-item"
-                  >
-                    {location.display_name}
-                  </div>
-                ))}
-              </div>
-            )}
 
-            {/* Always visible map container */}
-            <MapComponent userData={userData} locationAccessStatus={locationAccessStatus} />
+            <MapComponent userData={userData} setUserData={setUserData}  />
 
-            {userData.location && (
-              <p className="selected-location">
-                Selected: {userData.location}
-              </p>
-            )}
           </div>
 
           {/* Education Input */}

@@ -1,16 +1,7 @@
-import React, { useRef, useState } from "react";
 import InterestSelection from "./InterestSelection";
 import MapComponent from './MapComponent'
 
-const FormStep = ({ step, profileData, handleChange, handleFileChange, nextStep, prevStep, handleSubmit, error, formRef }) => {
-
-  const [locationAccessStatus, setLocationAccessStatus] = useState('pending');
-  const [userLocationData, setUserLocationData] = useState({
-      location: '',
-      latitude: 23.6345,
-      longitude: 102.5528,
-    });
-  
+const FormStep = ({ step, profileData, setProfileData, handleFileChange, nextStep, prevStep, handleSubmit, error, formRef }) => {
 
   switch (step) {
     case 1:
@@ -22,7 +13,7 @@ const FormStep = ({ step, profileData, handleChange, handleFileChange, nextStep,
             name="name"
             placeholder="Full Name"
             value={profileData.name}
-            onChange={handleChange}
+            onChange={(e) => setProfileData({ ...profileData, [e.target.name]: e.target.value })}
             required
           />
           <div className="file-upload">
@@ -36,7 +27,7 @@ const FormStep = ({ step, profileData, handleChange, handleFileChange, nextStep,
               name="education"
               placeholder="Your Education Background"
               value={profileData.education}
-              onChange={handleChange}
+              onChange={(e) => setProfileData({ ...profileData, [e.target.name]: e.target.value })}
               required={true}
             />
           </div>
@@ -55,16 +46,7 @@ const FormStep = ({ step, profileData, handleChange, handleFileChange, nextStep,
         <div className="form-step" ref={formRef}>
           <h3>Location & Education</h3>
           <div className="location-container">
-            <MapComponent userData={userLocationData} locationAccessStatus={locationAccessStatus} />
-          </div>
-          <div className="search-location-container">
-            <label>Search location</label>
-            <input
-              type="text"
-              placeholder="Search Location..."
-              value={profileData.location}
-              onChange={handleChange}
-            />
+            <MapComponent userData={profileData} setUserData={setProfileData} />
           </div>
           {error && <p className="error-text">{error}</p>}
           <div className="buttons-container">
@@ -82,7 +64,7 @@ const FormStep = ({ step, profileData, handleChange, handleFileChange, nextStep,
       return (
         <InterestSelection
           profileData={profileData}
-          setProfileData={handleChange}
+          setProfileData={setProfileData}
           prevStep={prevStep}
           handleSubmit={handleSubmit}
         />
