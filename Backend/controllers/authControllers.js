@@ -88,6 +88,9 @@ export const login = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    console.log(3);
+    
+
     if (!user.isVerified) {
       res.cookie('email', email, {
         httpOnly: true,

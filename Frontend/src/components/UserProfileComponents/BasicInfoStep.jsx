@@ -44,7 +44,7 @@ const FormStep = ({ step, profileData, setProfileData, handleFileChange, nextSte
     case 2:
       return (
         <div className="form-step" ref={formRef}>
-          <h3>Location & Education</h3>
+          <h3>Location </h3>
           <div className="location-container">
             <MapComponent userData={profileData} setUserData={setProfileData} />
           </div>

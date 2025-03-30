@@ -1,32 +1,30 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaGoogle } from 'react-icons/fa';
 import axios from 'axios';
 import '../../styles/Auth styles/Auth.css';
 import { useAuthForm } from '../../hooks/useAuthForm';
 import { handleSubmitSignup } from '../../utils/formHanderls';
+import PasswordFields from '../../components/PasswordComponents/PasswordInput';
 axios.defaults.withCredentials = true;
 
 export default function Signup() {
   const [success, setSuccess] = useState('');
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const navigate = useNavigate();
   const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const { 
     formData, 
-    passwordVisible, 
     error, 
     handleChange, 
     setError, 
     passwordStrength,
-    setPasswordVisible,
     setLoading,
     loading
-  } = useAuthForm({  name: '', email: '', password: '', confirmPassword: ''  });
+  } = useAuthForm({ name: '', email: '', password: '', confirmPassword: '' });
 
   const handleSubmit = async (e) => {
-    handleSubmitSignup(e,setLoading,formData,setError,validateEmail,setSuccess,navigate)
+    handleSubmitSignup(e, setLoading, formData, setError, validateEmail, setSuccess, navigate)
   };
 
   const validateEmail = (email) => {
@@ -67,51 +65,11 @@ export default function Signup() {
             <p className="error-text">Invalid email format</p>
           )}
 
-          <div className="password-container">
-            <input
-              type={passwordVisible ? 'text' : 'password'}
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            <span className="eye-icon" onClick={() => setPasswordVisible(!passwordVisible)}>
-              {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </div>
-
-          <div className="password-container">
-            <input
-              type={confirmPasswordVisible ? 'text' : 'password'}
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-            <span
-              className="eye-icon"
-              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
-            >
-              {confirmPasswordVisible ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </div>
-
-          <div className="password-strength-bar-container">
-            <progress
-              className="password-strength-bar"
-              value={passwordStrength}
-              max="100"
-            />
-          </div>
-          <p className="password-strength-text">
-            {passwordStrength >= 80 ? 'Strong' : passwordStrength >= 50 ? 'Medium' : 'Weak'}
-          </p>
-
-          {error && formData.password !== formData.confirmPassword && (
-            <p className="error-text">Passwords do not match</p>
-          )}
+          <PasswordFields 
+            formData={formData}
+            onChange={handleChange}
+            passwordStrength={passwordStrength}
+          />
 
           {error && <p className="error-text">{error}</p>}
           {success && <p className="success-text">{success}</p>}

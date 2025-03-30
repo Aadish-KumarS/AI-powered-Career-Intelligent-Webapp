@@ -17,7 +17,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 1rem;
   width: 35%;
-  height: 89vh;
+  height: inherit;
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -43,6 +43,7 @@
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
+  background-color: white;
 }
 
 @media (min-width: 768px) {
@@ -63,12 +64,17 @@
 }
 
 .profile-image {
-  width: 45px;
-  height: 45px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #f0f0f0;
-  background: linear-gradient(45deg, #ff6f61, #ffcc00);
+  border: .5px solid #c8c8c8;
+  background: white;
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 1;
+  opacity: .55;
 }
 
 .user-initial{
@@ -107,30 +113,31 @@
   font-size: 3rem;
   font-weight: 400;
   color: #373737;
-  margin-bottom: 0.25rem;
-  background-color: #fff;
   padding: 2rem;
   padding-bottom: 1rem;
   font-family: "Roboto";
+  position: relative;
+  z-index: 1;
 }
 
 .edit-btn{
   margin: 2rem;
-  margin-top: 0;
 }
 
 .profile-title {
   font-size: 1rem;
   color: #666;
   margin-bottom: 1rem;
+  display: none;
 }
 
 .skill-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  padding:1.5rem 1rem ;
   justify-content: center;
+  background: white ;
 }
 
 @media (min-width: 768px) {
@@ -141,11 +148,12 @@
 
 .skill-tag {
   display: inline-block;
-  padding: 0.35rem 0.75rem;
+  padding: 0.5rem 0.85rem;
   border-radius: 50px;
   font-size: 0.85rem;
   font-weight: 500;
-  background-color: #f0f0f0;
+  background-color: #fff;
+  box-shadow: 1px 0 3px #0000002b inset;
   color: #ff6f61;
 }
 
@@ -276,12 +284,13 @@
 }
 
 .section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 400;
   color: #333;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid #eee;
+  font-family: "roboto";
 }
 
 /* About Section */

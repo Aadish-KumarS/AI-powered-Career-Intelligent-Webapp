@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { getUserData, handleInputChange, fetchIPBasedLocation, getGeoLocation, addInterest, removeInterest, updatePassword, deleteAccount, updateProfile } from '../../utils/helper';
+import MapComponent from './MapComponent';
+import { FaEdit, FaHome, FaSave, FaUser, FaKey, FaTrash, FaInfoCircle } from "react-icons/fa";
+import PasswordChangeFields from '../PasswordComponents/PasswordChange'; 
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import '../../styles/UserProfile Styles/EditProfile.css'
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import { fetchIPBasedLocation, fetchUserProfile, getGeoLocation } from '../../utils/apiCalls';
-import { handleInputChange, handleInterestToggle, handlePasswordChange } from '../../utils/helper';
-import MapComponent from './MapComponent';
-import { CiSearch } from "react-icons/ci";
-import { FaEdit } from "react-icons/fa";
-
-
+import { useNavigate } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,38 +21,53 @@ export default function EditProfile() {
     education: '',
     interests: []
   });
+  
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
+  
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [locationAccessStatus, setLocationAccessStatus] = useState('pending');
+  const [activeSection, setActiveSection] = useState('personalInfo');
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
+  const [inputValue, setInputValue] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const navigate = useNavigate();
+  
 
-  const profileSectionRef = useRef(null);
-  const passwordSectionRef = useRef(null);
+  // Section refs for scrolling
+  const nameRef = useRef(null);
+  const locationRef = useRef(null);
+  const educationRef = useRef(null);
+  const interestsRef = useRef(null);
+  const passwordRef = useRef(null);
+  const deleteAccountRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const sideMenuRef = useRef(null);
+  
 
-  const availableInterests = [
-    'Technology', 'Science', 'Art', 'Music', 
-    'Sports', 'Literature', 'Traveling'
-  ];
-
-
-  // Get user's device location
   const getUserLocation = () => {
     if ("geolocation" in navigator) {
-      getGeoLocation(setUserData,setLocationAccessStatus,setError)
+      getGeoLocation(setUserData, setLocationAccessStatus, setError)
     } else {
       fetchIPBasedLocation(setUserData, setError, setLocationAccessStatus)
     }
   };
 
+  // Scroll to section function
+  const scrollToSection = (ref) => {
+    console.log(ref);
+    
+    ref.current.scrollIntoView({ behavior: 'smooth' });
+  };
+
   // Initial data fetch and location setup
   useEffect(() => {
-    // First, try to load from session storage
     const storedUserData = sessionStorage.getItem('userData');
     if (storedUserData) {
       const parsedUserData = JSON.parse(storedUserData);
@@ -67,51 +79,42 @@ export default function EditProfile() {
       getUserLocation();
     }
 
-    // Fetch user profile from API
-    fetchUserProfile (setUserData,setError) 
+    const token = sessionStorage.getItem('authToken');
+    const BASE_URL = "http://localhost:5000";
+    getUserData(BASE_URL,token,setUserData,userData)
 
-    // GSAP Animations
-    const profileSection = profileSectionRef.current;
-    const passwordSection = passwordSectionRef.current;
-
-    gsap.fromTo(profileSection, 
-      { opacity: 0, y: 50 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: profileSection,
-          start: 'top 80%'
-        }
+    const sections = [nameRef, locationRef, educationRef, interestsRef, passwordRef, deleteAccountRef];
+    
+    sections.forEach(section => {
+      if (section.current) {
+        gsap.fromTo(section.current, 
+          { opacity: 0, y: 30 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: section.current,
+              start: 'top 80%'
+            }
+          }
+        );
       }
-    );
+    });
 
-    gsap.fromTo(passwordSection, 
-      { opacity: 0, y: 50 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: passwordSection,
-          start: 'top 80%'
-        }
-      }
+    gsap.fromTo(
+      sideMenuRef.current,
+      { x: -200, opacity: 0 }, 
+      { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" } 
     );
   }, []);
 
-
-  // Map initialization effect
   useEffect(() => {
-    // Remove existing map if it exists
     if (map) {
       map.remove();
     }
 
-    // Always create map if latitude and longitude are available
     if (userData.latitude && userData.longitude && mapRef.current) {
       const newMap = L.map(mapRef.current).setView(
         [userData.latitude, userData.longitude], 
@@ -137,201 +140,207 @@ export default function EditProfile() {
     };
   }, [userData.latitude, userData.longitude]);
 
-
-  // Update profile
-  const updateProfile = async (e) => {
-    e.preventDefault();
-    try {
-      const token = sessionStorage.getItem('authToken');
-      const response = await axios.put(
-        'http://localhost:5000/api/users/update-profile', 
-        userData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      // Update session storage
-      sessionStorage.setItem('userData', JSON.stringify(userData));
-      
-      setSuccessMessage('Profile updated successfully');
-      setError('');
-    } catch (err) {
-      setError('Failed to update profile',err);
-      setSuccessMessage('');
-    }
-  };
-
-  // Update password
-  const updatePassword = async (e) => {
+  // Handle password update
+  const handlePasswordUpdate = (e) => {
     e.preventDefault();
     
-    // Basic validation
+    // Validate passwords match
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("New passwords do not match");
       return;
     }
-
-    try {
-      const token = sessionStorage.getItem('authToken');
-      await axios.put(
-        'http://localhost:5000/api/users/update-password', 
-        passwordData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      setSuccessMessage('Password updated successfully');
-      setError('');
-      
-      // Reset password fields
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-    } catch (err) {
-      setError('Failed to update password');
-      setSuccessMessage('');
-    }
-  };
-
-  // Delete account
-  const deleteAccount = async () => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete your account? This action cannot be undone.'
-    );
     
-    if (confirmDelete) {
-      try {
-        const token = sessionStorage.getItem('authToken');
-        await axios.delete('http://localhost:5000/api/users/delete-account', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        // Clear all stored data and redirect
-        sessionStorage.clear();
-        window.location.href = '/login';
-      } catch (err) {
-        setError('Failed to delete account');
-      }
+    // Validate password strength
+    if (passwordData.newPassword.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
     }
+    
+    setLoading(true);
+    updatePassword(
+      e, 
+      passwordData, 
+      setError, 
+      setSuccessMessage, 
+      setPasswordData,
+      setLoading
+    );
   };
 
   return (
-    <div className="edit-profile-container">
-      {/* Profile Section */}
-      <section ref={profileSectionRef} className="profile-section">
-        <h2> <span> <FaEdit /> </span> Edit User Profile</h2>
-        <form onSubmit={updateProfile}>
-          <div className="form-group">
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={userData.name}
-              onChange={handleInputChange(setUserData)}
-              required
-            />
+    <div className="profile-editor-container">
+
+      <div className="content-wrapper">
+        <aside className="side-menu" ref={sideMenuRef}>
+          <div className="menu-section">
+            <h3><FaInfoCircle /> Personal Info</h3>
+            <ul>
+              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(nameRef); }}>
+                Full Name
+              </li>
+              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(locationRef); }}>
+                Location
+              </li>
+              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(educationRef); }}>
+                Education
+              </li>
+              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(interestsRef); }}>
+                Interests
+              </li>
+            </ul>
           </div>
-
-          {/* Location Search and Map Container */}
-          <div className="form-group location-search">
-            <label>Location</label>
-            <div className="search-container">
-            </div>
-
-            <MapComponent userData={userData} setUserData={setUserData}  />
-
+          
+          <div className="menu-section">
+            <h3><FaKey /> Security</h3>
+            <ul>
+              <li onClick={() => { setActiveSection('security'); scrollToSection(passwordRef); }}>
+                Change Password
+              </li>
+              <li onClick={() => { setActiveSection('security'); scrollToSection(deleteAccountRef); }}>
+                Delete Account
+              </li>
+            </ul>
           </div>
+        </aside>
 
-          {/* Education Input */}
-          <div className="form-group">
-            <label>Education</label>
-            <input
-              type="text"
-              name="education"
-              value={userData.education}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          {/* Interests Selection */}
-          <div className="form-group interests-group">
-            <label>Interests</label>
-            <div className="interests-grid">
-              {availableInterests.map(interest => (
-                <div 
-                  key={interest} 
-                  className={`interest-item ${
-                    userData.interests?.includes(interest) ? 'selected' : ''
-                  }`}
-                  onClick={() => handleInterestToggle(interest)}
-                >
-                  {interest}
+        <main className="main-content">
+          {activeSection === 'personalInfo' && (
+            <form className="personal-info-form">
+              <div className="form-section" ref={nameRef}>
+                <h2>Full Name</h2>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="name"
+                    value={userData.name}
+                    onChange={handleInputChange(setUserData)}
+                    placeholder="Enter your full name"
+                    required
+                  />
                 </div>
-              ))}
+              </div>
+
+              <div className="form-section" ref={locationRef}>
+                <h2>Location</h2>
+                <div className="form-group location-search">
+                  <MapComponent userData={userData} setUserData={setUserData} />
+                </div>
+              </div>
+
+              <div className="form-section" ref={educationRef}>
+                <h2>Education</h2>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="education"
+                    value={userData.education}
+                    onChange={handleInputChange(setUserData)}
+                    placeholder="Enter your education details"
+                  />
+                </div>
+              </div>
+
+              <div className="form-section" ref={interestsRef}>
+                <h2>Interests</h2>
+                <div className="interest-input-wrapper" ref={dropdownRef}>
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    placeholder="Add more skills/interests..."
+                    className="interest-input"
+                  />
+
+                  {inputValue && suggestions.length > 0 && (
+                    <ul className="interests-dropdown">
+                      {suggestions.slice(0, 10).map((suggestion, index) => (
+                        <li 
+                          key={index} 
+                          onClick={(e) => addInterest(e.target.textContent, userData, setUserData, setInputValue, setSuggestions)}
+                        >
+                          {suggestion}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {loading && <p className="loading-text">Finding suggestions...</p>}
+                  {error && <p className="error-text">{error}</p>}
+                </div>
+
+                <div className="selected-interests">
+                  <h3>Selected Interests</h3>
+                  <div className="selected-interests-items">
+                    {userData.interests.map(interest => (
+                      <span 
+                        key={interest} 
+                        className="selected-interest-tag"
+                      >
+                        {interest} <span className='deleted-interest-tag' onClick={() => removeInterest(interest, setUserData)}>✕</span> 
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  className="save-changes-btn center" 
+                  onClick={(e) => updateProfile(e, userData, setError, setSuccessMessage,setLoading,navigate)}
+                >
+                    {loading ? (
+                      <>
+                        <span className="spinner"></span> Saving...
+                      </>
+                    ) : (
+                      <>
+                        <FaSave /> Save Changes
+                      </>
+                    )}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeSection === 'security' && (
+            <div className="security-content">
+              <div className="form-section" ref={passwordRef}>
+                <h2>Change Password</h2>
+                <form 
+                  onSubmit={handlePasswordUpdate} 
+                  className="password-form"
+                >
+                  {/* Using the new password component */}
+                  <PasswordChangeFields 
+                    passwordData={passwordData}
+                    setPasswordData={setPasswordData}
+                    loading={loading}
+                  />
+                  
+                  <button type="submit" className="change-password-btn" disabled={loading}>
+                    {loading ? 'Updating...' : 'Change Password'}
+                  </button>
+                </form>
+              </div>
+
+              <div className="form-section delete-account-section" ref={deleteAccountRef}>
+                <h2>Delete Account</h2>
+                <div className="warning-box">
+                  <p>Warning: This action cannot be undone. All your data will be permanently deleted.</p>
+                </div>
+                <button 
+                  onClick={() => deleteAccount(setError)}
+                  className="delete-account-btn center"
+                  disabled={loading}
+                >
+                  <FaTrash /> Delete My Account
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {error && <p className="error-message">{error}</p>}
-          {successMessage && <p className="success-message">{successMessage}</p>}
-
-          <button type="submit" className="update-btn primaray-btn">
-            Update Profile
-          </button>
-        </form>
-      </section>
-
-      {/* Password Section */}
-      <section ref={passwordSectionRef} className="password-section">
-        <h2>Change Password</h2>
-        <form onSubmit={updatePassword}>
-          <div className="form-group">
-            <label>Current Password</label>
-            <input
-              type="password"
-              name="currentPassword"
-              value={passwordData.currentPassword}
-              onChange={handlePasswordChange(setPasswordData)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>New Password</label>
-            <input
-              type="password"
-              name="newPassword"
-              value={passwordData.newPassword}
-              onChange={handlePasswordChange(setPasswordData)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Confirm New Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={passwordData.confirmPassword}
-              onChange={handlePasswordChange(setPasswordData)}
-              required
-            />
-          </div>
-
-          <button type="submit" className="change-password-btn">
-            Change Password
-          </button>
-        </form>
-
-        {/* Delete Account Section */}
-        <div className="delete-account-section">
-          <h3>Delete Account</h3>
-          <p>Warning: This action cannot be undone</p>
-          <button 
-            onClick={deleteAccount} 
-            className="delete-account-btn"
-          >
-            Delete My Account
-          </button>
-        </div>
-      </section>
+          {error && <div className="error-message">{error}</div>}
+          {successMessage && <div className="success-message">{successMessage}</div>}
+        </main>
+      </div>
     </div>
   );
 }

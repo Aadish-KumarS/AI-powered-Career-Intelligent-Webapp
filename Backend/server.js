@@ -11,12 +11,16 @@ import passport from 'passport';
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import './config/passport.js'
+import bodyParser from 'body-parser';
 
 dotenv.config(); 
 
 const app = express();
 
 // Middleware
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
+
 app.use(express.json());
 app.use(cors({
   origin: 'http://localhost:5173',

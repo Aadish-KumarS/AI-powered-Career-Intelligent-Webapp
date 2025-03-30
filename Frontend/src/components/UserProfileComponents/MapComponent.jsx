@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import L from "leaflet";
+import { IoMdAddCircle } from "react-icons/io";
 
 const LocationInput = ({ onLocationSelected, selectedLocation,userData }) => {
   const [inputValue, setInputValue] = useState("");
@@ -98,7 +99,7 @@ const LocationInput = ({ onLocationSelected, selectedLocation,userData }) => {
                   onClick={() => addLocation(location)}
                   aria-label="Add location"
                 >
-                  <span className="plus-symbol">+</span>
+                  <span className="plus-symbol"><IoMdAddCircle /></span>
                 </button>
               </li>
             ))}
@@ -128,6 +129,7 @@ const LocationInput = ({ onLocationSelected, selectedLocation,userData }) => {
 };
 
 const MapComponent = ({ userData, setUserData }) => {
+
     
   const defaultLocation = { 
     latitude: 40.7128, 

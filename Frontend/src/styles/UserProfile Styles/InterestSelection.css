@@ -14,8 +14,10 @@
 
 .form-step h3 {
   font-size: 1.5rem;
-  color: #333;
-  font-weight: bold;
+  font-weight: 400;
+  color: #373737;
+  text-align: center;
+  font-family: 'roboto';
 }
 
 /* Selected Interests */
@@ -24,7 +26,18 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   margin: 2rem 0;
-  max-width: 100%;
+  width: 100%;
+  flex-direction: column;
+}
+
+.selected-interests-items {
+  display: flex;
+  gap: 1rem;
+  background: #f9f9f9;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding:2rem 1.5rem;
+  flex-wrap: wrap;
 }
 
 .selected-interest-tag {
@@ -35,6 +48,10 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.3s;
+}
+
+.deleted-interest-tag{
+  cursor: pointer;
 }
 
 .selected-interest-tag:hover {
@@ -57,7 +74,7 @@
 }
 
 .interest-input:focus {
-  border-color: #007bff;
+  border-color: #ff6f61;
   outline: none;
 }
 

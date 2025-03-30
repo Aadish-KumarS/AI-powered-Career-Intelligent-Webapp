@@ -31,8 +31,18 @@ export async function getUserData(BASE_URL,token,setProfileData,profileData) {
           },
         }
       );
-      setProfileData({...profileData, name: response.data.name, education:response.data.education })
-      
+      const fetchedUserData = {
+        name: response.data.name, 
+        education:response.data.education,
+        location: response.data.location,
+        longitude: response.data.longitude,
+        latitude: response.data.latitude,
+        interests: response.data.interests,
+        profilePicture: response.data.profilePicture
+      }
+      setProfileData({...profileData, 
+        ...fetchedUserData});
+      sessionStorage.setItem('userData', JSON.stringify(fetchedUserData));
     } catch (error) {
       console.error('Error fetching the data',error);
     }
@@ -111,6 +121,144 @@ export const handleInterestToggle = (setter, userData) => (interest) => {
   setter(prevData => ({ ...prevData, interests: newInterests }));
 };
 
+export const fetchIPBasedLocation = async (setUserData, setError, setLocationAccessStatus) => {
+  try {
+    //CHANGE IT LATER
+    const response = await axios.get('http://localhost:5000/api/location/sds');
+    const { latitude, longitude, city, region, country_name } = response.data;
+    
+    setUserData(prevData => ({
+      ...prevData,
+      location: `${city}, ${region}, ${country_name}`,
+      latitude,
+      longitude
+    }));
+
+    setLocationAccessStatus('fallback');
+  } catch (error) {
+    console.error('Error fetching location:', error);
+    setError('Could not fetch location');
+    setLocationAccessStatus('error');
+  }
+};
+
+export const getGeoLocation = async (setUserData,setLocationAccessStatus, setError)=> {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+      axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+        .then(response => {
+          const locationName = response.data.display_name;
+          
+          setUserData(prevData => ({
+            ...prevData,
+            location: locationName,
+            latitude,
+            longitude
+          }));
+          
+          setLocationAccessStatus('success');
+        })
+        .catch(() => {
+          setUserData(prevData => ({
+            ...prevData,
+            latitude,
+            longitude,
+            location: 'Current Location'
+          }));
+          
+          setLocationAccessStatus('partial');
+        });
+    },
+    (error) => {
+      console.warn('Geolocation failed:', error);
+      fetchIPBasedLocation(setUserData, setError, setLocationAccessStatus);
+    }
+  );
+}
+
+export const updatePassword = async (e, passwordData, setError, setSuccessMessage, setPasswordData, setLoading) => {
+  e.preventDefault();
+  
+  if (passwordData.newPassword !== passwordData.confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const token = sessionStorage.getItem('authToken');
+    console.log(passwordData);
+    
+    await axios.put(
+      'http://localhost:5000/api/users/change-password', 
+      passwordData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    setSuccessMessage('Password updated successfully');
+    setError('');
+
+    sessionStorage.removeItem('authToken');
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 2000);
+    
+    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to update password');
+    setSuccessMessage('');
+  } finally {
+    setLoading(false); 
+  }
+};
+
+export const deleteAccount = async (setError) => {
+  const confirmDelete = window.confirm(
+    'Are you sure you want to delete your account? This action cannot be undone.'
+  );
+  
+  if (confirmDelete) {
+    try {
+      const token = sessionStorage.getItem('authToken');
+      await axios.delete('http://localhost:5000/api/users/delete-account', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      sessionStorage.clear();
+      window.location.href = '/login';
+    } catch (err) {
+      setError('Failed to delete account');
+    }
+  }
+};
+
+export const updateProfile = async (e, userData, setError, setSuccessMessage,setLoading,navigate) => {
+  e.preventDefault();
+  try {
+    const token = sessionStorage.getItem('authToken');
+    setLoading(true)
+    await axios.put(
+      'http://localhost:5000/api/users/update-profile', 
+      userData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    // Update session storage
+    sessionStorage.setItem('userData', JSON.stringify(userData));
+    
+    setSuccessMessage('Profile updated successfully');
+    setError('');
+  } catch (err) {
+    setError('Failed to update profile',err);
+    setSuccessMessage('');
+  } finally{
+    setLoading(false);
+    navigate('/profile/user-profile')
+  }
+};
+
 
 //CREATE USER PROFILE
 // create profile component helper functions 
@@ -150,3 +298,49 @@ export const handleCreateUserFileChange = (e,setProfileData,profileData) => {
     reader.readAsDataURL(file);
   }
 };
+
+
+//INTEREST COMPONENT
+// interest component helper functions 
+export const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
+export const handleInterestInputChange = (e, setInputValue, debouncedFetchSuggestions) => {
+  const value = e.target.value;
+  setInputValue(value);
+  debouncedFetchSuggestions(value);
+};
+
+export const addInterest = (interest, userData, setUserData, setInputValue, setSuggestions) => {
+  
+  if (!userData?.interests || !Array.isArray(userData.interests)) {
+    setUserData(prev => ({
+      ...prev,
+      interests:  interest
+    }));
+  } else if (!userData.interests.includes(interest)) {
+    setUserData(prev => ({
+      ...prev,
+      interests: [...prev.interests, interest]  
+    }));
+  }
+  setInputValue("");
+  setSuggestions([]);
+};
+
+export const removeInterest = (interest, setUserData) => {
+  setUserData(prev => ({
+    ...prev,
+    interests: prev.interests.filter(item => item !== interest) 
+  }));
+};
+

@@ -1,72 +1,137 @@
-.edit-profile-container {
+/* Main container */
+.profile-editor-container {
+  min-height: 100vh;
+  background: linear-gradient(to right, #ff7e5f, #feb47b);
+  display: flex;
   flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Navbar styles */
+.profile-editor-container .save-changes-btn {
+  width: fit-content;
+  gap: .5rem;
+}
+
+.profile-editor-container button{
+  width: fit-content;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  font-family: 'poppins', sans-serif;
+  background: linear-gradient(45deg, #ff6f61, #ffcc00);
+  color: white;
+  font-weight: 200;
+  transition: all 0.25s ease-in-out;
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  cursor: pointer !important;
+}
+
+.profile-editor-container .save-changes-btn:hover {
+  background-position: 100% 50%;
+}
+
+/* Content wrapper */
+.profile-editor-container .content-wrapper {
+  display: flex;
+  flex: 1;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+/* Side menu styles */
+.profile-editor-container .side-menu {
+  width: 350px;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  height: 100%;
+  position: sticky;
+  top: 0;
+}
+
+.profile-editor-container .menu-section {
+  margin-bottom: 2rem;
+}
+
+.profile-editor-container .menu-section h3 {
+  font-size: 1.2rem;
+  color: #373737;
+  margin-bottom: 1rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 4rem;
-  min-height: 100vh;
-  justify-content: space-between;
-  padding: 20px;
-  background: linear-gradient(to right, #ff7e5f, #feb47b);
-  overflow: hidden;
-  position: relative;
+  gap: 0.5rem;
 }
 
-.profile-section,
-.password-section {
-  background-color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.profile-editor-container .menu-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profile-editor-container .menu-section li {
+  padding: 0.75rem 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.profile-editor-container .menu-section li:hover {
+  background-color: rgba(255, 111, 97, 0.1);
+  color: #ff6f61;
+}
+
+/* Main content styles */
+.profile-editor-container .main-content {
+  flex: 1;
+  background-color: white;
   border-radius: 1rem;
-  width: 45%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
 }
 
-.profile-section h2,
-.password-section h2 {
-  font-family: 'Roboto';
-  font-size: 3rem;
-  font-weight: 400;
-  margin: 1.5rem;
-  margin-bottom: 3rem;
-  color: #373737;
+.profile-editor-container .form-section {
+  padding-top: 1rem;
 }
 
-.profile-section::before,
-.password-section::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: rgba(255, 255, 255, 0.05);
-  transform: rotate(-45deg);
-  z-index: -1;
+.profile-editor-container .form-section h2 {
+  font-size: 1.75rem;
+  font-weight: 400; 
+  color: #373737; 
+  font-family: 'Roboto', sans-serif;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
 }
 
-.form-group {
+
+/* Form styles */
+.profile-editor-container .form-group {
   margin-bottom: 1.5rem;
   position: relative;
 }
 
-.form-group label {
+.profile-editor-container .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
   color: #333;
   font-weight: 600;
   transition: color 0.3s ease;
   font-family: 'poppins';
   font-weight: 300;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .form-group input,
-.form-group textarea {
+.profile-editor-container .form-group textarea {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
@@ -77,23 +142,22 @@
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.profile-editor-container .form-group textarea:focus {
   border-color: #ff7e5f;
   outline: none;
 }
 
-.location-search {
+.profile-editor-container .location-search {
   position: relative;
 }
 
-.search-container {
+.profile-editor-container .search-container {
   display: flex;
   align-items: center;
-  gap: 1rem;
   flex-direction: column;
 }
 
-.search-results {
+.profile-editor-container .search-results {
   position: absolute;
   top: 100%;
   left: 0;
@@ -106,23 +170,24 @@
   z-index: 10;
 }
 
-.search-result-item {
+.profile-editor-container .search-result-item {
   padding: 0.75rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.search-result-item:hover {
+.profile-editor-container .search-result-item:hover {
   background-color: rgba(255, 111, 97, 0.1);
 }
 
-.interests-grid {
+/* Interests grid */
+.profile-editor-container .interests-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
 }
 
-.interest-item {
+.profile-editor-container .interest-item {
   padding: 0.5rem;
   text-align: center;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -132,20 +197,21 @@
   background-color: #f9f9f9;
 }
 
-.interest-item:hover {
+.profile-editor-container .interest-item:hover {
   background-color: rgba(255, 111, 97, 0.1);
   border-color: #ff6f61;
 }
 
-.interest-item.selected {
+.profile-editor-container .interest-item.selected {
   background: linear-gradient(45deg, #ff6f61, #ffcc00);
   color: #ffffff;
   border-color: transparent;
 }
 
+/* Button styles */
 .update-btn, 
 .change-password-btn,
-.search-btn {
+.profile-editor-container .search-btn {
   background: linear-gradient(45deg, #ff6f61, #ffcc00);
   color: white;
   font-weight: 200;
@@ -164,54 +230,117 @@
 
 .update-btn:hover, 
 .change-password-btn:hover,
-.search-btn:hover {
+.profile-editor-container .search-btn:hover {
   background-position: 100% 50%; 
 }
 
-.delete-account-section {
+/* Delete account section */
+.profile-editor-container .delete-account-section {
   margin-top: 2rem;
-  text-align: center;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #fff5f5;
+  border: 1px solid #ffecec;
 }
 
-.delete-account-btn {
-  background: linear-gradient(45deg, #ff4757, #ff6b6b);
-  color: #ffffff;
-  border: none;
+.profile-editor-container .warning-box {
+  background-color: #fff0f0;
+  border-left: 4px solid #ff4757;
   padding: 1rem;
-  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0.25rem;
+}
+
+.profile-editor-container .delete-account-btn {
+  background: linear-gradient(45deg, #ff4757, #ff6b6b);
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  gap: 0.5rem;
 }
 
-.delete-account-btn:hover {
+.profile-editor-container .delete-account-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
-.error-message {
+/* Message styles */
+.profile-editor-container .error-message {
   color: #ff4757;
-  margin-bottom: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #fff0f0;
+  border-radius: 0.5rem;
   font-weight: 500;
 }
 
-.success-message {
+.profile-editor-container .success-message {
   color: #4caf50;
-  margin-bottom: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f0fff0;
+  border-radius: 0.5rem;
   font-weight: 500;
 }
 
 /* Scrollbar Styling */
-.search-results::-webkit-scrollbar {
+.profile-editor-container .search-results::-webkit-scrollbar {
   width: 6px;
 }
 
-.search-results::-webkit-scrollbar-track {
+.profile-editor-container .search-results::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
 
-.search-results::-webkit-scrollbar-thumb {
+.profile-editor-container .search-results::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, #ff6f61, #ffcc00);
   border-radius: 10px;
+}
+
+/* Map container styles */
+.profile-editor-container .map-container {
+  height: 300px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+  
+  .side-menu {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem;
+  }
+  
+  .interests-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .content-wrapper {
+    padding: 1rem;
+  }
+  
+  .nav-center h1 {
+    font-size: 1.2rem;
+  }
+  
+  .save-changes-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
 }

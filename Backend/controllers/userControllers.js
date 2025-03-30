@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import bcrypt from 'bcryptjs';
 
 export const getUserProfile = async (req, res) => {
   try {
@@ -35,6 +36,9 @@ export const updateUserProfile = async (req, res) => {
       )
     );
 
+    console.log(req.body.data);
+    
+
     Object.assign(user, updates);
     const updatedUser = await user.save();
 
@@ -44,7 +48,6 @@ export const updateUserProfile = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
 
 export const deleteUserAccount = async (req, res) => {
   try {
@@ -57,3 +60,36 @@ export const deleteUserAccount = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const validatePassword = async (req, res, next) => {
+  try {
+      const { currentPassword, newPassword, confirmPassword } = req.body;
+
+      if (!currentPassword || !newPassword || !confirmPassword) {
+          return res.status(400).json({ message: 'All fields are required' });
+      }
+
+      if (newPassword !== confirmPassword) {
+          return res.status(400).json({ message: 'Passwords do not match' });
+      }
+
+      const user = await User.findById(req.user.id);
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+      if (!isMatch) {
+          return res.status(401).json({ message: 'Incorrect current password' });
+      }
+
+      req.user = user;
+      next(); 
+  } catch (error) {
+      console.error('Error in validatePassword middleware:', error);
+      res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export default validatePassword;

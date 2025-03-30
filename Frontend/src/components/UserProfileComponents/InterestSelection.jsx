@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import '../../styles/UserProfile Styles/InterestSelection.css';
+import { addInterest, debounce, handleInterestInputChange, removeInterest } from "../../utils/helper";
 
 const InterestSelection = ({ 
   profileData, 
@@ -39,20 +40,7 @@ const InterestSelection = ({
       setLoading(false);
     }
   };
-  
 
-  // Debounce function to limit API calls
-  const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
 
   // Debounced suggestion fetch
   const debouncedFetchSuggestions = useCallback(
@@ -60,38 +48,6 @@ const InterestSelection = ({
     [fetchSuggestions]
   );
 
-  // Handle input changes
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInputValue(value);
-    debouncedFetchSuggestions(value);
-  };
-
-  // Add interest to profile
-  const addInterest = (interest) => {
-    if (!profileData?.interests) {
-      setProfileData(prev => ({
-        ...prev,
-        interests: [interest]
-      }));
-    } else if (!profileData.interests.includes(interest)) {
-      setProfileData(prev => ({
-        ...prev,
-        interests: [...prev.interests, interest]
-      }));
-    }
-    setInputValue("");
-    setSuggestions([]);
-  };
-  
-
-  // Remove interest from profile
-  const removeInterest = (interest) => {
-    setProfileData(prev => ({
-      ...prev,
-      interests: prev.interests.filter(item => item !== interest)
-    }));
-  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -114,7 +70,7 @@ const InterestSelection = ({
         <input
           type="text"
           value={inputValue}
-          onChange={handleInputChange}
+          onChange={(e) => handleInterestInputChange(e, setInputValue, debouncedFetchSuggestions)}
           placeholder="Type to find professional skills/interests..."
           className="interest-input"
         />
@@ -124,7 +80,7 @@ const InterestSelection = ({
             {suggestions.slice(0, 10).map((suggestion, index) => (
               <li 
                 key={index} 
-                onClick={() => addInterest(suggestion)}
+                onClick={(e) => addInterest(e.target.textContent, profileData, setProfileData, setInputValue, setSuggestions,e)}
               >
                 {suggestion}
               </li>
@@ -138,14 +94,16 @@ const InterestSelection = ({
 
       <div className="selected-interests">
         <h3>Selected Interests</h3>
-        {profileData.interests.map(interest => (
-          <span 
-            key={interest} 
-            className="selected-interest-tag"
-          >
-            {interest} <span  onClick={() => removeInterest(interest)}>✕</span> 
-          </span>
-        ))}
+        <div className="selected-interests-items">
+          {profileData.interests.map(interest => (
+            <span 
+              key={interest} 
+              className="selected-interest-tag"
+            >
+              {interest} <span className="deleted-interest-tag"  onClick={() => removeInterest(interest, setProfileData)}>✕</span> 
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className="buttons-container">
