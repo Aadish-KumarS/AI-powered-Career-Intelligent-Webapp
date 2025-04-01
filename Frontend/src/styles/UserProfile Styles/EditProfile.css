@@ -42,6 +42,22 @@
   flex: 1;
   padding: 2rem;
   gap: 2rem;
+  position: relative;
+  min-height: 100vh;
+}
+
+.profile-editor-container .back-btn{
+  font-weight: 200;
+  border-radius: .25rem;
+  color: #fff;
+  font-size: .875rem;
+  padding: .5rem 1.15rem;
+  text-align: center;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  position: relative;
+  cursor: pointer;
+  border: none;
+  margin-bottom: 3rem;
 }
 
 /* Side menu styles */
@@ -51,9 +67,9 @@
   border-radius: 1rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  height: 100%;
-  position: sticky;
-  top: 0;
+  height: 92vh;
+  position:fixed;
+  padding-top: 1rem;
 }
 
 .profile-editor-container .menu-section {
@@ -98,6 +114,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   overflow-y: auto;
+  margin-left: 24rem;
 }
 
 .profile-editor-container .form-section {
@@ -113,6 +130,9 @@
   letter-spacing: 0.5px;
 }
 
+.delete-title{
+  color: rgb(255, 55, 55) !important;
+}
 
 /* Form styles */
 .profile-editor-container .form-group {
@@ -128,6 +148,12 @@
   font-family: 'poppins';
   font-weight: 300;
   font-size: 1rem;
+}
+
+.profile-editor-container .profile-preview{
+  border: 1px solid #cbcbcb;
+  width: 100px;
+  height: 100px;
 }
 
 .form-group input,
@@ -306,6 +332,21 @@
   margin-top: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #feb47b;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Responsive styles */

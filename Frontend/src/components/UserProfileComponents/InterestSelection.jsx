@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import '../../styles/UserProfile Styles/InterestSelection.css';
-import { addInterest, debounce, handleInterestInputChange, removeInterest } from "../../utils/helper";
+import { addInterest, debounce, fetchSuggestions, handleInterestInputChange, removeInterest } from "../../utils/helper";
 
 const InterestSelection = ({ 
   profileData, 
@@ -15,39 +15,11 @@ const InterestSelection = ({
   const dropdownRef = useRef(null);
 
 
-  // Wikipedia API for skill suggestions
-  const fetchSuggestions = async (query) => {
-    if (query.length < 2) {
-      setSuggestions([]);
-      return;
-    }
-  
-    setLoading(true);
-    setError(null);
-  
-    try {
-      const response = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=opensearch&format=json&search=${query}&limit=10&origin=*`
-      );
-      
-      const data = await response.json();
-      setSuggestions(data[1]); // Extract search results
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
-      setError("Could not fetch suggestions");
-      setSuggestions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
   // Debounced suggestion fetch
-  const debouncedFetchSuggestions = useCallback(
-    debounce(fetchSuggestions, 300),
-    [fetchSuggestions]
+  const handleFetchSuggestions = useCallback(
+    (query) => fetchSuggestions(query, setSuggestions, setLoading, setError),
+    []
   );
-
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -70,7 +42,7 @@ const InterestSelection = ({
         <input
           type="text"
           value={inputValue}
-          onChange={(e) => handleInterestInputChange(e, setInputValue, debouncedFetchSuggestions)}
+          onChange={(e) => handleInterestInputChange(e, setInputValue, handleFetchSuggestions)}
           placeholder="Type to find professional skills/interests..."
           className="interest-input"
         />

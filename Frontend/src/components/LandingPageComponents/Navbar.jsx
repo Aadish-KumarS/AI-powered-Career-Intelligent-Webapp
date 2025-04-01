@@ -3,7 +3,8 @@ import {  useEffect } from 'react';
 import '../../styles/Landingpage Styles/Navbar.css';
 import { FaRegUser } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
-
+import { IoSettingsOutline } from "react-icons/io5";
+import SettingsDropdown from './SettingsDropdown';
 
 export default function Navbar() {
 
@@ -30,9 +31,7 @@ export default function Navbar() {
             <FaRegUser />
           </div>
         </Link>
-        <button className="settings-btn">
-          <span className="settings-icon"></span>
-        </button>
+        <SettingsDropdown />
       </div>
     </nav>
   );

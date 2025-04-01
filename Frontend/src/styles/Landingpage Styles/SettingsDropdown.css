@@ -1,0 +1,90 @@
+/* Settings Dropdown Container */
+.settings-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Settings Button */
+.settings-btn{
+  cursor: pointer;
+  width: 30px !important;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color:#ff6f61 ;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  font-size: 1.25rem;
+  transition: background-color .2s ease-in-out;
+}
+
+
+.settings-btn:hover,
+.user-profile:hover {
+  background-color: #f0f0f0;
+}
+
+.settings-btn-active {
+  background-color: #e6e6e6;
+}
+
+.settings-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Dropdown Menu */
+.settings-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  width: 200px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.settings-dropdown-hidden {
+  display: none;
+}
+
+.settings-dropdown-visible {
+  display: block;
+}
+
+/* Dropdown Items */
+.dropdown-menu {
+  width: 100%;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+div.dropdown-item:nth-of-type(1){
+  color: rgb(251, 47, 47);
+  background-color: #fd48482b;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-icon {
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+}

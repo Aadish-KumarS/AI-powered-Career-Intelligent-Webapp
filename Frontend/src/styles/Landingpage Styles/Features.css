@@ -47,7 +47,7 @@
   height: 300px;
   border-radius: 15px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.15s ease;
   cursor: pointer;
   color: #333;
   overflow: hidden;
@@ -55,18 +55,16 @@
   z-index: 1;
 }
 
-.features-section .feature-card .background-text {
-  color: #33333330;
-  font-size: 22rem;
-  filter: blur(3px);
-  font-weight: 500;
+.features-section .feature-card h3 {
+  font-size: 2rem;
+  font-weight: 200;
+  margin-bottom: 15px;
+  font-family: 'poppins';
 }
 
-.features-section .feature-card h3 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 15px;
-  font-family: 'roboto', sans-serif;
+.features-section .feature-card.expanded h3 {
+  font-size: 3rem;
+  font-weight: 200;
 }
 
 .features-section .feature-card p {
@@ -80,7 +78,7 @@
 .features-section .feature-card .expand-btn {
   border: none;
   transition: transform 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.216) inset;
   cursor: pointer;
   font-size: 1.35rem;
   padding: .25rem;
@@ -88,36 +86,56 @@
   aspect-ratio: 1;
   border-radius: 3px;
   justify-self: flex-end;
+  color: #ff6f61;
+  background-color: white;
 }
 
 .features-section .feature-card .expand-btn:hover{
   transform: scale(1.1);
 }
 
-.features-section .feature-card:hover {
-  transform: translateY(-15px) !important;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.1);
-}
-
 .features-section .feature-card.expanded {
   width: 80%;
   transform: scale(1.05);
-  background-color: #f3f3f3;
-  box-shadow: 0 15px 60px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.114) inset;
+  padding: 5rem 3rem;
+  height: 670px;
+  padding-top: 3rem;
 }
 
-.features-section .feature-card.expanded p {
+.features-section .feature-card.expanded button {
+  margin-top: 3rem;
+}
+
+.features-section .feature-card.expanded p{
   color: #333;
   font-size: 1.2rem;
+}
+
+.features-section .feature-card.expanded li {
+  list-style: none;
+  position: relative;
+  padding: .5rem 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.3s ease-in-out;
+  margin: 1.5rem 0;
+  color: white;
+  border-radius: 8px;
+}
+
+.features-section .feature-card.expanded li:hover {
+  color: #222;
+  background-color: #ffffff54;
 }
 
 .features-section .feature-card.hidden {
   display: none;
 }
 
-
-
-/* Shapes in Background */
 .features-section::before {
   content: "";
   position: absolute;
@@ -142,6 +160,20 @@
   border-radius: 50%;
   filter: blur(80px);
   opacity: 0.2;
+}
+
+.features-img-container {
+  width: 100%;
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  transform: translateX(-25%);
+}
+
+.features-img-container img{
+  width: 500px;
+  height: 100%;
+  opacity: .25;
 }
 
 @media (max-width: 768px) {

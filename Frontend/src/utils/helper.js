@@ -189,7 +189,6 @@ export const updatePassword = async (e, passwordData, setError, setSuccessMessag
 
   try {
     const token = sessionStorage.getItem('authToken');
-    console.log(passwordData);
     
     await axios.put(
       'http://localhost:5000/api/users/change-password', 
@@ -245,7 +244,6 @@ export const updateProfile = async (e, userData, setError, setSuccessMessage,set
       { headers: { Authorization: `Bearer ${token}` } }
     );
     
-    // Update session storage
     sessionStorage.setItem('userData', JSON.stringify(userData));
     
     setSuccessMessage('Profile updated successfully');
@@ -256,6 +254,31 @@ export const updateProfile = async (e, userData, setError, setSuccessMessage,set
   } finally{
     setLoading(false);
     navigate('/profile/user-profile')
+  }
+};
+
+export const fetchSuggestions = async (query, setSuggestions, setLoading, setError) => {
+  if (query.length < 2) {
+    setSuggestions([]);
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    const response = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=opensearch&format=json&search=${query}&limit=10&origin=*`
+    );
+
+    const data = await response.json();
+    setSuggestions(data[1]); 
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+    setError("Could not fetch suggestions");
+    setSuggestions([]);
+  } finally {
+    setLoading(false);
   }
 };
 

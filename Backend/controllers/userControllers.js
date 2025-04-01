@@ -36,9 +36,6 @@ export const updateUserProfile = async (req, res) => {
       )
     );
 
-    console.log(req.body.data);
-    
-
     Object.assign(user, updates);
     const updatedUser = await user.save();
 

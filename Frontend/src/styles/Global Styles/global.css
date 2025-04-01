@@ -12,13 +12,8 @@ body {
   background:white;
   color: #333;
   transition: background-color 0.3s, color 0.3s;
+  overscroll-behavior: none;
 }
-.dark {
-  background-color: #121212;
-  color: white;
-}
-
-
 
 .center {
   display: flex;
@@ -41,7 +36,9 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-
+button {
+  cursor: pointer !important;
+}
 
 /* Abstract Background Elements */
 .abstract-bg {

@@ -88,9 +88,6 @@ export const login = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    console.log(3);
-    
-
     if (!user.isVerified) {
       res.cookie('email', email, {
         httpOnly: true,
@@ -119,18 +116,6 @@ export const login = async (req, res) => {
 
 //GOOGLE AUTH ==================================================
 //GOOGLE AUTH ==================================================
-
-// Google OAuth Callback Controller
-export const googleAuthCallback = (req, res) => {
-  try {
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { expiresIn: "3d" });
-
-    res.cookie("token", token, { httpOnly: true, secure: true });
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
-  } catch (error) {
-    res.status(500).json({ message: "Authentication failed", error: error.message });
-  }
-};
 
 // GOOGLE LOGIN
 export const googleLogin = async (req, res) => {

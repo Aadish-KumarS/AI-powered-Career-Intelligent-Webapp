@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getUserData, handleInputChange, fetchIPBasedLocation, getGeoLocation, addInterest, removeInterest, updatePassword, deleteAccount, updateProfile } from '../../utils/helper';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { getUserData, handleInputChange, fetchIPBasedLocation, getGeoLocation, addInterest, removeInterest, updatePassword, deleteAccount, updateProfile, handleCreateUserFileChange, debounce, fetchSuggestions, handleInterestInputChange } from '../../utils/helper';
 import MapComponent from './MapComponent';
-import { FaEdit, FaHome, FaSave, FaUser, FaKey, FaTrash, FaInfoCircle } from "react-icons/fa";
+import { FaSave, FaKey, FaTrash, FaInfoCircle } from "react-icons/fa";
 import PasswordChangeFields from '../PasswordComponents/PasswordChange'; 
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -19,7 +19,8 @@ export default function EditProfile() {
     latitude: 23.6345,
     longitude: 102.5528,
     education: '',
-    interests: []
+    interests: [],
+    profilePicture: ''
   });
   
   const [passwordData, setPasswordData] = useState({
@@ -47,6 +48,7 @@ export default function EditProfile() {
   const passwordRef = useRef(null);
   const deleteAccountRef = useRef(null);
   const dropdownRef = useRef(null);
+  const pictureRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const sideMenuRef = useRef(null);
   
@@ -61,10 +63,13 @@ export default function EditProfile() {
 
   // Scroll to section function
   const scrollToSection = (ref) => {
-    console.log(ref);
-    
     ref.current.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const handleFetchSuggestions = useCallback(
+    (query) => fetchSuggestions(query, setSuggestions, setLoading, setError),
+    []
+  );
 
   // Initial data fetch and location setup
   useEffect(() => {
@@ -172,6 +177,8 @@ export default function EditProfile() {
 
       <div className="content-wrapper">
         <aside className="side-menu" ref={sideMenuRef}>
+          <button className='back-btn' onClick={() => window.history.back()}>Back</button>
+
           <div className="menu-section">
             <h3><FaInfoCircle /> Personal Info</h3>
             <ul>
@@ -183,6 +190,9 @@ export default function EditProfile() {
               </li>
               <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(educationRef); }}>
                 Education
+              </li>
+              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(pictureRef); }}>
+                Profile Picture
               </li>
               <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(interestsRef); }}>
                 Interests
@@ -240,13 +250,25 @@ export default function EditProfile() {
                 </div>
               </div>
 
+              <div className="form-section" ref={pictureRef}>
+              <div className="file-upload">
+                <h2>Profile Picture</h2>
+                <div className="form-group">
+                  <input type="file" accept="image/*" onChange={(e) => handleCreateUserFileChange(e,setUserData,userData)} />
+                </div>
+                {userData.profilePicture && (
+                  <img src={userData.profilePicture} alt="Profile Preview" className="profile-preview" />
+                )}
+              </div>
+              </div>
+
               <div className="form-section" ref={interestsRef}>
                 <h2>Interests</h2>
                 <div className="interest-input-wrapper" ref={dropdownRef}>
                   <input
                     type="text"
                     value={inputValue}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInterestInputChange(e, setInputValue, handleFetchSuggestions)}
                     placeholder="Add more skills/interests..."
                     className="interest-input"
                   />
@@ -308,7 +330,6 @@ export default function EditProfile() {
                   onSubmit={handlePasswordUpdate} 
                   className="password-form"
                 >
-                  {/* Using the new password component */}
                   <PasswordChangeFields 
                     passwordData={passwordData}
                     setPasswordData={setPasswordData}
@@ -322,7 +343,7 @@ export default function EditProfile() {
               </div>
 
               <div className="form-section delete-account-section" ref={deleteAccountRef}>
-                <h2>Delete Account</h2>
+                <h2 className='delete-title'>Delete Account</h2>
                 <div className="warning-box">
                   <p>Warning: This action cannot be undone. All your data will be permanently deleted.</p>
                 </div>

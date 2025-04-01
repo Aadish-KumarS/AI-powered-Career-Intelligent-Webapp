@@ -48,6 +48,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.3s;
+  box-shadow: 1.5px 0 3px #0000005c inset;
 }
 
 .deleted-interest-tag{

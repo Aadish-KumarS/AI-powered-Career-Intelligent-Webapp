@@ -32,10 +32,23 @@ export default function Features() {
             className={`flex-column feature-card feature-card-${feature.id} ${expandedId === feature.id ? "expanded" : ""} ${expandedId && expandedId !== feature.id ? "hidden" : ""}`}
           >
             <h3>{feature.title}</h3>
-            <p>{expandedId === feature.id ? feature.details : feature.shortDesc}</p>
+            {expandedId === feature.id ? (
+              <ul>
+                {feature.details.map((point, index) => (
+                  <li key={index}>{point}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>{feature.shortDesc}</p>
+            )}
             <button onClick={() => toggleExpand(feature.id)} className="expand-btn center">
               {expandedId === feature.id ? <RiCollapseDiagonal2Line /> : <FaExpand />}
             </button>
+            {expandedId && 
+              <div className="features-img-container"> 
+                <img src={feature.img} alt="" />
+              </div>
+            }
           </div>
         ))}
       </div>

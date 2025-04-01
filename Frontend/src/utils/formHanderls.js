@@ -82,12 +82,8 @@ export const handleSubmitLogin = async (e, setLoading, setError, formData, navig
   }
 
   try {
-    console.log(formData);
-    
     const response = await axios.post("http://localhost:5000/api/auth/login", formData, { withCredentials: true });
 
-    console.log(1);
-    
     if (response.data) {
       const token = response.data.token;
       sessionStorage.setItem("authToken", token); 
@@ -251,3 +247,14 @@ export const handleSubmitCreateProfile = async (e,profileData,setError,BASE_URL,
   }
 };
 
+//LOGOUT 
+export const logoutUser = async (navigate) => {
+  try {
+    await axios.get('/api/logout', { withCredentials: true }); 
+    sessionStorage.removeItem('authToken'); 
+    sessionStorage.removeItem('user'); 
+    navigate('/login'); 
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};

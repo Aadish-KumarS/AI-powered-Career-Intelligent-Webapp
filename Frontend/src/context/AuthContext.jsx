@@ -9,8 +9,6 @@ export function useAuthContext() {
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
-
   
   const isAuthenticatedFun = () => {
     const tokenFromSessionStorage = sessionStorage.getItem('authToken');
@@ -26,20 +24,14 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = (token) => {
-    sessionStorage.setItem('authToken', token);
-    setIsAuthenticated(true);
-    navigate('/dashboard');
-  };
-
-  const logout = () => {
-    sessionStorage.removeItem('authToken');
-    setIsAuthenticated(false);
-    navigate('/login');
-  };
+  // const login = (token) => {
+  //   sessionStorage.setItem('authToken', token);
+  //   setIsAuthenticated(true);
+  //   navigate('/dashboard');
+  // };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated}}>
       {children}
     </AuthContext.Provider>
   );
