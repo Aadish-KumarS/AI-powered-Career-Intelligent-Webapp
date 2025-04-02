@@ -3,7 +3,6 @@ import {  useEffect } from 'react';
 import '../../styles/Landingpage Styles/Navbar.css';
 import { FaRegUser } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
-import { IoSettingsOutline } from "react-icons/io5";
 import SettingsDropdown from './SettingsDropdown';
 
 export default function Navbar() {
@@ -18,7 +17,9 @@ export default function Navbar() {
 
   return (
     <nav className="navbar fade-in">
-      <h1 className="logo">Right Track</h1>
+      <Link to='/'>
+        <h1 className="logo" >Right Track</h1>
+      </Link>
       <ul className="nav-links">
         <li><a href="/#features">Features</a></li>
         <li><a href="/#about">About</a></li>

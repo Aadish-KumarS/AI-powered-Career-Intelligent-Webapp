@@ -5,10 +5,13 @@ import { FaArrowRight } from 'react-icons/fa';
 import RocketIcon from '../../assets/rocket.svg?react';
 import BrainIcon from '../../assets/brain.svg?react';
 import heroImage from '../../assets/hero-illustration.jpeg';
+import { useNavigate } from 'react-router-dom';
 
 
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     gsap.fromTo(".hero-title span", 
       { opacity: 0, y: -30 },  
@@ -69,7 +72,7 @@ export default function HeroSection() {
           <span>with</span> <span>AI</span>
         </h1>
         <p className="hero-subtitle">An intelligent career roadmap built for your success, powered by AI.</p>
-        <button className="btn btn-primary">Get Started <FaArrowRight /></button>
+        <button className="btn btn-primary" onClick={() => navigate('/signup')}>Get Started <FaArrowRight /></button>
       </div>
       <div className="hero-image">
         <img src={heroImage} alt="Career Roadmap AI" />
