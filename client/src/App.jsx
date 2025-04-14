@@ -11,6 +11,7 @@ import ProtectedAuthRoute from './components/ProtectedRoute';  // Ensure correct
 
 import Dashboard from './pages/Dashboard'; 
 import Profile from './pages/User profile pages/Profile'; 
+import Roadmap from './features/roadmap-generator/Roadmap';
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
 
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile/*" element={<Profile />} />
+
+      <Route path="/generate-roadmap" element={<Roadmap goal="frontend developer" />} />
     </Routes>
   );
 }
