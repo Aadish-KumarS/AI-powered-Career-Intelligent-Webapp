@@ -1,8 +1,14 @@
 import { Handle, } from 'reactflow';
 
 const CustomNode = ({ data, selected }) => {
+  const nodeStyle = {
+    backgroundColor: data.backgroundColor || '#607D8B',
+    borderColor: data.borderColor || '#607D8B',
+    color: data.textColor || '#ffffff'
+  };
+  
   return (
-    <div className={`roadmap-node ${selected ? 'selected' : ''} ${data.nodeType || 'default'}`}>
+    <div className={`roadmap-node node-${data.nodeType || 'default'} ${selected ? 'selected' : ''} ${data.nodeType || 'default'}`}  style={nodeStyle}>
       <Handle 
         type="target" 
         position="top" 

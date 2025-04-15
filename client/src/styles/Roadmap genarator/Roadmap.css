@@ -15,6 +15,7 @@
   padding: 35px;
   margin-bottom: 35px;
   text-align: center;
+  margin-top: 3rem;
 }
 
 .input-title {
@@ -116,6 +117,19 @@
   margin-bottom: 40px;
 }
 
+/* View mode variations */
+.roadmap-container.view-default {
+  background-color: #fcfcfc;
+}
+
+.roadmap-container.view-compact {
+  background-color: #f7f7f7;
+}
+
+.roadmap-container.view-expanded {
+  background-color: #f7f9fc;
+}
+
 /* Roadmap Header */
 .roadmap-header {
   padding: 25px 30px;
@@ -179,6 +193,71 @@
 .save-roadmap-btn:disabled {
   background: #8bc34a;
   cursor: default;
+  animation: pulse 1s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Career Paths Selector */
+.career-paths-selector {
+  padding: 15px 30px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.career-paths-selector h5 {
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.path-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.path-btn {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  color: #555;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.path-btn:hover {
+  background-color: #e5e5e5;
+  transform: translateY(-2px);
+}
+
+.path-btn.active {
+  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
+  color: white;
+  box-shadow: 0 4px 10px rgba(255, 126, 95, 0.2);
+}
+
+.path-reset-btn {
+  padding: 8px 16px;
+  background-color: #64b5f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.path-reset-btn:hover {
+  background-color: #42a5f5;
+  transform: translateY(-2px);
 }
 
 /* Roadmap Layout */
@@ -204,7 +283,8 @@
 }
 
 .roadmap-flow-container {
-  background-color: #fdfdfd;
+  height: inherit !important;
+  overflow: visible !important;
 }
 
 /* Flow theme variations */
@@ -239,6 +319,10 @@
   box-shadow: 0 6px 15px rgba(255, 126, 95, 0.3);
 }
 
+.roadmap-panel {
+  z-index: 10;
+}
+
 /* Loading state */
 .roadmap-loading {
   display: flex;
@@ -268,174 +352,97 @@
   }
 }
 
-/* Error state */
-.roadmap-error {
-  padding: 25px;
-  color: #e53935;
-  text-align: center;
-  background-color: #fff5f5;
-  border: 1px solid #ffcdd2;
-  border-radius: 14px;
-  margin: 25px 0;
-}
-
-/* Node styling */
-.roadmap-node {
-  padding: 18px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
-  color: white;
-  width: 240px;
+/* Node styling - for CustomNode component */
+.node-custom {
+  border-radius: 12px;
+  padding: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: none;
-  backdrop-filter: blur(5px);
+  width: 240px;
+  max-width: 100%;
+  overflow: hidden;
+  border: 2px solid transparent;
 }
 
-.roadmap-node.selected {
-  border: 2px solid #fff;
+.node-custom:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.node-custom.selected {
+  border-color: #ffffff;
   box-shadow: 0 0 0 4px rgba(255, 126, 95, 0.3), 0 12px 25px rgba(0, 0, 0, 0.15);
   transform: translateY(-5px) scale(1.03);
 }
 
-.roadmap-node:hover {
-  box-shadow: 0 12px 25px rgba(255, 126, 95, 0.25);
-  transform: translateY(-3px);
-}
-
-/* Node type variations with more distinctive gradients */
-.roadmap-node.root {
-  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
-  box-shadow: 0 8px 25px rgba(255, 126, 95, 0.25);
-}
-
-.roadmap-node.intermediate {
-  background: linear-gradient(135deg, #feb47b 0%, #ffcf9f 100%);
-  box-shadow: 0 8px 20px rgba(254, 180, 123, 0.25);
-}
-
-.roadmap-node.leaf {
-  background: linear-gradient(135deg, #66bb6a 0%, #a5d6a7 100%);
-  box-shadow: 0 8px 20px rgba(102, 187, 106, 0.25);
-}
-
-.node-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.node-title {
-  font-weight: 700;
-  margin-bottom: 10px;
+/* Node type variations */
+.node-core {
+  background-color: #4CAF50;
   color: white;
-  font-size: 1.25rem;
-  letter-spacing: 0.2px;
-  line-height: 1.3;
 }
 
-.node-description {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.92);
-  line-height: 1.5;
+.node-optional {
+  background-color: #FF9800;
+  color: white;
 }
 
-.node-icon {
-  margin-top: 12px;
-  align-self: center;
+.node-advanced {
+  background-color: #9C27B0;
+  color: white;
 }
 
-/* Handle styling */
-.node-handle {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: #ff7e5f;
-  border: 2px solid white;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+.node-beginner {
+  background-color: #2196F3;
+  color: white;
 }
 
-.source-handle {
-  bottom: -6px;
+.node-intermediate {
+  background-color: #FFC107;
+  color: black;
 }
 
-.target-handle {
-  top: -6px;
+.node-expert {
+  background-color: #F44336;
+  color: white;
 }
 
-.node-handle:hover {
-  transform: scale(1.2);
-  background-color: #feb47b;
+.node-default {
+  background-color: #607D8B;
+  color: white;
 }
 
-/* Edge styling - completely revamped */
-.react-flow__edge-path {
-  stroke-width: 3;
-  stroke: #ff7e5f;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.1));
-  transition: filter 0.3s ease, stroke-width 0.3s ease;
+/* Path highlighting */
+.highlighted-node {
+  z-index: 10;
+  box-shadow: 0 0 0 4px rgba(255, 126, 95, 0.3), 0 12px 25px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
 }
 
-.react-flow__edge-path-bg {
-  stroke-width: 7;
-  stroke: rgba(255, 255, 255, 0.8);
-  filter: blur(0.5px);
+.faded-node {
+  opacity: 0.4 !important;
+  filter: grayscale(50%) !important;
 }
 
-.react-flow__edge-path-outline {
-  stroke-width: 12;
-  stroke: transparent;
+.highlighted-edge {
+  z-index: 9;
+  stroke-width: 4 !important;
+  filter: drop-shadow(0 0 3px rgba(255, 126, 95, 0.5));
 }
 
-.react-flow__edge.selected .react-flow__edge-path {
-  stroke-width: 4;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.2));
+.faded-edge {
+  opacity: 0.3;
 }
 
-.react-flow__edge.animated .react-flow__edge-path {
-  stroke-dasharray: 5 5;
-  animation: dashdraw 1s linear infinite;
-}
-
-@keyframes dashdraw {
-  from {
-    stroke-dashoffset: 10;
-  }
-}
-
-/* Edge priority styles */
-.roadmap-edge.priority-1 .react-flow__edge-path {
+/* Edge styling */
+.roadmap-edge.required .react-flow__edge-path {
   stroke: #ff7e5f;
   stroke-width: 3;
 }
 
-.roadmap-edge.priority-2 .react-flow__edge-path {
+.roadmap-edge.recommended .react-flow__edge-path {
   stroke: #feb47b;
-  stroke-width: 2.5;
-}
-
-.roadmap-edge.priority-3 .react-flow__edge-path {
-  stroke: #ffcf9f;
   stroke-width: 2;
-}
-
-/* Edge hover effect */
-.react-flow__edge-interaction:hover + .react-flow__edge-path {
-  stroke-width: 4;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.2));
-}
-
-/* Fix for black background around edges */
-.react-flow__edges {
-  pointer-events: none;
-}
-
-.react-flow__edge {
-  pointer-events: visibleStroke;
-}
-
-.react-flow__edge-interaction {
-  pointer-events: visibleStroke;
+  stroke-dasharray: 5, 5;
 }
 
 /* Details panel */
@@ -444,17 +451,37 @@
   padding: 25px;
   background-color: #f9f9f9;
   overflow-y: auto;
-  height: 100%;
+  height: 700px;
   min-width: 300px;
   max-width: 350px;
   border-radius: 16px;
   border: 1px solid #eaeaea;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  scrollbar-width: thin;
+  scrollbar-color: #ff7e5f #f0f0f0;
+}
+
+.roadmap-details::-webkit-scrollbar {
+  width: 8px;
+}
+
+.roadmap-details::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
+}
+
+.roadmap-details::-webkit-scrollbar-thumb {
+  background-color: #ffb49e;
+  border-radius: 10px;
+  border: 2px solid #f0f0f0;
+}
+
+.roadmap-details::-webkit-scrollbar-thumb:hover {
+  background-color: #ff7e5f;
 }
 
 .node-details {
   animation: fadeIn 0.35s ease;
-  padding: 15px;
 }
 
 @keyframes fadeIn {
@@ -479,6 +506,74 @@
   letter-spacing: -0.3px;
 }
 
+.node-metadata {
+  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.difficulty-badge, .category-badge, .time-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.difficulty-badge {
+  background-color: #e9f5ff;
+  color: white;
+}
+
+.category-badge {
+  color: white;
+}
+
+.roadmaps-grid{
+  display: grid;
+  gap: 2rem;
+}
+
+.card-actions{
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.card-actions button,
+.roadmap-card-header button{
+  padding: .45rem 1.2rem;
+  border: none;
+  border-radius: .25rem;
+  box-shadow: 0 3px 4px rgba(55, 55, 55, 0.187);
+}
+
+.roadmap-card-header h5{
+  font-size: 1.5rem;
+  font-family: 'roboto';
+  font-weight: 200;
+}
+
+.roadmap-card-header button {
+  margin: .5rem 0;
+}
+
+.load-btn{
+  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
+  color:white;
+}
+
+.delete-btn{
+  background-color: rgb(255, 212, 212);
+  color: red;
+}
+
+.time-badge {
+  background-color: #f2f2f2;
+  color: #757575;
+}
+
 .details-description {
   margin-bottom: 25px;
   line-height: 1.7;
@@ -486,8 +581,13 @@
   font-size: 1.05rem;
 }
 
-.details-prerequisites h5,
-.details-resources h5,
+.details-skills, .details-technologies, .details-prerequisites, 
+.details-resources, .details-tasks, .details-relevance {
+  margin-bottom: 20px;
+}
+
+.details-skills h5, .details-technologies h5, .details-prerequisites h5,
+.details-resources h5, .details-tasks h5, .details-relevance h5,
 .node-navigation h5 {
   font-size: 1.15rem;
   margin: 0 0 12px 0;
@@ -498,8 +598,9 @@
   padding-left: 15px;
 }
 
-.details-prerequisites h5:before,
-.details-resources h5:before,
+.details-skills h5:before, .details-technologies h5:before, 
+.details-prerequisites h5:before, .details-resources h5:before, 
+.details-tasks h5:before, .details-relevance h5:before,
 .node-navigation h5:before {
   content: "";
   position: absolute;
@@ -512,15 +613,54 @@
   border-radius: 50%;
 }
 
-.details-prerequisites ul,
-.details-resources ul {
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.node-title{
+  background-color: #607d8b45;
+  font-size: 1.25rem;
+  font-family: 'roboto';
+  padding: .5rem;
+  border-radius: .25rem;
+  box-shadow: 2px 1px 3px #1a202c42 inset;
+}
+
+.react-flow__node{
+  padding: 18px;
+  border-radius: 14px;
+  /* background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); */
+  color: white;
+  width: 240px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  backdrop-filter: blur(5px);
+}
+
+.skill-tag, .tech-tag {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #f0f0f0;
+  color: #555;
+  display: inline-block;
+}
+
+.skill-tag.trending {
+  background-color: #ffeadf;
+  color: #ff7e5f;
+}
+
+.details-prerequisites ul, .details-resources ul, .task-list {
   margin: 0;
   padding-left: 20px;
   list-style-type: none;
 }
 
-.details-prerequisites li,
-.details-resources li {
+.details-prerequisites li, .details-resources li, .task-item {
   margin-bottom: 10px;
   line-height: 1.5;
   color: #666;
@@ -528,33 +668,12 @@
   padding-left: 15px;
 }
 
-.details-prerequisites li:before,
-.details-resources li:before {
+.details-prerequisites li:before, .details-resources li:before, .task-item:before {
   content: "•";
   color: #ff7e5f;
   position: absolute;
   left: 0;
   font-weight: bold;
-}
-
-.details-prerequisites {
-  margin-bottom: 25px;
-}
-
-.details-resources {
-  margin-bottom: 25px;
-}
-
-.details-resources a {
-  color: #ff7e5f;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  font-weight: 500;
-}
-
-.details-resources a:hover {
-  color: #feb47b;
-  text-decoration: underline;
 }
 
 .prerequisite-item {
@@ -564,6 +683,47 @@
 
 .prerequisite-item:hover {
   color: #ff7e5f;
+}
+
+.resource-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.resource-item {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+  transition: all 0.2s ease;
+}
+
+.resource-item:hover {
+  background-color: #e5e5e5;
+}
+
+.resource-link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+.resource-type {
+  font-size: 0.8rem;
+  color: #ff7e5f;
+  margin-bottom: 3px;
+}
+
+.resource-title {
+  font-weight: 500;
+  color: #333;
+}
+
+.edge-type-label {
+  font-size: 0.8rem;
+  margin-left: 5px;
+  opacity: 0.7;
 }
 
 .node-navigation {
@@ -587,6 +747,8 @@
   cursor: pointer;
   transition: all 0.25s ease;
   box-shadow: 0 3px 10px rgba(255, 126, 95, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
 .next-step-btn:hover {
@@ -594,23 +756,61 @@
   box-shadow: 0 5px 15px rgba(255, 126, 95, 0.25);
 }
 
+.next-step-btn.required {
+  background: linear-gradient(135deg, #ff5252 0%, #ff7e5f 100%);
+}
+
+.next-step-btn.recommended {
+  background: linear-gradient(135deg, #ff9e22 0%, #feb47b 100%);
+}
+
 .empty-details {
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   color: #999;
   font-style: italic;
   text-align: center;
-  opacity: 0.7;
-  flex-direction: column;
-  gap: 15px;
+  padding: 20px;
+  gap: 30px;
+}
+
+.empty-details p {
+  margin-bottom: 20px;
 }
 
 .empty-details:before {
   content: "↖️";
   font-size: 2rem;
   opacity: 0.5;
+}
+
+/* Industry insights */
+.industry-insights {
+  background-color: #f9f9fb;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #eaeaea;
+}
+
+.industry-insights h5 {
+  color: #333;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.industry-insights h6 {
+  color: #555;
+  font-size: 1rem;
+  margin: 15px 0 10px 0;
+  font-weight: 500;
+}
+
+.trending-skills, .future-outlook, .salary-range {
+  margin-bottom: 20px;
 }
 
 /* MiniMap customization */
@@ -625,24 +825,9 @@
 }
 
 .minimap-node {
-  fill: #ff7e5f;
+  fill: #607D8B;
   stroke: rgba(255, 255, 255, 0.6);
   stroke-width: 1;
-}
-
-.minimap-node.intermediate {
-  fill: #feb47b;
-  stroke: rgba(255, 255, 255, 0.6);
-}
-
-.minimap-node.root {
-  fill: #ff7e5f;
-  stroke: rgba(255, 255, 255, 0.6);
-}
-
-.minimap-node.leaf {
-  fill: #66bb6a;
-  stroke: rgba(255, 255, 255, 0.6);
 }
 
 .minimap-mask {
@@ -686,7 +871,87 @@
   opacity: 0.8;
 }
 
-/* Responsive design - improved */
+/* Hide ReactFlow attribution */
+.react-flow__attribution {
+  display: none;
+}
+
+/* SavedRoadmaps Component */
+.saved-roadmaps-container,
+.recent-roadmaps-container {
+  padding: 30px 20px;
+  background: linear-gradient(to bottom, #f8f9fb, #e6e9ef);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  margin-bottom: 40px;
+}
+
+.saved-roadmaps-container h3 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.roadmap-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.roadmap-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.roadmap-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.roadmap-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #1a202c;
+  font-weight: 600;
+  text-align: left;
+}
+
+.roadmap-card p {
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 1.2rem;
+  line-height: 1.5;
+}
+
+.roadmap-card-preview {
+  height: 280px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  overflow: hidden;
+  position: relative;
+  padding: 8px;
+}
+
+.roadmap-preview {
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+}
+
+.roadmap-preview .react-flow__renderer {
+  scale: 0.45;
+}
+
+/* Responsive design */
 @media (max-width: 992px) {
   .roadmap-layout {
     flex-direction: column;
@@ -716,6 +981,16 @@
   
   .input-description {
     max-width: 100%;
+  }
+  
+  .career-paths-selector {
+    padding: 15px 20px;
+  }
+  
+  .path-buttons {
+    overflow-x: auto;
+    padding-bottom: 10px;
+    flex-wrap: nowrap;
   }
 }
 
@@ -748,49 +1023,148 @@
   .roadmap-header {
     padding: 20px;
   }
+  
+  .roadmap-card-list {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* Custom scroll for the details panel */
-.roadmap-details {
-  scrollbar-width: thin;
-  scrollbar-color: #ff7e5f #f0f0f0;
+/* Update the React Flow node styling */
+.react-flow__node {
+  padding: 18px;
+  border-radius: 14px;
+  color: white;
+  width: 240px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  backdrop-filter: blur(5px);
 }
 
-.roadmap-details::-webkit-scrollbar {
-  width: 8px;
+/* Make sure the node handles the category colors correctly */
+.react-flow__node.node-core {
+  background-color: #4CAF50;
 }
 
-.roadmap-details::-webkit-scrollbar-track {
-  background: #f0f0f0;
+.react-flow__node.node-optional {
+  background-color: #FF9800;
+}
+
+.react-flow__node.node-advanced {
+  background-color: #9C27B0;
+}
+
+.react-flow__node.node-beginner {
+  background-color: #2196F3;
+}
+
+.react-flow__node.node-intermediate {
+  background-color: #FFC107;
+  color: black; /* Special case for better readability */
+}
+
+.react-flow__node.node-expert {
+  background-color: #F44336;
+}
+
+.react-flow__node.node-default {
+  background-color: #607D8B;
+}
+
+/* Ensure the node custom class also gets the correct styling */
+.node-custom {
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  width: 240px;
+  max-width: 100%;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.node-custom:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.node-custom.selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(255, 126, 95, 0.3), 0 12px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px) scale(1.03);
+}
+
+/* Node title styling */
+.node-title {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-size: 1.25rem;
+  font-family: 'Roboto', sans-serif;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 2px 1px 3px rgba(0, 0, 0, 0.2) inset;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* Fix path highlighting */
+.highlighted-node {
+  z-index: 10;
+  box-shadow: 0 0 0 4px rgba(255, 126, 95, 0.3), 0 12px 25px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.faded-node {
+  opacity: 0.4;
+  filter: grayscale(50%);
+}
+
+/* Category badges styling */
+.category-badge {
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.roadmap-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  background-color: #fff7ed;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: transparent;
+  border: 2px solid transparent;
   border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #333;
+  position: relative;
 }
 
-.roadmap-details::-webkit-scrollbar-thumb {
-  background-color: #ffb49e;
-  border-radius: 10px;
-  border: 2px solid #f0f0f0;
+.tab-btn:hover {
+  background-color: #ffedd5;
+  color: #c2410c;
 }
 
-.roadmap-details::-webkit-scrollbar-thumb:hover {
-  background-color: #ff7e5f;
+.tab-btn.active {
+  background-color: #f97316;
+  color: #ffffff;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
 }
 
-/* Animation for saving success */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.save-roadmap-btn:disabled {
-  animation: pulse 1s ease-in-out;
-}
-
-/* Fix for the edge interaction */
-g.react-flow__connection {
-  pointer-events: none;
-}
-
-g.react-flow__connection path {
-  pointer-events: stroke;
+.tab-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

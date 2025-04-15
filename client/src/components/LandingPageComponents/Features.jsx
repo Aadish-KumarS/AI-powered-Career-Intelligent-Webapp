@@ -4,9 +4,11 @@ import "../../styles/Landingpage Styles/Features.css";
 import { FaExpand } from 'react-icons/fa';
 import { RiCollapseDiagonal2Line } from "react-icons/ri";
 import featuresData from "../../constants/featureConstants";
+import { useNavigate } from "react-router-dom";
 
 export default function Features() {
   const [expandedId, setExpandedId] = useState(null);
+  const navigate = useNavigate();
 
   const toggleExpand = (id) => {
     if (expandedId === id) {
@@ -44,6 +46,9 @@ export default function Features() {
             <button onClick={() => toggleExpand(feature.id)} className="expand-btn center">
               {expandedId === feature.id ? <RiCollapseDiagonal2Line /> : <FaExpand />}
             </button>
+            {expandedId && 
+              <button className="try-now-btn" onClick={() => navigate(feature.link)}>Try now</button>
+            }
             {expandedId && 
               <div className="features-img-container"> 
                 <img src={feature.img} alt="" />

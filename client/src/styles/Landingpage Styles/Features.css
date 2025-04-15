@@ -40,6 +40,22 @@
   padding-bottom: 3em;
 }
 
+.features-section .feature-card.expanded {
+  height: fit-content !important;
+}
+
+.try-now-btn{
+  background: linear-gradient(45deg, #ff6f61, #ffcc00);
+  color: white;
+  border: none;
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  width: 200px;
+  padding: 1rem;
+  border-radius: .5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.231);
+}
+
 .features-section .feature-card {
   background-color: #fff;
   padding: 30px;

@@ -15,7 +15,8 @@ const featuresData = [
       "✅ Get insights into industry trends and in-demand skills.",
       "✅ Track your progress with milestone-based achievements."
     ],
-    img: roadmap
+    img: roadmap,
+    link: '/generate-roadmap'
   },
   {
     id: 2,
@@ -28,7 +29,8 @@ const featuresData = [
       "📌 Receive reminders and notifications before important dates.",
       "📌 Explore eligibility criteria, registration details, and exam guidelines."
     ],
-    img: exam
+    img: exam,
+    link: '/generate-roadmap'
   },
   {
     id: 3,
@@ -41,7 +43,8 @@ const featuresData = [
       "📍 Check center capacity, availability, and registration details.",
       "📍 Filter centers based on distance, facilities, and accessibility."
     ],
-    img: location
+    img: location,
+    link: '/generate-roadmap'
   },
   {
     id: 4,
@@ -54,7 +57,8 @@ const featuresData = [
       "🎓 Get notified about new scholarships and approaching deadlines.",
       "🎓 Step-by-step guidance on the application process."
     ],
-    img: ai
+    img: ai,
+    link: '/generate-roadmap'
   }
 ];
 
