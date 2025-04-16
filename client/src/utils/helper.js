@@ -32,14 +32,20 @@ export async function getUserData(BASE_URL,token,setProfileData,profileData) {
         }
       );
       const fetchedUserData = {
-        name: response.data.name, 
-        education:response.data.education,
-        location: response.data.location,
-        longitude: response.data.longitude,
-        latitude: response.data.latitude,
-        interests: response.data.interests,
-        profilePicture: response.data.profilePicture
-      }
+        name: response.data.name || "",
+        profilePicture: response.data.profilePicture || "",
+        location: response.data.location || "",
+        latitude: response.data.latitude ?? null,
+        longitude: response.data.longitude ?? null,
+        education: {
+          highestLevel: response.data.education?.highestLevel || "",
+          institution: response.data.education?.institution || "",
+          graduationYear: response.data.education?.graduationYear || "",
+          fieldOfStudy: response.data.education?.fieldOfStudy || ""
+        },
+        interests: response.data.interests || [],
+        isFirstTime: response.data.isFirstTime ?? null
+      };
       setProfileData({...profileData, 
         ...fetchedUserData});
       sessionStorage.setItem('userData', JSON.stringify(fetchedUserData));
@@ -79,12 +85,9 @@ export async function getUserDetail(token,navigate,BASE_URL,setUserData) {
   }
 }
 
-export const getIsFirstTime = async (token,navigate,BASE_URL,setIsFirstTime) => {
+export const getIsFirstTime = async (token, BASE_URL) => {
   try {
-    if (!token) {
-      navigate('/signup');
-      return;
-    }
+    if (!token) return null;
 
     const response = await axios.get(`${BASE_URL}/api/users/profile`, {
       headers: {
@@ -92,19 +95,34 @@ export const getIsFirstTime = async (token,navigate,BASE_URL,setIsFirstTime) => 
       },
     });
 
-    setIsFirstTime(response.data.isFirstTime); 
+    return response.data.isFirstTime;
   } catch (error) {
-    console.error('Error fetching the data:', error);
+    console.error("Error fetching the user profile:", error);
+    return null;
   }
 };
 
 
-
 //EDIT USER PROFILE
-// edit profile component helper functions 
 export const handleInputChange = (setter) => (e) => {
   const { name, value } = e.target;
-  setter(prevData => ({ ...prevData, [name]: value }));
+
+  if (name.includes(".")) {
+    const [parent, child] = name.split(".");
+
+    setter((prev) => ({
+      ...prev,
+      [parent]: {
+        ...prev[parent],
+        [child]: value,
+      },
+    }));
+  } else {
+    setter((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
 };
 
 export const handlePasswordChange = (setter) => (e) => {

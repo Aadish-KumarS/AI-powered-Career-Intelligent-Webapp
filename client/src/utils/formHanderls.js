@@ -69,11 +69,11 @@ export const handleSubmitForgotPassword = async (e,setError,setSuccess,setLoadin
 };
 
 //LOGIN
-export const handleSubmitLogin = async (e, setLoading, setError, formData, navigate, setIsFirstTime, setVerificationMessage) => {
+export const handleSubmitLogin = async ( e, setLoading, setError, formData, navigate, setIsFirstTime, setVerificationMessage) => {
   e.preventDefault();
   setLoading(true);
-  setError(""); 
-  setVerificationMessage(""); 
+  setError("");
+  setVerificationMessage("");
 
   if (!formData.email || !formData.password) {
     setError("All fields are required");
@@ -82,24 +82,30 @@ export const handleSubmitLogin = async (e, setLoading, setError, formData, navig
   }
 
   try {
-    const response = await axios.post("http://localhost:5000/api/auth/login", formData, { withCredentials: true });
+    const response = await axios.post(
+      "http://localhost:5000/api/auth/login",
+      formData,
+      { withCredentials: true }
+    );
 
-    if (response.data) {
-      const token = response.data.token;
-      sessionStorage.setItem("authToken", token); 
+    const { token } = response.data;
 
-      getIsFirstTime(token, navigate, "http://localhost:5000", (isFirstTime) => {
-        setIsFirstTime(isFirstTime);
+    if (token) {
+      sessionStorage.setItem("authToken", token);
 
-        if (isFirstTime) {
-          navigate("/profile/create-user-profile");
-        } else {
-          navigate("/profile/user-profile");
-        }
-      });
-    } 
+      const isFirstTime = await getIsFirstTime(token, "http://localhost:5000");
+      setIsFirstTime(isFirstTime);
+
+      if (isFirstTime) {
+        navigate("/profile/create-user-profile");
+      } else {
+        navigate("/profile/user-profile");
+      }
+    }
   } catch (err) {
-    if (err.response && err.response.data && err.response.data.message) {
+    console.error("Login error:", err);
+
+    if (err.response?.data?.message) {
       const errorMessage = err.response.data.message;
 
       if (errorMessage === "Please verify your email before logging in.") {
@@ -108,10 +114,9 @@ export const handleSubmitLogin = async (e, setLoading, setError, formData, navig
         setError(errorMessage);
       }
     } else {
-      setError("Something went wrong. Please try again.");
-    }
+      setError("Something went wrong. Please try again."); }
   } finally {
-    setLoading(false); 
+    setLoading(false);
   }
 };
 
@@ -250,11 +255,16 @@ export const handleSubmitCreateProfile = async (e,profileData,setError,BASE_URL,
 //LOGOUT 
 export const logoutUser = async (navigate) => {
   try {
-    await axios.get('/api/logout', { withCredentials: true }); 
+    await axios.get("/api/logout", { withCredentials: true });
     sessionStorage.removeItem('authToken'); 
     sessionStorage.removeItem('user'); 
-    navigate('/login'); 
+
+    setTimeout(() => {
+      navigate("/signup", { replace: true });
+    }, 100);
+    
   } catch (error) {
-    console.error('Logout failed:', error);
+    console.error("Logout failed:", error);
+    navigate("/signup", { replace: true });
   }
 };

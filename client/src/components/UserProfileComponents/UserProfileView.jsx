@@ -12,28 +12,21 @@ export default function Profile() {
   const BASE_URL = "http://localhost:5000";
   const token = sessionStorage.getItem('authToken');
   const navigate = useNavigate();
-
-  
-  // const userData = {
-  //   name: "John Doe",
-  //   title: "Software Engineer | AI Enthusiast",
-  //   bio: "Passionate software engineer with 5+ years of experience in building web applications and AI solutions. Currently focused on machine learning applications and career advancement technologies.",
-  //   location: "San Francisco, CA",
-  //   education: "MS Computer Science, Stanford",
-  //   email: "john.doe@example.com",
-  //   profileImage: "/path/to/profile-pic.jpg",
-  //   skills: ["Python", "React", "Machine Learning"]
-  // };
   
 
   const [userData, setUserData] = useState({
     name: "",
-    title: "",
+    title: "", 
     location: "",
-    education: "",
     email: "",
     profileImage: "",
-    interests: []
+    interests: [],
+    education: {
+      highestLevel: "",
+      institution: "",
+      graduationYear: "",
+      fieldOfStudy: ""
+    }
   });
   
 
@@ -184,7 +177,7 @@ export default function Profile() {
                 </div>
                 <div className="detail-item">
                   <h3 className="detail-label">Education</h3>
-                  <p className="detail-value">{userData.education}</p>
+                  <p className="detail-value">{userData.education.fieldOfStudy}</p>
                 </div>
                 <div className="detail-item">
                   <h3 className="detail-label">Email</h3>

@@ -26,8 +26,16 @@ const FormStep = ({ step, profileData, setProfileData, handleFileChange, nextSte
               type="text"
               name="education"
               placeholder="Your Education Background"
-              value={profileData.education}
-              onChange={(e) => setProfileData({ ...profileData, [e.target.name]: e.target.value })}
+              value={profileData.education.fieldOfStudy}
+              onChange={(e) =>
+                setProfileData((prev) => ({
+                  ...prev,
+                  education: {
+                    ...prev.education,
+                    fieldOfStudy: e.target.value,
+                  },
+                }))
+              }
               required={true}
             />
           </div>

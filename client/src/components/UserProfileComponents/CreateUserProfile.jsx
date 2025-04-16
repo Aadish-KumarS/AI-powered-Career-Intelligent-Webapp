@@ -19,7 +19,12 @@ export default function CreateProfile() {
     location: "",
     latitude: null,
     longitude: null,
-    education: "",
+    education: {
+      highestLevel: "",
+      institution: "",
+      graduationYear: "",
+      fieldOfStudy: ""
+    },
     interests: [],
     isFirstTime: null,
   });
@@ -30,7 +35,7 @@ export default function CreateProfile() {
 
   
   useEffect(() => {
-    getUserData(BASE_URL,token,setProfileData,profileData)
+    getUserData(BASE_URL,token,setProfileData,profileData);
 
     gsap.fromTo(".left-form", 
       {
@@ -108,6 +113,8 @@ export default function CreateProfile() {
   // Handle final form submission
   const handleSubmit = async (e) => {
     const updatedProfileData = { ...profileData, isFirstTime: false };
+    console.log(updatedProfileData);
+    
     handleSubmitCreateProfile(e, updatedProfileData, setError, BASE_URL, token, formRef, navigate);
 };
   

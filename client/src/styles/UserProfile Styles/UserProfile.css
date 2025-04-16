@@ -78,7 +78,15 @@
 }
 
 .user-initial{
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 7rem;
   color: white;
+  background: linear-gradient(45deg, #ff6f61, #ffcc00);
   font-family: "poppins";
   font-weight: 600;
 }

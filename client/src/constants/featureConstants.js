@@ -16,7 +16,7 @@ const featuresData = [
       "✅ Track your progress with milestone-based achievements."
     ],
     img: roadmap,
-    link: '/generate-roadmap'
+    link: '/services/generate-roadmap'
   },
   {
     id: 2,

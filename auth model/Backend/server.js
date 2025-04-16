@@ -43,9 +43,7 @@ app.use('/api/auth', authRoutes);
 app.use("/api/auth", resetRoutes);
 app.use('/otp', otpRoutes);
 app.use("/api/users", userRoutes);
-
 app.use("/api",location)
-
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/' }), 
   (req, res) => {

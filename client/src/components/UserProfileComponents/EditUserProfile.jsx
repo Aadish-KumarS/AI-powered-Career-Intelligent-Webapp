@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { getUserData, handleInputChange, fetchIPBasedLocation, getGeoLocation, addInterest, removeInterest, updatePassword, deleteAccount, updateProfile, handleCreateUserFileChange, debounce, fetchSuggestions, handleInterestInputChange } from '../../utils/helper';
+import { getUserData, handleInputChange, fetchIPBasedLocation, getGeoLocation, addInterest, removeInterest, updatePassword, deleteAccount, updateProfile, handleCreateUserFileChange, fetchSuggestions, handleInterestInputChange } from '../../utils/helper';
 import MapComponent from './MapComponent';
 import { FaSave, FaKey, FaTrash, FaInfoCircle } from "react-icons/fa";
 import PasswordChangeFields from '../PasswordComponents/PasswordChange'; 
@@ -18,7 +18,12 @@ export default function EditProfile() {
     location: '',
     latitude: 23.6345,
     longitude: 102.5528,
-    education: '',
+    education: {
+      highestLevel: "",
+      institution: "",
+      graduationYear: "",
+      fieldOfStudy: ""
+    },
     interests: [],
     profilePicture: ''
   });
@@ -145,17 +150,14 @@ export default function EditProfile() {
     };
   }, [userData.latitude, userData.longitude]);
 
-  // Handle password update
+
   const handlePasswordUpdate = (e) => {
     e.preventDefault();
     
-    // Validate passwords match
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setError("New passwords do not match");
       return;
     }
-    
-    // Validate password strength
     if (passwordData.newPassword.length < 8) {
       setError("Password must be at least 8 characters long");
       return;
@@ -242,8 +244,8 @@ export default function EditProfile() {
                 <div className="form-group">
                   <input
                     type="text"
-                    name="education"
-                    value={userData.education}
+                    name="education.fieldOfStudy"
+                    value={userData.education.fieldOfStudy}
                     onChange={handleInputChange(setUserData)}
                     placeholder="Enter your education details"
                   />

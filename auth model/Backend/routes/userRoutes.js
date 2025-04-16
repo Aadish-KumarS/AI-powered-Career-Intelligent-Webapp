@@ -1,5 +1,5 @@
 import express from "express";
-import validatePassword, { getUserProfile, updateUserProfile, deleteUserAccount } from "../controllers/userControllers.js";
+import validatePassword, { getUserProfile, updateUserProfile, deleteUserAccount, updateOnboarding } from "../controllers/userControllers.js";
 import { authenticateUser } from "../middleware/authMiddleware.js";
 import bcrypt from "bcryptjs";
 
@@ -21,5 +21,6 @@ router.put('/change-password', authenticateUser, validatePassword, async (req, r
       res.status(500).json({ message: 'Server error' });
   }
 });
+router.put('/:id/onboarding', updateOnboarding);
 
 export default router;
