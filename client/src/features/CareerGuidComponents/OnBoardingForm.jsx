@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import gsap from 'gsap';
 import '../../styles/CareerGuid Styles/OnBoarding.css';
 import { getUserIdFromToken, handleAddPastRole, handleAddSkill, handleCheckboxChange, handleInputChange, handleMultiSelectChange, handlePrevious, handleRemoveSkill, handleSelectChange, selectSuggestion, toggleSection } from '../../utils/MVPformHanderls.js';
@@ -8,7 +7,7 @@ import Navbar from '../../components/LandingPageComponents/Navbar.jsx';
 
 const OnboardingForm = () => {
   const [formData, setFormData] = useState({
-    name,
+    name: '',
     personalInfo: {
       currentOccupation: '',
     },
@@ -312,10 +311,10 @@ const OnboardingForm = () => {
               </label>
               <input
                 type="text"
-                id="fullName"
+                id="name"
                 name="name"
                 value={formData.name}
-                onChange={(e) => handleInputChange(e, 'personalInfo', null,setFormData,setShowSuggestions,fieldOptions,setAiSuggestions,suggestionRef)}
+                onChange={(e) => handleInputChange(e, 'name', null,setFormData,setShowSuggestions,fieldOptions,setAiSuggestions,suggestionRef)}
                 placeholder="Your full name"
                 required
                 className="focus-effect"

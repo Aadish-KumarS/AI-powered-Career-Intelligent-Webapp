@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 @router.post("/recommend-career")
 async def recommend(prompt: CareerPrompt):
+    logging.info(CareerPrompt)
     try:
         recommendation = await generate_career_advice(prompt)
         logging.info(f"Career advice generated: {recommendation}")
