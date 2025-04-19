@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import router  
+from app.api.v1.career_routes import career_routes
+
 
 app = FastAPI(
     title="AI Career Recommender",
@@ -25,3 +27,5 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api/v1")
+
+app.include_router(career_routes, prefix="/generator", tags=["Career Intelligence"])

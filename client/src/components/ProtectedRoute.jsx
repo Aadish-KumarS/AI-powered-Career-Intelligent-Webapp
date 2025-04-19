@@ -61,4 +61,13 @@ export const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+export const LoggedInAccessRoute = ({ children }) => {
+  const token = sessionStorage.getItem("authToken");
+  
+  if ( !token) {
+    return <Navigate to="/login" />;
+  }
+  return children;
+};
+
 export default ProtectedRoute;

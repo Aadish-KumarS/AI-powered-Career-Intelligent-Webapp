@@ -205,7 +205,7 @@
   transition: transform 0.3s ease;
 }
 
-.section-content {
+.onboarding-container .section-content {
   padding: 20px;
   overflow: hidden;
   opacity: 0;

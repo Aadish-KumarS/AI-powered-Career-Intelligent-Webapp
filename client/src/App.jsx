@@ -7,7 +7,7 @@ import EmailVerification from './pages/Auth pages/EmailVerification';
 import ForgotPassword from './pages/Auth pages/ForgotPassword';
 import ResetPassword from './pages/Auth pages/ResetPassword';
 
-import { AuthRoute } from './components/ProtectedRoute';  // Ensure correct import
+import  { AuthRoute, LoggedInAccessRoute } from './components/ProtectedRoute'; 
 
 import Dashboard from './pages/Dashboard'; 
 import Profile from './pages/User profile pages/Profile'; 
@@ -29,7 +29,7 @@ function App() {
       <Route path="/profile/*" element={<Profile />} />
       <Route path="/services/*" element={<CareerGuidMVP />} />
 
-      <Route path="/services/generate-roadmap" element={<Roadmap goal="frontend developer" />} />
+      <Route path="/services/generate-roadmap" element={<LoggedInAccessRoute><Roadmap /></LoggedInAccessRoute>} />
     </Routes>
   );
 }

@@ -1,0 +1,253 @@
+/* Career Analysis Component Styling */
+.career-analysis-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  margin-bottom: 40px;
+}
+
+/* Header Section */
+.career-analysis-header {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  padding: 35px;
+  margin-bottom: 35px;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.career-analysis-header h1 {
+  margin: 0 0 12px 0;
+  font-size: 2.2rem;
+  font-weight: 500;
+  color: #ff7e5f;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.career-analysis-header p {
+  margin: 0 0 28px 0;
+  color: #777;
+  font-size: 1.25rem;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.analyze-btn {
+  padding: 12px 28px;
+  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 12px rgba(255, 126, 95, 0.25);
+  font-size: 1.05rem;
+  min-width: 200px;
+}
+
+.analyze-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 126, 95, 0.35);
+}
+
+.analyze-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 126, 95, 0.3);
+}
+
+.analyze-btn:disabled {
+  background: linear-gradient(90deg, #ffb7a5 0%, #ffd4b0 100%);
+  cursor: not-allowed;
+  box-shadow: 0 4px 8px rgba(255, 126, 95, 0.15);
+  transform: none;
+}
+
+.analyze-btn.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.analyze-btn.loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: loading-sweep 1.5s infinite;
+}
+
+@keyframes loading-sweep {
+  0% { left: -30%; }
+  100% { left: 100%; }
+}
+
+.error-message {
+  color: #e53935;
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.95rem;
+  padding: 10px 15px;
+  background-color: rgba(229, 57, 53, 0.08);
+  border-radius: 8px;
+  display: inline-block;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Analysis Content */
+.career-analysis-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #fcfcfc;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* Tabs */
+.career-analysis-tabs {
+  display: flex;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eaeaea;
+  padding: 0 20px;
+}
+
+.tab-button {
+  padding: 18px 24px;
+  background: none;
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-button:hover {
+  color: #ff6f61;
+}
+
+.tab-button.active {
+  color: #ff7e5f;
+  background-color: #fdfdfd;
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+}
+
+/* Content Panel */
+.career-analysis-panel {
+  padding: 30px;
+  min-height: 500px;
+}
+
+/* Loading State */
+.career-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 500px;
+  color: #555;
+}
+
+.loading-spinner {
+  width: 45px;
+  height: 45px;
+  margin-bottom: 25px;
+  border: 4px solid rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  border-top-color: #ff7e5f;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.career-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  min-height: 400px;
+}
+
+.empty-state-image {
+  width: 180px;
+  height: 180px;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.career-empty-state h3 {
+  font-size: 1.5rem;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.career-empty-state p {
+  color: #777;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .career-analysis-tabs {
+    overflow-x: auto;
+    padding: 0 10px;
+  }
+  
+  .tab-button {
+    padding: 15px 18px;
+    font-size: 0.95rem;
+  }
+  
+  .career-analysis-panel {
+    padding: 20px;
+  }
+  
+  .career-analysis-header {
+    padding: 25px;
+  }
+  
+  .career-analysis-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .career-analysis-header p {
+    font-size: 1.1rem;
+    max-width: 95%;
+  }
+}

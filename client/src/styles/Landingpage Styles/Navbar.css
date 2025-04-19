@@ -51,7 +51,7 @@
   transition: transform 0.3s ease;
 }
 
-.nav-links li a {
+.nav-links li a{
   text-decoration: none;
   color: #fff;
   font-size: 15px;
@@ -62,7 +62,13 @@
   transition: color 0.3s ease-in-out, transform 0.3s ease;
 }
 
-.nav-links li a::after {
+.nav-links li .services-dropdown-toggle {
+  padding: 8px 10px;
+
+}
+
+.nav-links li a::after,
+.nav-links li .services-dropdown-toggle::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -73,16 +79,22 @@
   transition: width 0.3s ease, left 0.3s ease;
 }
 
-.nav-links li a:hover::after {
+.nav-links li a:hover::after ,
+.nav-links li .services-dropdown-toggle:hover::after {
   width: 100%;
   left: 0;
 }
 
-.nav-links li a:hover {
+.nav-links li a:hover,
+.nav-links li .services-dropdown-toggle:hover {
   color: #ff7e5f;
   transform: translateY(-5px);
   background-color: #ffffff62;
   border-radius: 5px;
+}
+
+.nav-links li div:hover{
+  transform: none !important;
 }
 
 /* Theme Toggle */
@@ -145,5 +157,71 @@
     position: absolute;
     top: 15px;
     right: 20px;
+  }
+}
+
+/* Services Dropdown Styles */
+.services-dropdown {
+  position: relative;
+  cursor: pointer;
+  color: #fff;
+}
+
+.services-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  min-width: 250px;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  z-index: 1000;
+  border-radius: 4px;
+  display: flex;
+  padding: 15px;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.dropdown-category {
+  display: flex;
+  flex-direction: column;
+  margin-right: 30px;
+}
+
+.dropdown-category h3 {
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 10px;
+  font-weight: 200;
+  font-family: 'poppins';
+}
+
+.navbar .dropdown-category a {
+  color: #555;
+  padding: 8px 0;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Animation for dropdown */
+.dropdown-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
