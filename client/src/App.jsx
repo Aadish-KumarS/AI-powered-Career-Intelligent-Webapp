@@ -14,6 +14,7 @@ import Profile from './pages/User profile pages/Profile';
 import Roadmap from './features/roadmap-generator/Roadmap';
 import CareerGuidMVP from './pages/CareerGuid pages/CareerGuidMVP';
 import LearningPath from './features/LearningPathComponents/LearningPath';
+import ExamRecommendation from './features/Exam&CertificationComponents/ExamRecommendation';
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
       <Route path="/services/generate-roadmap" element={<LoggedInAccessRoute><Roadmap /></LoggedInAccessRoute>} />
 
       <Route path="/services/learning-path" element={<LoggedInAccessRoute><LearningPath /></LoggedInAccessRoute>} />
+
+      <Route path="/services/exam-certification" element={<LoggedInAccessRoute><ExamRecommendation /></LoggedInAccessRoute>} />
     </Routes>
   );
 }

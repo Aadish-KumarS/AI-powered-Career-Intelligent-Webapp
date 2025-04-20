@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import router  
 from app.api.v1.career_routes import career_routes
 from app.api.v1.learning_path_routes import router as learning_router
+from app.api.v1.exam_router import router as exams_router
 
 app = FastAPI(
     title="AI Career Recommender",
@@ -31,3 +32,5 @@ app.include_router(router, prefix="/api/v1")
 app.include_router(career_routes, prefix="/generator", tags=["Career Intelligence"])
 
 app.include_router(learning_router,prefix="/career-guid")
+
+app.include_router(exams_router, prefix="/api/v1")
