@@ -374,7 +374,7 @@
 }
 
 /* Learning Path Styling */
-.learning-path-container {
+.skill-gap-container .learning-path-container {
   margin-bottom: 25px;
   border-radius: 16px;
   overflow: hidden;
@@ -384,7 +384,7 @@
   transition: all 0.3s ease;
 }
 
-.learning-path-container:hover {
+.skill-gap-container .learning-path-container:hover {
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
   transform: translateY(-3px);
 }

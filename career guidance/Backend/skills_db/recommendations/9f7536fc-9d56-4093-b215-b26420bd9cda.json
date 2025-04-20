@@ -1,0 +1,78 @@
+{
+  "recommendations": [
+    {
+      "title": "Python for Everybody Specialization",
+      "platform": "Coursera",
+      "type": "Course",
+      "difficulty": "Beginner",
+      "estimated_time_hours": 96,
+      "cost": "Subscription",
+      "certification": true,
+      "link": "https://www.coursera.org/specializations/python",
+      "prerequisites": [],
+      "learning_outcomes": [
+        "Understand basic programming concepts",
+        "Write Python programs to solve problems",
+        "Work with data structures like lists and dictionaries"
+      ],
+      "reason_recommended": "A well-structured specialization that covers the fundamentals of Python programming in a clear and engaging manner. The course is interactive and includes practical exercises.",
+      "best_for": "Beginners with no prior programming experience"
+    },
+    {
+      "title": "Automate the Boring Stuff with Python",
+      "platform": "Al Sweigart's Website (originally published as a book)",
+      "type": "Tutorial",
+      "difficulty": "Beginner",
+      "estimated_time_hours": 40,
+      "cost": "Free",
+      "certification": false,
+      "link": "https://automatetheboringstuff.com/",
+      "prerequisites": [],
+      "learning_outcomes": [
+        "Automate repetitive tasks with Python",
+        "Write scripts to interact with files and the internet",
+        "Use Python for practical real-world applications"
+      ],
+      "reason_recommended": "Focuses on practical application and helps learners quickly build useful programs. Makes learning fun and relevant by automating everyday tasks.",
+      "best_for": "Hands-on learners who want to apply Python to solve practical problems"
+    },
+    {
+      "title": "Real Python",
+      "platform": "Real Python",
+      "type": "Tutorial",
+      "difficulty": "All Levels",
+      "estimated_time_hours": 100,
+      "cost": "Subscription",
+      "certification": false,
+      "link": "https://realpython.com/",
+      "prerequisites": [
+        "Basic computer literacy"
+      ],
+      "learning_outcomes": [
+        "Deepen understanding of Python language features",
+        "Learn advanced concepts like decorators and generators",
+        "Build projects using popular Python libraries and frameworks"
+      ],
+      "reason_recommended": "Offers a wide range of in-depth tutorials and articles covering various aspects of Python, from beginner to advanced topics. High-quality content and clear explanations.",
+      "best_for": "Learners who prefer a structured, text-based learning approach with detailed explanations"
+    },
+    {
+      "title": "Python Crash Course, 2nd Edition: A Hands-On, Project-Based Introduction to Programming",
+      "platform": "Book",
+      "type": "Book",
+      "difficulty": "Beginner",
+      "estimated_time_hours": 50,
+      "cost": "Paid",
+      "certification": false,
+      "link": "search on Google",
+      "prerequisites": [],
+      "learning_outcomes": [
+        "Understand basic Python syntax and data structures",
+        "Build simple web applications with Django",
+        "Create games with Pygame"
+      ],
+      "reason_recommended": "A popular and well-regarded book that teaches Python through hands-on projects. Excellent for learners who prefer a project-based approach and want to build something tangible.",
+      "best_for": "Visual and hands-on learners who enjoy building projects"
+    }
+  ]
+}

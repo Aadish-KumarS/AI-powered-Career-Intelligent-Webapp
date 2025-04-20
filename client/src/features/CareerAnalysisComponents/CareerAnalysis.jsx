@@ -5,6 +5,7 @@ import SkillGapResult from './SkillGapResult';
 import JobMarketInsights from './JobMarketInsights';
 import CareerPath from './CareerPath';
 import '../../styles/Career analysis styles/CareerAnalysis.css';
+import Navbar from '../../components/LandingPageComponents/Navbar'
 
 const CareerAnalysis = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -165,6 +166,7 @@ const CareerAnalysis = () => {
 
   return (
     <div className="career-analysis-container">
+      <Navbar />
       <div className="career-analysis-header">
         <h1>Career Insights</h1>
         <p>Discover opportunities to grow your career based on your profile, skills, and the job market</p>

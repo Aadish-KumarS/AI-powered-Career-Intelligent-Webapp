@@ -44,7 +44,7 @@ export default function Navbar() {
                 <h3>Micro Services</h3>
                 <Link to="/services/generate-roadmap">AI Roadmap Generator </Link>
                 <Link to="/services/career-guid/career-analysis">AI Career Analysis</Link>
-                <Link to="/services/micro/3">Micro Service 3</Link>
+                <Link to="/services/learning-path">Learning Progession Tracker</Link>
               </div>
               <div className="dropdown-category">
                 <h3>Macro Services</h3>

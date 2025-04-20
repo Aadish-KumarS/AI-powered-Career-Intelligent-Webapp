@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/User profile pages/Profile'; 
 import Roadmap from './features/roadmap-generator/Roadmap';
 import CareerGuidMVP from './pages/CareerGuid pages/CareerGuidMVP';
+import LearningPath from './features/LearningPathComponents/LearningPath';
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
       <Route path="/services/*" element={<CareerGuidMVP />} />
 
       <Route path="/services/generate-roadmap" element={<LoggedInAccessRoute><Roadmap /></LoggedInAccessRoute>} />
+
+      <Route path="/services/learning-path" element={<LoggedInAccessRoute><LearningPath /></LoggedInAccessRoute>} />
     </Routes>
   );
 }

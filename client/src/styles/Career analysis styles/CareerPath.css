@@ -40,7 +40,7 @@
 }
 
 /* Header */
-.career-path-header {
+.career-path-container .career-path-header {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -49,7 +49,7 @@
   border-bottom: 1px solid #eaeaea;
 }
 
-.career-path-header h1 {
+.career-path-container .career-path-header h1 {
   font-size: 2.2rem;
   font-weight: 500;
   color: #ff7e5f;
@@ -130,7 +130,7 @@
 }
 
 /* Timeline items */
-.timeline-item {
+.career-path-container .timeline-item {
   background-color: #f9f9f9;
   border-radius: 12px;
   margin-bottom: 25px;
@@ -140,16 +140,16 @@
   border-left: 4px solid #feb47b;
 }
 
-.timeline-item:hover {
+.career-path-container .timeline-item:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
 }
 
-.timeline-item.expanded {
+.career-path-container .timeline-item.expanded {
   border-left-color: #ff7e5f;
 }
 
-.timeline-item-header {
+.career-path-container .timeline-item-header {
   display: flex;
   align-items: center;
   padding: 18px 20px;
@@ -158,7 +158,7 @@
   transition: background-color 0.2s ease;
 }
 
-.timeline-item-header:hover {
+.career-path-container .timeline-item-header:hover {
   background-color: #ffffff62;
 }
 
@@ -189,7 +189,7 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
-.timeline-item-header h3 {
+.career-path-container .timeline-item-header h3 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 500;
@@ -204,7 +204,7 @@
   padding: 0 10px;
 }
 
-.timeline-item-content {
+.career-path-container .timeline-item-content {
   padding: 0;
   height: 0;
   overflow: hidden;
@@ -214,7 +214,7 @@
   border-top: 1px solid #eaeaea;
 }
 
-.timeline-item.expanded .timeline-item-content {
+.career-path-container .timeline-item.expanded .career-path-container .timeline-item-content {
   padding: 20px;
   opacity: 1;
 }
@@ -226,19 +226,19 @@
   margin-bottom: 20px;
 }
 
-.timeline-item-content h4 {
+.career-path-container .timeline-item-content h4 {
   color: #ff6f61;
   margin: 0 0 10px 0;
   font-size: 1.1rem;
   font-weight: 500;
 }
 
-.timeline-item-content ul {
+.career-path-container .timeline-item-content ul {
   margin: 0;
   padding-left: 20px;
 }
 
-.timeline-item-content li {
+.career-path-container .timeline-item-content li {
   margin-bottom: 8px;
   color: #555;
   line-height: 1.5;
@@ -672,7 +672,7 @@
 }
 
 @media (max-width: 480px) {
-  .career-path-header h1 {
+  .career-path-container .career-path-header h1 {
     font-size: 1.8rem;
   }
   
@@ -683,7 +683,7 @@
     font-size: 1.5rem;
   }
   
-  .timeline-item-header h3,
+  .career-path-container .timeline-item-header h3,
   .skill-card h3,
   .challenge-card h3,
   .milestone-content h3 {
