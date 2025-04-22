@@ -7,14 +7,11 @@ import EmailVerification from './pages/Auth pages/EmailVerification';
 import ForgotPassword from './pages/Auth pages/ForgotPassword';
 import ResetPassword from './pages/Auth pages/ResetPassword';
 
-import  { AuthRoute, LoggedInAccessRoute } from './components/ProtectedRoute'; 
+import  { AuthRoute } from './components/ProtectedRoute'; 
 
 import Dashboard from './pages/Dashboard'; 
 import Profile from './pages/User profile pages/Profile'; 
-import Roadmap from './features/roadmap-generator/Roadmap';
 import CareerGuidMVP from './pages/CareerGuid pages/CareerGuidMVP';
-import LearningPath from './features/LearningPathComponents/LearningPath';
-import ExamRecommendation from './features/Exam&CertificationComponents/ExamRecommendation';
 
 function App() {
   return (
@@ -31,11 +28,6 @@ function App() {
       <Route path="/profile/*" element={<Profile />} />
       <Route path="/services/*" element={<CareerGuidMVP />} />
 
-      <Route path="/services/generate-roadmap" element={<LoggedInAccessRoute><Roadmap /></LoggedInAccessRoute>} />
-
-      <Route path="/services/learning-path" element={<LoggedInAccessRoute><LearningPath /></LoggedInAccessRoute>} />
-
-      <Route path="/services/exam-certification" element={<LoggedInAccessRoute><ExamRecommendation /></LoggedInAccessRoute>} />
     </Routes>
   );
 }

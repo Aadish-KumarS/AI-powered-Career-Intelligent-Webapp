@@ -219,7 +219,7 @@ const OnboardingForm = () => {
   // Determine if the Next button should be disabled based on required fields
   const isNextDisabled = () => {
     // For simplicity, we're just requiring basic personal info
-    if (currentStep === 1 && !formData.personalInfo.fullName) {
+    if (currentStep === 1 && !formData.name) {
       return true;
     }
     return false;

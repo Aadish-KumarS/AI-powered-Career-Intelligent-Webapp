@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { gsap } from "gsap";
 import "../../styles/Exam styles/ExamRecommendation.css";
+import Navbar from "../../components/LandingPageComponents/Navbar";
 
 const ExamRecommendation = () => {
   // State management
@@ -282,6 +283,7 @@ const ExamRecommendation = () => {
 
   return (
     <div className="exam-recommendation-container">
+      <Navbar />
       <h1 className="main-title">Career Exam Pathway</h1>
       
       {/* Nav tabs */}

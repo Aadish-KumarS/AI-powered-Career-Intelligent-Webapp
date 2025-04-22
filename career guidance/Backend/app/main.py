@@ -4,6 +4,8 @@ from app.api.v1.router import router
 from app.api.v1.career_routes import career_routes
 from app.api.v1.learning_path_routes import router as learning_router
 from app.api.v1.exam_router import router as exams_router
+from app.api.v1.exam_scraper_routes import router as exam_scraper_routes  # Import the exams router
+from app.core.cache import setup_cache
 
 app = FastAPI(
     title="AI Career Recommender",
@@ -34,3 +36,9 @@ app.include_router(career_routes, prefix="/generator", tags=["Career Intelligenc
 app.include_router(learning_router,prefix="/career-guid")
 
 app.include_router(exams_router, prefix="/api/v1")
+
+app.include_router(exam_scraper_routes, prefix="/api/v1")
+
+@app.on_event("startup")
+async def startup_event():
+    await setup_cache()

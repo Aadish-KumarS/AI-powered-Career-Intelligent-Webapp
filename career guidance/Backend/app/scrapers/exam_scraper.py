@@ -85,7 +85,7 @@ class ExamScraper:
     @rate_limit(seconds=2)
     def scrape_upsc_exams(self) -> List[Dict[str, Any]]:
         """Scrape upcoming exams from UPSC website."""
-        url = "https://upsc.gov.in/examinations"
+        url = "https://upsc.gov.in/examinations/active-examinations"
         exams = []
         
         try:
@@ -93,7 +93,7 @@ class ExamScraper:
             response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
-            
+            print(soup.prettify()[:3000])  
             # Find the exam tables
             exam_tables = soup.find_all('table')
             

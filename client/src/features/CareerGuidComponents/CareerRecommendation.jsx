@@ -1097,7 +1097,7 @@ const renderCareerPaths = () => {
               onClick={() => switchView('roadmap')}
             >
               <FiClock className="tab-icon" />
-              Roadmap
+              Learning Curve
             </button>
             <button 
               className={`nav-tab ${currentView === 'entry' ? 'active' : ''}`}
@@ -1186,7 +1186,7 @@ const renderCareerDetails = (careerPath) => {
     case 'roadmap' :
       return (
         <div className="career-roadmap">
-          <h3>3-6 Month Learning Roadmap</h3>
+          <h3>3-6 Month Learning Curve</h3>
           <div className="roadmap-info">
             <div className="roadmap-commitment">
               <FiClock className="commitment-icon" />

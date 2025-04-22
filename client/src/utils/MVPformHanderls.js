@@ -6,10 +6,9 @@ import { jwtDecode } from 'jwt-decode';
 // Handle text input change - with deep nesting support
 export const handleInputChange = (e, section, subsection = null,setFormData,setShowSuggestions,fieldOptions,setAiSuggestions,suggestionRef) => {
   const { name, value } = e.target;
-  console.log(name,value);
-  
   
   setFormData(prev => {
+    
     if (subsection) {
       return {
         ...prev,
@@ -22,7 +21,12 @@ export const handleInputChange = (e, section, subsection = null,setFormData,setS
         }
       };
     }
-    console.log(section,name,value)
+    if(section == 'name'){
+      return{
+        ...prev,
+        [name] : value
+      }
+    }    
     return {
       ...prev,
       [section]: {

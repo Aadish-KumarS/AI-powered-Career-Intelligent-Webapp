@@ -375,7 +375,7 @@
   overflow: hidden;
 }
 
-.progress-bar {
+.view-profile-container .progress-bar {
   height: 100%;
   background: linear-gradient(45deg, #ff6f61, #ffcc00);
   border-radius: 4px;
