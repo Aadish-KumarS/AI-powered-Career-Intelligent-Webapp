@@ -1,10 +1,6 @@
 # AI-powered-Career-Intelligent-Webapp
 ---
-Great! Here's the **enhanced `README.md` file** with **GitHub-style badges**, **color-coded sections**, and optional deployment notes for **Render** and **Vercel**.
 
----
-
-````markdown
 # 🎓 AI-Powered Career Guidance Web Application
 
 [![Frontend: React](https://img.shields.io/badge/frontend-react-blue.svg)]()
@@ -125,7 +121,6 @@ cd ../server-fastapi-exams
 uvicorn main:app --reload
 
 # 5. Create .env files for API keys and MongoDB URI
-````
 
 ---
 
