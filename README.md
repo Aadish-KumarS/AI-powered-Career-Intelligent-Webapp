@@ -121,7 +121,7 @@ cd ../server-fastapi-exams
 uvicorn main:app --reload
 
 # 5. Create .env files for API keys and MongoDB URI
-
+```
 ---
 
 ## 🚀 Deployment Instructions
