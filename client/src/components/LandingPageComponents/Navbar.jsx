@@ -29,8 +29,6 @@ export default function Navbar() {
       <ul className="nav-links">
         <li><a href="/#features">Features</a></li>
         <li><a href="/#about">About</a></li>
-        <li><a href="/#how-it-works">How It Works</a></li>
-        <li><a href="/#target-users">Users</a></li>
         <li className="services-dropdown">
           <div 
             className="services-dropdown-toggle"
@@ -41,16 +39,15 @@ export default function Navbar() {
           {showServicesDropdown && (
             <div className="dropdown-content">
               <div className="dropdown-category">
+                <div className="dropdown-category">
+                  <h3>Macro Services</h3>
+                  <Link to="/services/career-guid/onboarding">AI Career Guidance & Recommondation</Link>
+                  <Link to="/services/career-guid/career-analysis">AI Career Analysis</Link>
+                </div>
                 <h3>Micro Services</h3>
                 <Link to="/services/generate-roadmap">AI Roadmap Generator </Link>
-                <Link to="/services/career-guid/career-analysis">AI Career Analysis</Link>
-                <Link to="/services/learning-path">Learning Progession Tracker</Link>
                 <Link to="/services/exam-certification">Exam Certification AI Recommondation</Link>
-              </div>
-              <div className="dropdown-category">
-                <h3>Macro Services</h3>
-                <Link to="/services/career-guid/onboarding">AI Career Guidance & Recommondation</Link>
-                <Link to="/services/macro/2">Macro Service 2</Link>
+                <Link to="/services/learning-path">Learning Progession Tracker</Link>
               </div>
             </div>
           )}

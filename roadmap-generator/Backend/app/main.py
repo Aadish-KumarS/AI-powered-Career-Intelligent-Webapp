@@ -7,6 +7,7 @@ import json
 import httpx
 import time
 import logging
+import re
 
 from app.models.roadmapModel import Roadmap
 from app.crud.roadmapCRUD import save_roadmap
@@ -115,7 +116,7 @@ async def generate_roadmap(req: RoadmapRequest):
     7. Include portfolio-ready project suggestions at key stages
     8. Emphasize both technical and soft skills
     9. Provide industry relevance and practical applications
-    10. Return ONLY complete, valid JSON — no extra text, formatting, or explanation
+    10. Important Note: Return ONLY complete, valid JSON — no extra text, formatting, or explanation
     """
 
 
@@ -151,15 +152,14 @@ async def generate_roadmap(req: RoadmapRequest):
         result = response.json()
         content = result["choices"][0]["message"]["content"]
 
-        start_idx = content.find("{")
-        end_idx = content.rfind("}") + 1
-
-        if start_idx != -1 and end_idx > start_idx:
+        json_match = re.search(r'\{.*\}', content, re.DOTALL)
+        if json_match:
+            json_str = json_match.group()
             try:
-                roadmap_json = json.loads(content[start_idx:end_idx])
+                roadmap_json = json.loads(json_str)
                 return roadmap_json
             except json.JSONDecodeError:
-                logger.error(f"Failed to parse JSON from LLM response. Raw content: {content}")
+                logger.error(f"Failed to parse JSON from LLM response. Extracted content: {json_str}")
                 raise HTTPException(status_code=500, detail="Failed to parse JSON from LLM response.")
         else:
             logger.error(f"Could not extract valid JSON from LLM response. Raw content: {content}")

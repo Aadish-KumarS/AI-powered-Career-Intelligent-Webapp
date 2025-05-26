@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import '../../styles/CareerGuid Styles/OnBoarding.css';
 import { getUserIdFromToken, handleAddPastRole, handleAddSkill, handleCheckboxChange, handleInputChange, handleMultiSelectChange, handlePrevious, handleRemoveSkill, handleSelectChange, selectSuggestion, toggleSection } from '../../utils/MVPformHanderls.js';
 import Navbar from '../../components/LandingPageComponents/Navbar.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const OnboardingForm = () => {
   const [formData, setFormData] = useState({
@@ -55,6 +56,8 @@ const OnboardingForm = () => {
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [userId, setUserId] = useState(null);
+
+  const navigate = useNavigate();
   
   const formRef = useRef(null);
   const nextBtnRef = useRef(null);
@@ -93,7 +96,9 @@ const OnboardingForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const isLastStep = currentStep === totalSteps - 1;
+    const isLastStep = currentStep === totalSteps ;
+    console.log(isLastStep);
+    
   
     if (!isLastStep) {
       setCurrentStep(prev => prev + 1);
@@ -119,7 +124,8 @@ const OnboardingForm = () => {
           },
           body: JSON.stringify(formData),
         });
-        console.log('Career guidance data updated:', response.data);
+        // console.log('Career guidance data updated:', response.data);
+        navigate('/services/career-guid/career-recommendation')
   
         if (formRef.current) {
           gsap.to(formRef.current, {
@@ -746,38 +752,6 @@ const OnboardingForm = () => {
                   </div>
                 ))}
               </div>
-            </div>
-            
-            <div className="toggle-group">
-              <label>
-                <span>Enable Notifications</span>
-                <div className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    id="notifications"
-                    name="notifications"
-                    checked={formData.preferences.notifications}
-                    onChange={(e) => handleCheckboxChange(e, 'preferences',setFormData)}
-                  />
-                  <div className="toggle-slider"></div>
-                </div>
-              </label>
-            </div>
-            
-            <div className="toggle-group">
-              <label>
-                <span>Dark Mode</span>
-                <div className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    id="darkMode"
-                    name="darkMode"
-                    checked={formData.preferences.darkMode}
-                    onChange={(e) => handleCheckboxChange(e, 'preferences',setFormData)}
-                  />
-                  <div className="toggle-slider"></div>
-                </div>
-              </label>
             </div>
           </div>
         )}

@@ -197,13 +197,15 @@
 
 /* Skills Section Styles */
 .skills-list {
-  display: flex;
+  display: f,
+  lex;
   flex-direction: column;
   gap: 14px;
 }
 
-.skill-item, .emerging-skill-item {
+.job-market-insights  .skill-item, .emerging-skill-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -211,7 +213,10 @@
   background-color: #f7f7f7;
   border-radius: 10px;
   transition: all 0.2s ease;
+  height: fit-content;
 }
+
+
 
 .skill-item:hover, .emerging-skill-item:hover {
   background-color: #f0f0f0;
@@ -224,8 +229,8 @@
 }
 
 .demand-bar-container, .growth-bar-container {
-  flex: 1;
   height: 12px;
+  width: 100%;
   background-color: #e0e0e0;
   border-radius: 6px;
   overflow: hidden;

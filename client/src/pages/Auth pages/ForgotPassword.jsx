@@ -18,8 +18,8 @@ export default function ForgotPassword() {
 
   return (
     <div className="auth-container">
-      <button className="back-btn" onClick={() => window.history.back()}>
-        Back
+      <button className="back-btn" onClick={() =>window.location.href = '/'}>
+        Home
       </button>
       <div className="auth-card">
         <h2 className="auth-title">Forgot Password?</h2>

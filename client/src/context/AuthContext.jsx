@@ -23,12 +23,6 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // const login = (token) => {
-  //   sessionStorage.setItem('authToken', token);
-  //   setIsAuthenticated(true);
-  //   navigate('/dashboard');
-  // };
-
   return (
     <AuthContext.Provider value={{ isAuthenticated}}>
       {children}

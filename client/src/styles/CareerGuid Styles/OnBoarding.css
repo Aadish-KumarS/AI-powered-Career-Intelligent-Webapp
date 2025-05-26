@@ -222,7 +222,8 @@
 
 #section-personalInfo,
 #section-skills,
-#section-careerInfo{
+#section-careerInfo,
+#section-experience{
   height: 100% !important;
   opacity: 1 !important;
 }

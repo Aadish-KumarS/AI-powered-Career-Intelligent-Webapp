@@ -40,7 +40,7 @@ export default function Signup() {
     <div className="auth-container">
       <div>
       </div>
-      <button className='back-btn' onClick={() => window.history.back()}>Back</button>
+      <button className='back-btn' onClick={() => window.location.href = '/'}>Home</button>
       <div className="auth-card">
         <h2 className="auth-title">Create an Account</h2>
         <form onSubmit={handleSubmit}>

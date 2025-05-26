@@ -17,6 +17,7 @@
   height: 400px;
   text-align: center;
   padding: 30px;
+  margin-top: 3rem;
 }
 
 .loading-animation {
@@ -227,7 +228,6 @@
 
 .copy-button:hover, .download-button:hover {
   background-color: rgba(255, 255, 255, 0.35);
-  transform: translateY(-4px);
 }
 
 .button-icon {
@@ -237,6 +237,10 @@
 /* Download dropdown */
 .download-dropdown {
   position: relative;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dropdown-icon {
@@ -252,9 +256,9 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   padding: 12px;
-  min-width: 200px;
+  min-width: 185px;
   z-index: 100;
-  margin-top: 8px;
+  /* margin-top: 8px; */
   display: none;
   border: 1px solid rgba(255, 126, 95, 0.1);
 }

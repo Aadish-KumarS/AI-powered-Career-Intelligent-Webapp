@@ -99,6 +99,8 @@ async def generate_career_advice(payload):
         "- **Year 1–2**: [details]\n"
         "- **Year 3–4**: [details]\n"
         "- **Year 5**: [details]"
+
+        "IMPORTANT NOTE: MAINTAIN THE STRUCTURE AT ALL TIMES, USE THE SAME FLOW"
     )
     
     user_content = (

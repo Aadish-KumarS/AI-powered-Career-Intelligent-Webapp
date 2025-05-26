@@ -94,8 +94,9 @@ export const handleSubmitLogin = async ( e, setLoading, setError, formData, navi
       sessionStorage.setItem("authToken", token);
 
       const isFirstTime = await getIsFirstTime(token, "http://localhost:5000");
+      
       setIsFirstTime(isFirstTime);
-
+      
       if (isFirstTime) {
         navigate("/profile/create-user-profile");
       } else {

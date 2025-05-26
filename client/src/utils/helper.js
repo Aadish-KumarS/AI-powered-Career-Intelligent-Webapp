@@ -385,3 +385,126 @@ export const removeInterest = (interest, setUserData) => {
   }));
 };
 
+//SKILL GAP RES
+export const mergeAndTransformSkillGapData = (llmResponse, userData) => {
+  // Handle case where either input is undefined
+  if (!llmResponse) return userData;
+  if (!userData) return { result: llmResponse };
+  
+  // Extract content from LLM response if needed
+  const llmData = llmResponse.choices?.[0]?.message?.content 
+    ? JSON.parse(llmResponse.choices[0].message.content) 
+    : llmResponse;
+  
+  // Create base structure for result
+  const result = {
+    result: {
+      skill_assessment: {
+        current_strengths: llmData.skill_assessment?.current_strengths || [],
+        current_skill_levels: {},
+        transferable_skills: llmData.skill_assessment?.transferable_skills || [],
+        skill_gaps: {}
+      },
+      missing_skills: [],
+      learning_path: llmData.learning_path || {},
+      industry_insights: {
+        market_trends: llmData.industry_insights?.market_trends || [],
+        regional_factors: llmData.industry_insights?.regional_factors || [],
+        salary_expectations: llmData.industry_insights?.salary_expectations || []
+      },
+      career_trajectory: {
+        short_term_goals: llmData.career_trajectory?.short_term_goals || [],
+        medium_term_goals: llmData.career_trajectory?.medium_term_goals || [],
+        long_term_goals: llmData.career_trajectory?.long_term_goals || [],
+        estimated_timeline: llmData.career_trajectory?.estimated_timeline || "Not specified"
+      },
+      networking_recommendations: llmData.networking_recommendations || [],
+      portfolio_recommendations: llmData.portfolio_recommendations || []
+    },
+    processed_at: new Date().toISOString(),
+    request_id: `req-${Date.now()}`
+  };
+  
+  // Transform current_skill_levels from array to object format
+  if (llmData.skill_assessment?.current_skill_levels) {
+    llmData.skill_assessment.current_skill_levels.forEach(skill => {
+      result.result.skill_assessment.current_skill_levels[skill.skill] = 
+        `(${skill.level}) Consider strengthening your knowledge in ${skill.skill}.`;
+    });
+  }
+  
+  // Transform skill_gaps from array to object format
+  if (llmData.missing_skills) {
+    llmData.missing_skills.forEach(role => {
+      result.result.skill_assessment.skill_gaps[role.role] = {
+        priority_level: role.essential_technical_skills?.[0]?.importance || "Medium",
+        essential_technical_skills: role.essential_technical_skills?.map(skill => skill.skill) || [],
+        essential_soft_skills: role.essential_soft_skills?.map(skill => ({
+          skill: skill.skill,
+          importance_rating: skill.importance
+        })) || [],
+        recommended_tools: Array.isArray(role.recommended_tools) 
+          ? role.recommended_tools 
+          : role.recommended_tools?.split(', ') || [],
+        nice_to_have: Array.isArray(role.nice_to_have)
+          ? role.nice_to_have
+          : role.nice_to_have?.split(', ') || []
+      };
+    });
+  }
+  
+  // Transform missing_skills to match expected format
+  if (llmData.missing_skills) {
+    result.result.missing_skills = llmData.missing_skills.map(role => ({
+      role: role.role,
+      essential_technical_skills: role.essential_technical_skills?.map(skill => ({
+        skill: skill.skill,
+        proficiency_level: skill.importance === "High" ? "Proficient" : 
+                          skill.importance === "Medium" ? "Intermediate" : "Beginner"
+      })) || [],
+      essential_soft_skills: role.essential_soft_skills?.map(skill => ({
+        skill: skill.skill,
+        importance_rating: skill.importance
+      })) || [],
+      recommended_tools: Array.isArray(role.recommended_tools) 
+        ? role.recommended_tools 
+        : role.recommended_tools?.split(', ') || [],
+      nice_to_have: Array.isArray(role.nice_to_have)
+        ? role.nice_to_have
+        : role.nice_to_have?.split(', ') || []
+    }));
+  }
+  
+  // Merge with any existing user data from MongoDB
+  if (userData.result) {
+    // Merge skill_assessment
+    if (userData.result.skill_assessment) {
+      Object.assign(result.result.skill_assessment, userData.result.skill_assessment);
+    }
+    
+    // Merge learning_path
+    if (userData.result.learning_path) {
+      Object.assign(result.result.learning_path, userData.result.learning_path);
+    }
+    
+    // Merge other sections as needed
+    if (userData.result.industry_insights) {
+      Object.assign(result.result.industry_insights, userData.result.industry_insights);
+    }
+    
+    if (userData.result.career_trajectory) {
+      Object.assign(result.result.career_trajectory, userData.result.career_trajectory);
+    }
+    
+    // Use existing timestamps if available
+    if (userData.processed_at) {
+      result.processed_at = userData.processed_at;
+    }
+    
+    if (userData.request_id) {
+      result.request_id = userData.request_id;
+    }
+  }
+  
+  return result;
+};

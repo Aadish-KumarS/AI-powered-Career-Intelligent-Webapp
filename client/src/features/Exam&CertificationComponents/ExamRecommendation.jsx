@@ -33,71 +33,75 @@ const ExamRecommendation = () => {
     const fetchRecommendations = async () => {
       setIsLoading(true);
       try {
-        // const res = await fetch("http://localhost:8000/api/v1/exams/recommend-exams", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     education: {
-        //       highestLevel: "Bachelor's",
-        //       fieldOfStudy: "Computer Science",
-        //       institution: "Example University",
-        //       graduationYear: 2024,
-        //     },
-        //     skills: {
-        //       technicalSkills: [{ name: "Python" }, { name: "JavaScript" }],
-        //       softSkills: [{ name: "Problem Solving" }],
-        //     },
-        //     careerInfo: {
-        //       careerGoals: ["Backend Developer"],
-        //       desiredIndustries: ["Tech", "Software"],
-        //     },
-        //     experience: {
-        //       currentRole: "Student",
-        //       yearsOfExperience: 0,
-        //     },
-        //     preferences: {
-        //       personalityType: "INTJ",
-        //     },
-        //   }),
-        // });
-
-        // const data = await res.json();
-        // if (data.recommendations) {
-        //   setRecommendations(data.recommendations);
-        // }
-        setRecommendations([
-          {
-              "exam_name": "Joint Entrance Examination (JEE Main)",
-              "why_recommended": "This exam is essential for admission to top engineering colleges in India and will be beneficial for pursuing a B.Tech in a field aligned with technology.",
-              "ideal_timeline": "2024"
+        const res = await fetch("http://localhost:8001/api/v1/recommend-exams", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-          {
-              "exam_name": "SAT Subject Test - Mathematics Level 2",
-              "why_recommended": "Demonstrating strong mathematical skills is important for a career in engineering and technology.",
-              "ideal_timeline": "2023"
-          },
-          {
-              "exam_name": "Microsoft Technology Associate (MTA) Certification",
-              "why_recommended": "Validates basic programming skills, which are crucial for a career in technology.",
-              "ideal_timeline": "2023"
-          },
-          {
-              "exam_name": "National Talent Search Examination (NTSE)",
-              "why_recommended": "A prestigious scholarship exam that can showcase analytical thinking and problem-solving abilities.",
-              "ideal_timeline": "2022"
-          }
-      ]);
+          body: JSON.stringify({
+            education: {
+              highestLevel: "Bachelor's",
+              fieldOfStudy: "Computer Science",
+              institution: "Example University",
+              graduationYear: "2024",  // Changed to string to match Pydantic model expectations
+            },
+            skills: {
+              technicalSkills: [{ name: "Python" }, { name: "JavaScript" }],
+              softSkills: [{ name: "Problem Solving" }],
+            },
+            careerInfo: {
+              careerGoals: ["Backend Developer"],
+              desiredIndustries: ["Tech", "Software"],
+            },
+            experience: {
+              currentRole: "Student",
+              yearsOfExperience: 0,
+            },
+            preferences: {
+              personalityType: "INTJ",
+            },
+          }),
+        });
+        
+        const data = await res.json();
+        if (data.recommendations) {
+          setRecommendations(data.recommendations);
+        } else if (data.error) {
+          setError(data.error);
+        }
+        
         setIsLoading(false);
       } catch (err) {
         console.error("Failed to fetch recommendations", err);
         setError("Failed to load recommendations. Please try again later.");
         setIsLoading(false);
         
+        // Fallback to hardcoded data in case of failure
+        // setRecommendations([
+        //   {
+        //     "exam_name": "AWS Certified Developer - Associate",
+        //     "why_recommended": "Perfect for aspiring backend developers with Python and JavaScript skills",
+        //     "ideal_timeline": "Within 6 months of graduation"
+        //   },
+        //   {
+        //     "exam_name": "Microsoft Certified: Azure Developer Associate",
+        //     "why_recommended": "Complements your CS degree and adds cloud development credentials",
+        //     "ideal_timeline": "First year after graduation"
+        //   },
+        //   {
+        //     "exam_name": "Oracle Certified Professional: Java SE Developer",
+        //     "why_recommended": "Builds on your CS background and expands your backend skills",
+        //     "ideal_timeline": "Within your first year in the industry"
+        //   },
+        //   {
+        //     "exam_name": "MongoDB Developer Certification",
+        //     "why_recommended": "Adds database expertise to your backend development skillset",
+        //     "ideal_timeline": "After 6 months of work experience"
+        //   }
+        // ]);
       }
     };
-
+    
     fetchRecommendations();
   }, []);
 

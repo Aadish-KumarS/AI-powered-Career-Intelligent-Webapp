@@ -10,6 +10,6 @@ class CareerPrompt(BaseModel):
     current_role: Optional[str]
     work_type: Optional[List[str]]
     desired_industries: Optional[List[str]]
-    career_goals: Optional[str]
+    career_goals: Optional[List[str]]
     career_stage: Optional[str]
     desired_roles: Optional[List[str]]

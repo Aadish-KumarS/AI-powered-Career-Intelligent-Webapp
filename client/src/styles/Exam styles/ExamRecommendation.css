@@ -70,6 +70,7 @@
 
 .exam-recommendation-container  .nav-tab.active {
   color: #fff;
+  background-color:#ff7e5f ;
 }
 
 .exam-recommendation-container  .nav-tab.active::before {
@@ -133,7 +134,7 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
-  opacity: 0;
+  /* opacity: 0; */
   transform: translateY(30px);
   display: flex;
   flex-direction: column;

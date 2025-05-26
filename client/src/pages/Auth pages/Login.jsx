@@ -24,7 +24,7 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-      <button className='back-btn' onClick={() => window.history.back()}>Back</button>
+      <button className='back-btn' onClick={() => window.location.href = '/'}>Home</button>
       <div className="auth-card">
         <h2 className="auth-title">Log in to Your Account</h2>
         

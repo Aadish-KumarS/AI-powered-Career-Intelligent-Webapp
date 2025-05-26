@@ -106,10 +106,9 @@ export const updateOnboarding = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    console.log("Updated user data:", updatedUser);
-    res.status(200).json(updatedUser);
+    return res.status(200).json({ user: updatedUser });
   } catch (error) {
     console.error("Error updating onboarding:", error);
-    res.status(500).json({ message: "Server error", error });
+    return res.status(500).json({ message: "Server error", error });
   }
 };

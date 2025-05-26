@@ -32,24 +32,24 @@ const CareerRecommendation = () => {
   const timelineRef = useRef(null);
   const chartsRef = useRef(null);
 
-  // Parse career paths from recommendation string
+ // Parse career paths from recommendation string
   const parseRecommendation = (recData) => {
     if (!recData || !recData.recommendation) return [];
-  
+
     const recText = recData.recommendation;
     const sections = recText.split(/## \d+\. /);
     if (sections.length <= 1) return [];
-  
+
     sections.shift(); // Remove the first empty section
-  
+
     return sections.map((section, index) => {
-      // Extract title
-      const titleMatch = section.match(/^Career Path Name:\s*(.+)$/m);
-      const title = titleMatch ? titleMatch[1].trim() : `Career Path ${index + 1}`; 
-  
+      // Extract title - Fix: Get the first line as the title instead of looking for "Career Path Name:"
+      const titleMatch = section.split('\n')[0];
+      const title = titleMatch ? titleMatch.trim() : `Career Path ${index + 1}`; 
+
       // Extract overview
       const overview = extractSection(section, "Overview", "Why This Career Fits");
-  
+
       // Extract sections
       const whyFits = extractSection(section, "Why This Career Fits", "Skills to Develop");
       const skills = extractSection(section, "Skills to Develop", "3–6 Month Learning Roadmap");
@@ -57,16 +57,17 @@ const CareerRecommendation = () => {
       const learningCurve = extractSection(section, "Learning Curve", "Entry Strategies");
       const entryStrategies = extractSection(section, "Entry Strategies", "5-Year Career Growth Path");
       const growthPath = extractSection(section, "5-Year Career Growth Path", "---");
-  
+console.log(roadmap);
+
       // Extract structured lists
       const skillsList = extractSkillsData(skills);
       const roadmapSteps = extractRoadmapData(roadmap);
       // const learningCurveSteps = extractLearningCurveData(learningCurve);
       const growthSteps = extractGrowthData(growthPath);
-  
+
       // Calculate match score
       const matchScore = 100 - (index * 15);
-  
+
       return {
         title,
         overview,
@@ -125,74 +126,85 @@ const CareerRecommendation = () => {
   // Extract roadmap as structured data
   const extractRoadmapData = (roadmapText) => {
     if (!roadmapText) return [];
-    
+
     const lines = roadmapText.split('\n');
+
     return lines
       .filter(line => line.trim().startsWith('- **Month'))
       .map(line => {
         line = line.replace('- ', '').trim();
-        
-        // Extract month range
+
+        // Extract month range, e.g. "**Month 3–6**:"
         const monthMatch = line.match(/\*\*Month (\d+)–(\d+)\*\*:/);
         if (!monthMatch) return null;
-        
+
         const startMonth = parseInt(monthMatch[1]);
         const endMonth = parseInt(monthMatch[2]);
-        
-        // Get everything after the month range
+
+        // Get everything after the month range marker
         let fullText = line.substring(monthMatch[0].length).trim();
-        
-        // Find all resource links and titles
+
+        // Extract estimated weekly time commitment (optional)
+        // e.g. "- **Estimated weekly time commitment**: 10-15 hours/week"
+        let estimatedTime = null;
+        const estimatedMatch = fullText.match(/estimated weekly time commitment[:\-]\s*([\d\-]+ hours\/week)/i);
+        if (estimatedMatch) {
+          estimatedTime = estimatedMatch[1].trim();
+          fullText = fullText.replace(estimatedMatch[0], '').trim();
+        }
+
+        // Find all resource links and titles: [Title](url)
         const resourceMatches = [...fullText.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)];
-        
-        // Extract titles and resources
+
+        // Extract resources array
         const resources = resourceMatches.map(match => ({
           title: match[1],
           url: match[2]
         }));
-        
-        // Extract description (text before first link and after last link)
+
+        // Extract description text parts
         let descriptionParts = [];
-        
-        // Text before first link
+
         if (resourceMatches.length > 0) {
+          // Text before first link
           const firstLinkIndex = fullText.indexOf(resourceMatches[0][0]);
           if (firstLinkIndex > 0) {
             descriptionParts.push(fullText.substring(0, firstLinkIndex).trim());
           }
-          
-          // Replace all resource matches with an empty string to get the text between/after links
+
+          // Replace links with placeholders
           let tempText = fullText;
           resourceMatches.forEach(match => {
-            tempText = tempText.replace(match[0], "|||");
+            tempText = tempText.replace(match[0], '|||');
           });
-          
-          // Split by the placeholder and filter out empty parts
-          const textParts = tempText.split("|||").filter(part => part.trim());
-          
-          // Add the text parts except the first one (which we already added)
+
+          // Split on placeholders to get text between/after links
+          const textParts = tempText.split('|||').filter(p => p.trim());
+
+          // Add all parts except the first (already added)
           if (textParts.length > 1) {
             descriptionParts = descriptionParts.concat(textParts.slice(1));
           } else if (textParts.length === 1 && firstLinkIndex === 0) {
-            // If there's only one part and it's after the links
             descriptionParts.push(textParts[0]);
           }
         } else {
-          // No links found, entire text is description
+          // No links, full text is description
           descriptionParts.push(fullText);
         }
-        
+
         const description = descriptionParts.join(' ').trim();
-        
+
         return {
           startMonth,
           endMonth,
+          description,
           resources,
-          description
+          estimatedTime
         };
       })
       .filter(Boolean);
   };
+
 
   // Extract growth path as structured data
   const extractGrowthData = (growthText) => {
@@ -278,14 +290,14 @@ const CareerRecommendation = () => {
     setError(null);
   
     try {
-      const userDataa = {
+      const resData = {
         "personality_type": userData.preferences.personalityType,
         "interests": userData.interests,
         "goals": userData.insights.fiveYearGoal,
         "education_level": userData.education.fieldOfStudy,
-        "experience_years": userData.experience.yearsOfExperience,
+        "experience_years": Number(userData.experience.yearsOfExperience),
         "current_role": userData.experience.currentRole,
-        "work_type": userData.workStyle,
+        "work_type": [userData.preferences.workEnvironment],
         "desired_industries" : userData.careerInfo.desiredIndustries,
         "career_goals" : userData.careerInfo.careerGoals,
         "career_stage" : userData.careerInfo.careerStage,
@@ -293,20 +305,26 @@ const CareerRecommendation = () => {
       };
       
       // Mock response for development
-      const mockResponse ={
-        "recommendation": " ## 1. Career Path Name: Educational Psychology Consultant\n\n### Overview\nThis career path involves working as a consultant in educational psychology, helping educational institutions and organizations create tailored educational programs that support students' emotional, social, and academic growth, based on the insights provided by psychological research.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs are perceptive, intuitive, and empathetic, which makes them naturally suited to understanding and addressing the emotional needs of their clients.\n- Psychological strengths: INFJs are adept at understanding complex concepts, uncovering patterns, and motivating others—skills that are essential for consulting and designing effective educational programs.\n\n### Skills to Develop\n- **Psychological research skills** — Understanding the latest research in educational psychology is crucial for delivering evidence-based recommendations.\n- **Program design and evaluation** — Creating successful educational programs requires the ability to design and evaluate strategies effectively.\n- **Communication and presentation** — Clear communication is essential for translating complex psychological concepts to various stakeholders, such as educators, administrators, and parents.\n- **Consultation and collaboration** — Successful educational psychology consultants must collaborate with educators and administrators to develop practical and implementable solutions.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Learn about the theoretical foundations of educational psychology by taking an online course like [Introduction to Educational Psychology](https://www.coursera.org/courses/educationalpsychology) or [Educational Psychology and Development](https://www.edx.org/professional-certificate/bcgx-psychology-child-development).\n- **Month 3–4**: Dive into program design and evaluation, by enrolling in [Designing and Implementing Effective Educational Programs](https://www.edx.org/professional-certificate/berkeleyx-edx-sd-designing-implementing-effective-pedagogical-programs) or [Evaluating Educational Programs](https://www.coursera.org/courses/evaluation).\n- **Month 5–6**: Gain hands-on experience by participating in a project or internship related to educational psychology consulting. For example, work on a program evaluation for a school or organization, or consult with educators on designing strategy for enhancing students' well-being.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe educational psychology consulting field can be competitive, but it presents opportunities for those who are passionate, dedicated, and committed to continued learning.\n\n### Entry Strategies\n- **Entry Role 1**: Junior Educational Psychology Consultant at educational organizations, research institutions, or consulting firms.\n- **Entry Role 2**: School Psychologist or Educational Psychologist working directly with students and educators to create supportive learning environments.\n- **Optional freelance/startup path**: Offer consultations and program design services independently to schools and educational organizations.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Build a portfolio of successful projects and collaborations, and establish a professional network.\n- **Year 3–4**: Specialize in a particular area, such as social-emotional learning, academic achievement, or career development, to become a recognized expert in your field.\n- **Year 5**: Seek opportunities to speak at conferences, publish research, or coach other educational psychologists to demonstrate your thought leadership in the field.\n\n---\n\n## 2. Career Path Name: Learning & Development Specialist in Corporate HR\n\n### Overview\nLearning & Development (L&D) Specialists focus on developing and implementing training programs and initiatives to help employees improve their skills, increase their productivity, and reach their potential. Within HR, L&D Specialists work closely with employees and management to meet business goals and foster personal growth.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy and intuition, which make them well-suited to understanding the unique learning needs of individuals, as well as the organizational goals that must be met.\n- Psychological strengths: INFJs are natural motivators, adept at identifying the potential within others and tailoring content to meet individual learning preferences.\n\n### Skills to Develop\n- **Training design, delivery, and evaluation** — Proficiency in creating training programs, facilitating sessions, and evaluating the effects on employee performance.\n- **Instructional design principles** — Understanding and applying effective strategies for course structure, interaction, and assessment.\n- **Collaboration** — Ability to work effectively with other HR professionals, management, and departments.\n- **Technical skills (e.g., e-learning tools, Learning Management Systems)** — Proficiency in utilizing and adapting technology to support learning and development.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Brush up on these essential skills with courses like [Learning & Development Fundamentals](https://www.linkedin.com/learning/learning-and-development-fundamentals) or [Introduction to Instructional Design](https://www.edx.org/professional-certificate/purduex-instructional-design-introduction).\n- **Month 3–4**: Learn how to create engaging online training programs by enrolling in [Designing Digital Learning](https://www.edx.org/professional-certificate/edx-designing-digital-learning) or [Creating eLearning: Instructional Design](https://www.pluralsight.com/courses/creating-elearning-instructional-design).\n- **Month 5–6**: Gain hands-on experience by working on a training project or internship within an HR department. For example, collaborate with colleagues to create a training program for onboarding new employees or develop a workshop on communication skills.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe Learning & Development field is evolving rapidly with the increased use of technology, so continuous learning is essential to remain current in this career.\n\n### Entry Strategies\n- **Entry Role 1**: HR Training Specialist or L&D Coordinator in a small to medium-sized organization.\n- **Entry Role 2**: HR Generalist with a focus on learning & development within a department or division.\n- **Optional freelance/startup path**: Offer training and development services to small businesses or organizations as an independent contractor.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in multiple areas of HR to develop a broad understanding of organizational issues and challenges.\n- **Year 3–4**: Specialize in a specific area, such as leadership development, diversity & inclusion, or technical skills training, to become an expert in that area.\n- **Year 5**: Seek opportunities to lead large-scale training initiatives, drive best practices, and influence the strategic direction of a company's learning and development programs.\n\n---\n\n## 3. Career Path Name: Mental Health Counselor in Education\n\n### Overview\nMental Health Counselors in Education work with students and their families, teachers, and administrators to create supportive learning environments that address emotional, behavioral, and academic challenges. They provide counseling services, consultation, and collaboration to promote student success.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy, understanding, and intuitiveness, making them well-suited to genuinely connecting with students and understanding their complex emotional needs.\n- Psychological strengths: INFJs are skilled at uncovering patterns, identifying solutions, and advocating for the well-being of others.\n\n### Skills to Develop\n- **Counseling techniques and therapeutic interventions** — Proficiency in a variety of therapeutic approaches, such as cognitive-behavioral therapy and solution-focused brief therapy.\n- **Assessment and diagnostic skills** — Ability to accurately diagnose mental health conditions and develop appropriate treatment plans.\n- **Collaboration** — Developing effective working relationships with teachers, administrators, and families to support students.\n- **Cultural competence** — Sensitivity to the diversity of students and families and the ability to adapt counseling approaches accordingly.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Gain a foundational understanding of psychology and counseling through online courses like [Introduction to Psychology](https://www.coursera.org/courses/introduction-to-psychology) or [Basic Counseling Skills](https://www.upenn.edu/citizenship/education/counselor-education/basic-counseling-skills/index.html).\n- **Month 3–4**: Learn about mental health conditions and therapeutic techniques by taking courses like [Abnormal Psychology](https://www.coursera.org/courses/abnormal-psychology) or [Introduction to Counseling Theories](https://www.coursera.org/courses/introduction-to-counseling-theories).\n- **Month 5–6**: Obtain hands-on experience through a counseling practicum or internship at a school or counseling center. This will provide opportunities to apply your knowledge in real-world contexts and receive feedback.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe mental health field requires significant education and ongoing training to maintain competence and licensure.\n\n### Entry Strategies\n- **Entry Role 1**: School Counselor, responsible for academic, career, and personal/social counseling for students.\n- **Entry Role 2**: Mental Health Counselor in a school setting, providing counseling services to students specifically focused on emotional and behavioral challenges.\n- **Optional freelance/startup path**: Offer your counseling services to schools and organizations on a contract basis.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in a school setting and become familiar with the unique challenges and opportunities of working with student populations.\n- **Year 3–4**: Specialize in a specific population, such as young children, special education students, or highly gifted learners, to gain expertise and become an expert in that area.\n- **Year 5**: Advance to leadership roles, such as Department Chair or Program Director, or consider furthering your education to pursue an advanced degree in areas like school psychology or educational leadership."
-    }
+      // const mockResponse ={
+      //   "recommendation": " ## 1. Career Path Name: Educational Psychology Consultant\n\n### Overview\nThis career path involves working as a consultant in educational psychology, helping educational institutions and organizations create tailored educational programs that support students' emotional, social, and academic growth, based on the insights provided by psychological research.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs are perceptive, intuitive, and empathetic, which makes them naturally suited to understanding and addressing the emotional needs of their clients.\n- Psychological strengths: INFJs are adept at understanding complex concepts, uncovering patterns, and motivating others—skills that are essential for consulting and designing effective educational programs.\n\n### Skills to Develop\n- **Psychological research skills** — Understanding the latest research in educational psychology is crucial for delivering evidence-based recommendations.\n- **Program design and evaluation** — Creating successful educational programs requires the ability to design and evaluate strategies effectively.\n- **Communication and presentation** — Clear communication is essential for translating complex psychological concepts to various stakeholders, such as educators, administrators, and parents.\n- **Consultation and collaboration** — Successful educational psychology consultants must collaborate with educators and administrators to develop practical and implementable solutions.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Learn about the theoretical foundations of educational psychology by taking an online course like [Introduction to Educational Psychology](https://www.coursera.org/courses/educationalpsychology) or [Educational Psychology and Development](https://www.edx.org/professional-certificate/bcgx-psychology-child-development).\n- **Month 3–4**: Dive into program design and evaluation, by enrolling in [Designing and Implementing Effective Educational Programs](https://www.edx.org/professional-certificate/berkeleyx-edx-sd-designing-implementing-effective-pedagogical-programs) or [Evaluating Educational Programs](https://www.coursera.org/courses/evaluation).\n- **Month 5–6**: Gain hands-on experience by participating in a project or internship related to educational psychology consulting. For example, work on a program evaluation for a school or organization, or consult with educators on designing strategy for enhancing students' well-being.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe educational psychology consulting field can be competitive, but it presents opportunities for those who are passionate, dedicated, and committed to continued learning.\n\n### Entry Strategies\n- **Entry Role 1**: Junior Educational Psychology Consultant at educational organizations, research institutions, or consulting firms.\n- **Entry Role 2**: School Psychologist or Educational Psychologist working directly with students and educators to create supportive learning environments.\n- **Optional freelance/startup path**: Offer consultations and program design services independently to schools and educational organizations.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Build a portfolio of successful projects and collaborations, and establish a professional network.\n- **Year 3–4**: Specialize in a particular area, such as social-emotional learning, academic achievement, or career development, to become a recognized expert in your field.\n- **Year 5**: Seek opportunities to speak at conferences, publish research, or coach other educational psychologists to demonstrate your thought leadership in the field.\n\n---\n\n## 2. Career Path Name: Learning & Development Specialist in Corporate HR\n\n### Overview\nLearning & Development (L&D) Specialists focus on developing and implementing training programs and initiatives to help employees improve their skills, increase their productivity, and reach their potential. Within HR, L&D Specialists work closely with employees and management to meet business goals and foster personal growth.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy and intuition, which make them well-suited to understanding the unique learning needs of individuals, as well as the organizational goals that must be met.\n- Psychological strengths: INFJs are natural motivators, adept at identifying the potential within others and tailoring content to meet individual learning preferences.\n\n### Skills to Develop\n- **Training design, delivery, and evaluation** — Proficiency in creating training programs, facilitating sessions, and evaluating the effects on employee performance.\n- **Instructional design principles** — Understanding and applying effective strategies for course structure, interaction, and assessment.\n- **Collaboration** — Ability to work effectively with other HR professionals, management, and departments.\n- **Technical skills (e.g., e-learning tools, Learning Management Systems)** — Proficiency in utilizing and adapting technology to support learning and development.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Brush up on these essential skills with courses like [Learning & Development Fundamentals](https://www.linkedin.com/learning/learning-and-development-fundamentals) or [Introduction to Instructional Design](https://www.edx.org/professional-certificate/purduex-instructional-design-introduction).\n- **Month 3–4**: Learn how to create engaging online training programs by enrolling in [Designing Digital Learning](https://www.edx.org/professional-certificate/edx-designing-digital-learning) or [Creating eLearning: Instructional Design](https://www.pluralsight.com/courses/creating-elearning-instructional-design).\n- **Month 5–6**: Gain hands-on experience by working on a training project or internship within an HR department. For example, collaborate with colleagues to create a training program for onboarding new employees or develop a workshop on communication skills.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe Learning & Development field is evolving rapidly with the increased use of technology, so continuous learning is essential to remain current in this career.\n\n### Entry Strategies\n- **Entry Role 1**: HR Training Specialist or L&D Coordinator in a small to medium-sized organization.\n- **Entry Role 2**: HR Generalist with a focus on learning & development within a department or division.\n- **Optional freelance/startup path**: Offer training and development services to small businesses or organizations as an independent contractor.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in multiple areas of HR to develop a broad understanding of organizational issues and challenges.\n- **Year 3–4**: Specialize in a specific area, such as leadership development, diversity & inclusion, or technical skills training, to become an expert in that area.\n- **Year 5**: Seek opportunities to lead large-scale training initiatives, drive best practices, and influence the strategic direction of a company's learning and development programs.\n\n---\n\n## 3. Career Path Name: Mental Health Counselor in Education\n\n### Overview\nMental Health Counselors in Education work with students and their families, teachers, and administrators to create supportive learning environments that address emotional, behavioral, and academic challenges. They provide counseling services, consultation, and collaboration to promote student success.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy, understanding, and intuitiveness, making them well-suited to genuinely connecting with students and understanding their complex emotional needs.\n- Psychological strengths: INFJs are skilled at uncovering patterns, identifying solutions, and advocating for the well-being of others.\n\n### Skills to Develop\n- **Counseling techniques and therapeutic interventions** — Proficiency in a variety of therapeutic approaches, such as cognitive-behavioral therapy and solution-focused brief therapy.\n- **Assessment and diagnostic skills** — Ability to accurately diagnose mental health conditions and develop appropriate treatment plans.\n- **Collaboration** — Developing effective working relationships with teachers, administrators, and families to support students.\n- **Cultural competence** — Sensitivity to the diversity of students and families and the ability to adapt counseling approaches accordingly.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Gain a foundational understanding of psychology and counseling through online courses like [Introduction to Psychology](https://www.coursera.org/courses/introduction-to-psychology) or [Basic Counseling Skills](https://www.upenn.edu/citizenship/education/counselor-education/basic-counseling-skills/index.html).\n- **Month 3–4**: Learn about mental health conditions and therapeutic techniques by taking courses like [Abnormal Psychology](https://www.coursera.org/courses/abnormal-psychology) or [Introduction to Counseling Theories](https://www.coursera.org/courses/introduction-to-counseling-theories).\n- **Month 5–6**: Obtain hands-on experience through a counseling practicum or internship at a school or counseling center. This will provide opportunities to apply your knowledge in real-world contexts and receive feedback.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe mental health field requires significant education and ongoing training to maintain competence and licensure.\n\n### Entry Strategies\n- **Entry Role 1**: School Counselor, responsible for academic, career, and personal/social counseling for students.\n- **Entry Role 2**: Mental Health Counselor in a school setting, providing counseling services to students specifically focused on emotional and behavioral challenges.\n- **Optional freelance/startup path**: Offer your counseling services to schools and organizations on a contract basis.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in a school setting and become familiar with the unique challenges and opportunities of working with student populations.\n- **Year 3–4**: Specialize in a specific population, such as young children, special education students, or highly gifted learners, to gain expertise and become an expert in that area.\n- **Year 5**: Advance to leadership roles, such as Department Chair or Program Director, or consider furthering your education to pursue an advanced degree in areas like school psychology or educational leadership."
+      // }
       
       // Uncomment for actual API call
-      // const response = await axios.post('http://localhost:8001/api/v1/recommend-career', userData, {
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
-      // setRecommendation(response.data);
+      console.log(resData);
       
-      setRecommendation(mockResponse);
-      const paths = parseRecommendation(mockResponse);
+      const response = await axios.post('http://localhost:8001/api/v1/recommend-career', resData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      setRecommendation(response.data);
+      
+      // setRecommendation(mockResponse);
+      // const paths = parseRecommendation(mockResponse);
+
+      const paths = parseRecommendation(response.data);
+      console.log(paths);
+      
       setCareerPaths(paths);
       
     } catch (error) {
@@ -406,12 +424,11 @@ const CareerRecommendation = () => {
     
     if (currentView === 'skills' && chartsRef.current) {
       const skillBars = chartsRef.current.querySelectorAll('.skill-progress-bar-fill');
-      
       gsap.fromTo(
         skillBars,
         { width: '0%' },
         {
-          width: (el) => el.getAttribute('data-percent') + '%',
+          width: (i, element) => element.getAttribute('data-percent') + '%',
           duration: 1,
           stagger: 0.1,
           ease: "power2.out"
@@ -484,132 +501,312 @@ const CareerRecommendation = () => {
   };
 
   // Handle download as PDF
-  const downloadRecommendationAsPDF = () => {
-    // Create temporary div for PDF
-    const pdfContent = document.createElement('div');
-    pdfContent.className = 'pdf-container';
-    
-    // Create header with title
-    const header = document.createElement('div');
-    header.className = 'pdf-header';
-    header.innerHTML = `
-      <h1>Career Recommendation Report</h1>
-      <div class="pdf-date">Generated on ${new Date().toLocaleDateString()}</div>
-    `;
-    pdfContent.appendChild(header);
-    
-    // Add user profile
-    if (userData) {
-      const userProfile = document.createElement('div');
-      userProfile.className = 'pdf-user-profile';
-      userProfile.innerHTML = `
-        <h2>Your Profile</h2>
-        <div class="profile-details">
-          <p><strong>Education Level:</strong> ${userData.education || 'Bachelor\'s in Computer Science'}</p>
-          <p><strong>Personality Type:</strong> INTJ</p>
-          <p><strong>Interests:</strong> technology, problem-solving, innovation</p>
-          <p><strong>Strengths:</strong> critical thinking, strategic planning</p>
-        </div>
+  const downloadRecommendationAsPDF = async () => {
+    try {
+      // Create temporary div for PDF
+      const pdfContent = document.createElement('div');
+      pdfContent.className = 'pdf-container';
+
+      // Apply comprehensive styling for PDF rendering
+      pdfContent.style.cssText = `
+        font-family: Arial, sans-serif;
+        color: #333;
+        padding: 20px;
+        width: 190mm;
+        min-height: 277mm;
+        background: #fff;
+        position: fixed;
+        top: 0;
+        left: -9999px;
+        z-index: -1;
+        box-sizing: border-box;
+        line-height: 1.4;
       `;
-      pdfContent.appendChild(userProfile);
-    }
-    
-    // Add summary section
-    const summarySection = document.createElement('div');
-    summarySection.className = 'pdf-summary-section';
-    summarySection.innerHTML = `
-      <h2>Career Recommendations Summary</h2>
-      <p>Based on your profile, we've identified the following career paths that align with your skills, 
-      interests, and personality. The recommendations are ranked by match score with the top recommendation 
-      representing the strongest alignment with your profile.</p>
-    `;
-    pdfContent.appendChild(summarySection);
-    
-    // Add career paths
-    const paths = careerPaths;
-    if (paths.length > 0) {
-      paths.forEach((path, index) => {
-        const pathElement = document.createElement('div');
-        pathElement.className = 'pdf-career-path';
-        
-        // Add best fit badge if applicable
-        const bestFitBadge = path.isBestFit ? 
-          '<span class="best-fit-badge">Best Match</span>' : '';
-        
-        pathElement.innerHTML = `
-          <h2>${index + 1}. ${path.title} ${bestFitBadge}</h2>
-          
-          <h3>Overview</h3>
-          <div class="path-section">${formatContentForPDF(path.overview)}</div>
-          
-          <h3>Why This Career Fits</h3>
-          <div class="path-section">${formatContentForPDF(path.whyFits)}</div>
-          
-          <h3>Skills to Develop</h3>
-          <div class="path-section">${formatContentForPDF(path.skills)}</div>
-          
-          <h3>Learning Roadmap</h3>
-          <div class="path-section">${formatContentForPDF(path.roadmap)}</div>
-          
-          <h3>Entry Strategies</h3>
-          <div class="path-section">${formatContentForPDF(path.entryStrategies)}</div>
-          
-          <h3>Career Growth Path</h3>
-          <div class="path-section">${formatContentForPDF(path.growthPath)}</div>
+
+      // Create inline CSS for better PDF rendering
+      const style = document.createElement('style');
+      style.textContent = `
+        .pdf-container h1 {
+          color: #2c3e50;
+          font-size: 24px;
+          margin-bottom: 10px;
+          text-align: center;
+          border-bottom: 2px solid #3498db;
+          padding-bottom: 10px;
+        }
+        .pdf-container h2 {
+          color: #34495e;
+          font-size: 18px;
+          margin: 20px 0 10px 0;
+          border-left: 4px solid #3498db;
+          padding-left: 10px;
+        }
+        .pdf-container h3 {
+          color: #2c3e50;
+          font-size: 14px;
+          margin: 15px 0 8px 0;
+          font-weight: bold;
+        }
+        .pdf-container p {
+          margin: 8px 0;
+          font-size: 12px;
+          line-height: 1.5;
+        }
+        .pdf-container ul, .pdf-container ol {
+          margin: 8px 0;
+          padding-left: 20px;
+        }
+        .pdf-container li {
+          margin: 4px 0;
+          font-size: 12px;
+          line-height: 1.4;
+        }
+        .pdf-date {
+          text-align: center;
+          font-size: 12px;
+          color: #7f8c8d;
+          margin-bottom: 20px;
+        }
+        .profile-details p {
+          margin: 5px 0;
+          padding: 3px 0;
+        }
+        .path-section {
+          margin: 10px 0;
+          padding: 8px;
+          background: #f8f9fa;
+          border-left: 3px solid #e74c3c;
+        }
+        .best-fit-badge {
+          background: #e74c3c;
+          color: white;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 10px;
+          margin-left: 10px;
+        }
+        .pdf-career-path {
+          margin-bottom: 25px;
+          page-break-inside: avoid;
+        }
+        .pdf-footer {
+          margin-top: 30px;
+          text-align: center;
+          font-size: 10px;
+          color: #7f8c8d;
+          border-top: 1px solid #bdc3c7;
+          padding-top: 10px;
+        }
+      `;
+      pdfContent.appendChild(style);
+
+      // Header
+      const header = document.createElement('div');
+      header.className = 'pdf-header';
+      header.innerHTML = `
+        <h1>Career Recommendation Report</h1>
+        <div class="pdf-date">Generated on ${new Date().toLocaleDateString()}</div>
+      `;
+      pdfContent.appendChild(header);
+
+      // User Profile Section
+      if (typeof userData !== 'undefined' && userData) {
+        const userProfile = document.createElement('div');
+        userProfile.className = 'pdf-user-profile';
+        userProfile.innerHTML = `
+          <h2>Your Profile</h2>
+          <div class="profile-details">
+            <p><strong>Education Level:</strong> ${userData.education || 'Bachelor\'s in Computer Science'}</p>
+            <p><strong>Personality Type:</strong> INTJ</p>
+            <p><strong>Interests:</strong> technology, problem-solving, innovation</p>
+            <p><strong>Strengths:</strong> critical thinking, strategic planning</p>
+          </div>
         `;
-        pdfContent.appendChild(pathElement);
-      });
+        pdfContent.appendChild(userProfile);
+      }
+
+      // Summary
+      const summarySection = document.createElement('div');
+      summarySection.className = 'pdf-summary-section';
+      summarySection.innerHTML = `
+        <h2>Career Recommendations Summary</h2>
+        <p>Based on your profile, we've identified the following career paths that align with your skills, 
+        interests, and personality. The recommendations are ranked by match score with the top recommendation 
+        representing the strongest alignment with your profile.</p>
+      `;
+      pdfContent.appendChild(summarySection);
+
+      // Career Paths
+      if (typeof careerPaths !== 'undefined' && careerPaths && careerPaths.length > 0) {
+        careerPaths.forEach((path, index) => {
+          const pathElement = document.createElement('div');
+          pathElement.className = 'pdf-career-path';
+
+          const bestFitBadge = path.isBestFit ? '<span class="best-fit-badge">Best Match</span>' : '';
+
+          pathElement.innerHTML = `
+            <h2>${index + 1}. ${path.title} ${bestFitBadge}</h2>
+            
+            <h3>Overview</h3>
+            <div class="path-section">${formatContentForPDF ? formatContentForPDF(path.overview) : (path.overview || 'No overview available')}</div>
+            
+            <h3>Why This Career Fits</h3>
+            <div class="path-section">${formatContentForPDF ? formatContentForPDF(path.whyFits) : (path.whyFits || 'No information available')}</div>
+            
+            <h3>Skills to Develop</h3>
+            <div class="path-section">${formatContentForPDF ? formatContentForPDF(path.skills) : (path.skills || 'No skills listed')}</div>
+            
+            <h3>Learning Roadmap</h3>
+            <div class="path-section">${formatContentForPDF ? formatContentForPDF(path.roadmap) : (path.roadmap || 'No roadmap available')}</div>
+            
+            <h3>Entry Strategies</h3>
+            <div class="path-section">${formatContentForPDF ? formatContentForPDF(path.entryStrategies) : (path.entryStrategies || 'No strategies listed')}</div>
+            
+            <h3>Career Growth Path</h3>
+            <div class="path-section">${formatContentForPDF ? formatContentForPDF(path.growthPath) : (path.growthPath || 'No growth path available')}</div>
+          `;
+
+          pdfContent.appendChild(pathElement);
+        });
+      } else {
+        // Add sample content if no career paths available
+        const sampleContent = document.createElement('div');
+        sampleContent.innerHTML = `
+          <h2>Sample Career Recommendation</h2>
+          <p>This is a sample PDF to demonstrate the layout. Your actual career recommendations will appear here once generated.</p>
+        `;
+        pdfContent.appendChild(sampleContent);
+      }
+
+      // Footer
+      const footer = document.createElement('div');
+      footer.className = 'pdf-footer';
+      footer.innerHTML = `
+        <p>This recommendation is based on your profile data and AI analysis.</p>
+        <p>© ${new Date().getFullYear()} Career Guidance System</p>
+      `;
+      pdfContent.appendChild(footer);
+
+      // Append to DOM with better positioning
+      document.body.appendChild(pdfContent);
+
+      // Wait longer for rendering and use more reliable timing
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Enhanced PDF options
+      const options = {
+        margin: [10, 10, 10, 10],
+        filename: `career_recommendation_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { 
+          type: 'jpeg', 
+          quality: 0.95 
+        },
+        html2canvas: { 
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: true,
+          letterRendering: true,
+          removeContainer: false
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { 
+          mode: ['avoid-all', 'css', 'legacy'] 
+        }
+      };
+
+      try {
+        // Generate PDF with better error handling
+        await html2pdf()
+          .from(pdfContent)
+          .set(options)
+          .save();
+
+        // Clean up
+        document.body.removeChild(pdfContent);
+        
+        // Show success message if toast is available
+        if (typeof toast !== 'undefined') {
+          toast.success('PDF downloaded successfully!');
+        } else {
+          console.log('PDF downloaded successfully!');
+        }
+
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError);
+        document.body.removeChild(pdfContent);
+        
+        if (typeof toast !== 'undefined') {
+          toast.error('Failed to generate PDF. Please try again.');
+        } else {
+          alert('Failed to generate PDF. Please try again.');
+        }
+      }
+
+    } catch (error) {
+      console.error('PDF download error:', error);
+      if (typeof toast !== 'undefined') {
+        toast.error('An error occurred while preparing the PDF.');
+      } else {
+        alert('An error occurred while preparing the PDF.');
+      }
     }
-    
-    // Add footer
-    const footer = document.createElement('div');
-    footer.className = 'pdf-footer';
-    footer.innerHTML = `
-      <p>This recommendation is based on your profile data and AI analysis.</p>
-      <p>© ${new Date().getFullYear()} Career Guidance System</p>
-    `;
-    pdfContent.appendChild(footer);
-    
-    // Apply styling
-    pdfContent.style.fontFamily = 'Arial, sans-serif';
-    pdfContent.style.color = '#333';
-    pdfContent.style.padding = '20px';
-    
-    // Append to document (hidden)
-    pdfContent.style.position = 'absolute';
-    pdfContent.style.left = '-9999px';
-    document.body.appendChild(pdfContent);
-    
-    // PDF options
-    const options = {
-      margin: 10,
-      filename: 'career_recommendation.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    
-    // Generate PDF
-    html2pdf().from(pdfContent).set(options).save().then(() => {
-      document.body.removeChild(pdfContent);
-      toast.success('PDF downloaded successfully!');
-    });
   };
 
   // Format content for PDF
   const formatContentForPDF = (content) => {
     if (!content) return '';
     
-    let formattedContent = content
-      .replace(/\n- /g, '<li>')
-      .replace(/\n/g, '<br>');
+    // Helper function to convert markdown formatting to HTML
+    const convertMarkdown = (text) => {
+      return text
+        // Convert **bold** to <strong>bold</strong>
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Convert [text](url) to <a href="url">text</a>
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    };
     
-    if (formattedContent.includes('<li>')) {
-      formattedContent = formattedContent.replace(/(<li>.*?)(?=<li>|$)/g, '$1</li>');
-      formattedContent = `<ul>${formattedContent}</ul>`;
+    const lines = content.split('\n');
+    const result = [];
+    let currentList = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.startsWith('- ')) {
+        // This is a bullet point
+        const bulletContent = convertMarkdown(line.substring(2).trim());
+        currentList.push(bulletContent);
+      } else {
+        // Not a bullet point
+        if (currentList.length > 0) {
+          // We have accumulated bullet points, output them as a list
+          const listItems = currentList.map(item => `<li>${item}</li>`).join('');
+          result.push(`<ul>${listItems}</ul>`);
+          currentList = [];
+        }
+        
+        if (line && line !== '---') {
+          // Non-empty line and not a separator, add as paragraph
+          const paragraphContent = convertMarkdown(line);
+          result.push(`<p>${paragraphContent}</p>`);
+        }
+      }
     }
     
-    return formattedContent;
+    // Don't forget any remaining bullet points
+    if (currentList.length > 0) {
+      const listItems = currentList.map(item => `<li>${item}</li>`).join('');
+      result.push(`<ul>${listItems}</ul>`);
+    }
+    
+    return result.join('');
   };
 
 // Handle regenerate recommendation
@@ -1302,9 +1499,9 @@ return (
                 <button onClick={downloadRecommendationAsText}>
                   <FiFileText className="option-icon" /> Text File
                 </button>
-                <button onClick={downloadRecommendationAsPDF}>
+                {/* <button onClick={downloadRecommendationAsPDF}>
                   <FiFileText className="option-icon" /> PDF Report
-                </button>
+                </button> */}
               </div>
             </div>
             <button className="action-button regenerate-button" onClick={regenerateRecommendation} title="Regenerate Recommendation">

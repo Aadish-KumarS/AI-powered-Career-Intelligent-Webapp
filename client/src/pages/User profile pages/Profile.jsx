@@ -8,7 +8,8 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 const Profile = () => {
   return (
     <Routes>
-        <Route path="/create-user-profile" element={ <ProtectedRoute> <CreateUserProfile /></ProtectedRoute>} />
+        {/* <Route path="/create-user-profile" element={ <ProtectedRoute> <CreateUserProfile /></ProtectedRoute>} /> */}
+        <Route path="/create-user-profile" element={  <CreateUserProfile />} />
       <Route path="/user-profile" element={<UserProfileView />} />
       <Route path="/edit-profile" element={<EditProfile />} />
     </Routes>
