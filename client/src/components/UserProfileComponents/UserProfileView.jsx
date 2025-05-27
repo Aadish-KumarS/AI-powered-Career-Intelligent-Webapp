@@ -36,14 +36,6 @@ export default function Profile() {
       icon: "trending-icon"
     },
     {
-      text: "Find nearest exam centers",
-      icon: "location-icon"
-    },
-    {
-      text: "Track exam notices & dates",
-      icon: "notification-icon"
-    },
-    {
       text: "Personalized career suggestions",
       icon: "user-icon"
     },
@@ -51,7 +43,24 @@ export default function Profile() {
       text: "Industry insights & trends",
       icon: "insights-icon"
     },
+    {
+      text: "AI exam & certification recommendation",
+      icon: "exam-icon"
+    },
+    {
+      text: "Real-time skill gap analysis",
+      icon: "skill-icon"
+    },
+    {
+      text: "AI-personalized career path planning",
+      icon: "path-icon"
+    },
+    {
+      text: "Job market insights and forecasts",
+      icon: "market-icon"
+    }
   ];
+
 
   // Progress tracking data
   const progressData = [
@@ -191,6 +200,8 @@ export default function Profile() {
             <div className="content-card">
               <h2 className="section-title">Learning Progress</h2>
               <div className="progress-list">
+                <p style={{color: "orange"}}>(Upcoming Feature ⭐)</p>
+                <p style={{color: "red",fontSize: '10px',marginTop: '-.75rem'}}>Under Development</p>
                 {progressData.map((item, index) => (
                   <div key={index} className="progress-item">
                     <div className="progress-header">
@@ -213,6 +224,8 @@ export default function Profile() {
             <div className="content-card">
               <h2 className="section-title">Upcoming Events</h2>
               <div className="events-list">
+                <p style={{color: "orange"}}>(Upcoming Feature ⭐)</p>
+                <p style={{color: "red",fontSize: '10px',marginTop: '-.75rem'}}>Under Development</p>
                 {upcomingEvents.map((event, index) => (
                   <div key={index} className={`event-item event-${event.type}`}>
                     <div className="event-content">

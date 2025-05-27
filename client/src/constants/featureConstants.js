@@ -20,45 +20,73 @@ const featuresData = [
   },
   {
     id: 2,
-    title: "Exam & Certification Tracker",
-    shortDesc: "Stay updated with upcoming exams, certifications, and deadlines.",
+    title: "Exam & Certification Recommender",
+    shortDesc: "Get AI-powered suggestions for exams and certifications.",
     details: [
-      "Never miss an important exam date again! Our platform keeps you informed about all necessary certifications.",
-      "📌 Get real-time updates on exam schedules and deadlines.",
-      "📌 Track multiple exams and certifications in one place.",
-      "📌 Receive reminders and notifications before important dates.",
-      "📌 Explore eligibility criteria, registration details, and exam guidelines."
+      "Receive intelligent recommendations for exams and certifications based on your current profile and future goals.",
+      "📌 AI-suggested certifications aligned with your skillset and aspirations.",
+      "📌 Explore eligibility, registration, preparation resources, and deadlines.",
+      "📌 Save and manage exams to track your progress effortlessly.",
+      "📌 Stay ahead with timely updates and alerts."
     ],
     img: exam,
-    link: '/generate-roadmap'
+    link: 'services/exam-certification'
   },
   {
     id: 3,
-    title: "Locate Your Center",
-    shortDesc: "Locate nearby exam centers with Google Maps integration.",
+    title: "AI Skill Gap Analysis",
+    shortDesc: "Analyze your skills and identify what’s missing to reach your goals.",
     details: [
-      "Easily find the closest exam centers based on your location using Google Maps API.",
-      "📍 View a list of nearby exam centers with ratings and reviews.",
-      "📍 Get precise navigation directions via Google Maps.",
-      "📍 Check center capacity, availability, and registration details.",
-      "📍 Filter centers based on distance, facilities, and accessibility."
+      "Bridge the gap between your current abilities and your dream career.",
+      "📊 AI compares your profile with desired roles and industry standards.",
+      "📊 Highlights missing skills and knowledge areas.",
+      "📊 Suggests learning paths to close those gaps efficiently.",
+      "📊 Real-time updates based on your ongoing progress."
     ],
-    img: location,
-    link: '/generate-roadmap'
+    img: ai,
+    link: 'services/career-guid/career-analysis'
   },
   {
     id: 4,
-    title: "Scholarship Finder",
-    shortDesc: "Discover financial aid and scholarships tailored for you.",
+    title: "AI Career Recommendation",
+    shortDesc: "Discover careers uniquely tailored to your personality and goals.",
     details: [
-      "Our system fetches relevant scholarships and financial aid opportunities based on your qualifications.",
-      "🎓 Access a curated list of scholarships suited to your profile.",
-      "🎓 Filter scholarships by eligibility criteria, country, and field of study.",
-      "🎓 Get notified about new scholarships and approaching deadlines.",
-      "🎓 Step-by-step guidance on the application process."
+      "Let our AI analyze your background, interests, and aspirations to recommend ideal career paths.",
+      "🎯 Get matched with careers that suit your profile.",
+      "🎯 Understand why each path fits based on your education, experience, and preferences.",
+      "🎯 Explore emerging roles and long-term potential.",
+      "🎯 Jumpstart your journey with next-step suggestions."
     ],
     img: ai,
-    link: '/generate-roadmap'
+    link: 'services/career-guid/onboarding'
+  },
+  {
+    id: 5,
+    title: "AI Job Insight",
+    shortDesc: "Stay informed about market trends and job opportunities.",
+    details: [
+      "Gain a strategic advantage with real-time job market intelligence.",
+      "💼 Discover trending job roles in your target industries.",
+      "💼 Understand hiring trends, salary benchmarks, and skill demand.",
+      "💼 Regional insights to help you target the right opportunities.",
+      "💼 Tailored advice for navigating today’s job landscape."
+    ],
+    img: location,
+    link: 'services/career-guid/career-analysis'
+  },
+  {
+    id: 6,
+    title: "AI Personalized Career Path",
+    shortDesc: "Follow a step-by-step career path curated just for you.",
+    details: [
+      "Turn your career goals into a dynamic, personalized journey.",
+      "🧭 Get a structured plan with short-term and long-term milestones.",
+      "🧭 Visualize your path from beginner to expert.",
+      "🧭 Adapt the roadmap as your goals and interests evolve.",
+      "🧭 Stay motivated with progress tracking and adaptive feedback."
+    ],
+    img: ai,
+    link: 'services/career-guid/career-analysis'
   }
 ];
 
