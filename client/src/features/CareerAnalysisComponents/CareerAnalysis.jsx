@@ -124,24 +124,7 @@ const CareerAnalysis = () => {
       // Create an array of promises for all API calls
       const apiCalls = [
         // API call for Job Market Insights
-        // fetch('http://localhost:8001/generator/career/job-market-insights', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //     'X-Request-ID': `req-${Date.now()}`
-        //   },
-        //   body: JSON.stringify(requestData)
-        // }).then(response => {
-        //   if (!response.ok) {
-        //     throw new Error(`Job market insights failed: ${response.status}`);
-        //   }
-        //   return response.json();
-        // })
-      ];
-  
-      apiCalls.push(
-        // API call 1: Skill Gap Analysis
-        fetch('http://localhost:8001/generator/career/analyze-skill-gap', {
+        fetch('http://localhost:8001/generator/career/job-market-insights', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -150,15 +133,15 @@ const CareerAnalysis = () => {
           body: JSON.stringify(requestData)
         }).then(response => {
           if (!response.ok) {
-            throw new Error(`Skill gap analysis failed: ${response.status}`);
+            throw new Error(`Job market insights failed: ${response.status}`);
           }
           return response.json();
         })
-      );
-      
+      ];
+  
       // apiCalls.push(
-      //   // API call 2: Career Path Suggestions
-      //   fetch('http://localhost:8001/generator/career/suggest-career-path', {
+      //   // API call 1: Skill Gap Analysis
+      //   fetch('http://localhost:8001/generator/career/analyze-skill-gap', {
       //     method: 'POST',
       //     headers: {
       //       'Content-Type': 'application/json',
@@ -167,28 +150,45 @@ const CareerAnalysis = () => {
       //     body: JSON.stringify(requestData)
       //   }).then(response => {
       //     if (!response.ok) {
-      //       throw new Error(`Career path suggestion failed: ${response.status}`);
+      //       throw new Error(`Skill gap analysis failed: ${response.status}`);
       //     }
       //     return response.json();
       //   })
       // );
+      
+      apiCalls.push(
+        // API call 2: Career Path Suggestions
+        fetch('http://localhost:8001/generator/career/suggest-career-path', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Request-ID': `req-${Date.now()}`
+          },
+          body: JSON.stringify(requestData)
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error(`Career path suggestion failed: ${response.status}`);
+          }
+          return response.json();
+        })
+      );
   
       // Wait for all API calls to complete
       const results = await Promise.all(apiCalls);
-      // const jobMarketData = results[0];
-      const skillGapData = results[0]; 
-      // const careerPathData = results[2]; // Uncomment when using all three APIs
+      const jobMarketData = results[0];
+      // const skillGapData = results[0]; 
+      const careerPathData = results[1];
+      //  // Uncomment when using all three APIs
   
       // Fix: Check if the result is already an object, or if it's a string that needs parsing
-      console.log(results);
       
-      // setJobMarketResults(typeof jobMarketData.result === 'string' ? JSON.parse(jobMarketData.result) : jobMarketData);
-      setSkillGapResults(typeof skillGapData.result === 'string' ? JSON.parse(skillGapData.result) : skillGapData);
-      // setCareerPathResults(typeof careerPathData.result === 'string' ? JSON.parse(careerPathData.result) : careerPathData);
+      setJobMarketResults(typeof jobMarketData.result === 'string' ? JSON.parse(jobMarketData.result) : jobMarketData);
+      // setSkillGapResults(typeof skillGapData.result === 'string' ? JSON.parse(skillGapData.result) : skillGapData);
+      setCareerPathResults(typeof careerPathData.result === 'string' ? JSON.parse(careerPathData.result) : careerPathData);
       
-      // setSkillGapResults(skillGapResultMoackData);
-      setJobMarketResults(jobMarketResultMoackData);
-      setCareerPathResults(careerPathResultMoackData);
+      setSkillGapResults(skillGapResultMoackData);
+      // setJobMarketResults(jobMarketResultMoackData);
+      // setCareerPathResults(careerPathResultMoackData);
 
       // setAnalysisComplete(true);
       
