@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "../../styles/UserProfile Styles/UserProfile.css"
+import '../../styles/Global Styles/profile-theme.css';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../LandingPageComponents/Navbar'
 import { getUserDetail } from "../../utils/helper";
@@ -116,7 +117,7 @@ export default function Profile() {
 
   return (
     <div className="view-profile-container">
-      <Navbar />
+      <Navbar variant="app" />
       <div className="profile-header">
         <div className="profile-setting">
           <div className="profile-image-container">

@@ -8,7 +8,8 @@ import {
   FiLayers, FiBarChart2, FiPieChart, FiActivity, FiEdit
 } from 'react-icons/fi';
 import { gsap } from 'gsap';
-import html2pdf from 'html2pdf.js';
+import '../../styles/Global Styles/service-theme.css';
+import '../../styles/Global Styles/guidance-workspace.css';
 import '../../styles/CareerGuid Styles/CareerRecommendation.css';
 import Navbar from '../../components/LandingPageComponents/Navbar'
 import { careerRecommendationMockData } from '../../constants/mockData';
@@ -623,6 +624,7 @@ The transition requires moving from descriptive reporting to predictive thinking
   // eslint-disable-next-line no-unused-vars
   const downloadRecommendationAsPDF = async () => {
     try {
+      const { default: html2pdf } = await import('html2pdf.js');
       // Create temporary div for PDF
       const pdfContent = document.createElement('div');
       pdfContent.className = 'pdf-container';
@@ -851,31 +853,18 @@ The transition requires moving from descriptive reporting to predictive thinking
         // Clean up
         document.body.removeChild(pdfContent);
         
-        // Show success message if toast is available
-        if (typeof toast !== 'undefined') {
-          toast.success('PDF downloaded successfully!');
-        } else {
-          console.log('PDF downloaded successfully!');
-        }
+        toast.success('PDF downloaded successfully!');
 
       } catch (pdfError) {
         console.error('PDF generation error:', pdfError);
         document.body.removeChild(pdfContent);
         
-        if (typeof toast !== 'undefined') {
-          toast.error('Failed to generate PDF. Please try again.');
-        } else {
-          alert('Failed to generate PDF. Please try again.');
-        }
+        toast.error('We could not prepare the PDF. Please try again.');
       }
 
     } catch (error) {
       console.error('PDF download error:', error);
-      if (typeof toast !== 'undefined') {
-        toast.error('An error occurred while preparing the PDF.');
-      } else {
-        alert('An error occurred while preparing the PDF.');
-      }
+      toast.error('An error occurred while preparing the PDF.');
     }
   };
 
@@ -1036,7 +1025,7 @@ const renderSkillBar = (skill, index) => {
           data-percent={proficiencyPercent}
           style={{
             width: animateSkills ? `${proficiencyPercent}%` : '0%',
-            backgroundColor: getColorForProficiency(skill.proficiency)
+            '--skill-color': getColorForProficiency(skill.proficiency)
           }}
         />
       </div>
@@ -1050,11 +1039,11 @@ const renderSkillBar = (skill, index) => {
 // Get color based on proficiency level
 const getColorForProficiency = (level) => {
   const colors = [
-    '#ff4d4d', // Level 1 (Red)
-    '#ffa64d', // Level 2 (Orange)
-    '#ffdb4d', // Level 3 (Yellow)
-    '#4dff88', // Level 4 (Light Green)
-    '#4d99ff'  // Level 5 (Blue)
+    '#b35a3c', // Level 1
+    '#c87950', // Level 2
+    '#c38b35', // Level 3
+    '#547764', // Level 4
+    '#1d302b'  // Level 5
   ];
   
   return colors[level - 1] || colors[2]; // Default to middle level if invalid
@@ -1142,14 +1131,26 @@ const renderEntryStrategies = (entryText) => {
   return (
     <div className="entry-strategies">
       {strategies.map((strategy, index) => {
-        // Parse strategy text to extract role title and description
-        const roleTitleMatch = strategy.match(/^.*?:(.*?)–(.*)/);
+        // LLM output may include Markdown emphasis around labels such as
+        // "**Entry Role 1**". Strip presentation markup before rendering.
+        const cleanedStrategy = strategy
+          .replace(/\*\*/g, '')
+          .replace(/`/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+        const roleTitleMatch = cleanedStrategy.match(/^(?:Entry Role \d+|Optional [^:]+):\s*(.+?)(?:\s+[—–-]\s+(.+))?$/i);
         let roleTitle = '';
-        let roleDescription = strategy;
+        let roleDescription = cleanedStrategy;
         
         if (roleTitleMatch) {
           roleTitle = roleTitleMatch[1].trim();
-          roleDescription = roleTitleMatch[2].trim();
+          roleDescription = roleTitleMatch[2]?.trim() || '';
+        } else {
+          const parts = cleanedStrategy.split(/\s+[—–-]\s+/, 2);
+          if (parts.length === 2) {
+            roleTitle = parts[0].trim();
+            roleDescription = parts[1].trim();
+          }
         }
         
         return (
@@ -1157,7 +1158,7 @@ const renderEntryStrategies = (entryText) => {
             <div className="strategy-number">{index + 1}</div>
             <div className="strategy-content">
               {roleTitle && <h4 className="strategy-title">{roleTitle}</h4>}
-              <p className="strategy-description">{roleDescription}</p>
+              {roleDescription && <p className="strategy-description">{roleDescription}</p>}
             </div>
           </div>
         );
@@ -1556,52 +1557,73 @@ const renderFormattedContent = (content) => {
   );
 };
 
+const profileHighlights = [
+  {
+    label: 'Working style',
+    value: userData?.preferences?.personalityType || userData?.preferences?.workStyle?.[0] || 'Profile-led'
+  },
+  {
+    label: 'Background',
+    value: userData?.education?.fieldOfStudy || userData?.education?.highestLevel || 'Not specified'
+  },
+  {
+    label: 'Experience',
+    value: userData?.experience?.yearsOfExperience
+      ? `${userData.experience.yearsOfExperience} year${String(userData.experience.yearsOfExperience) === '1' ? '' : 's'}`
+      : userData?.experience?.currentRole || 'Early career'
+  }
+];
+
 return (
   <div className="career-recommendation-container">
-    <Navbar />
+    <Navbar variant="app" />
+    <main className="guidance-workspace">
     {loading && (
-      <div className="loading-container">
+      <section className="guidance-state loading-container" aria-live="polite">
         <div className="loading-animation">
           <div className="loading-circle"></div>
           <div className="loading-circle"></div>
           <div className="loading-circle"></div>
         </div>
-        <p className="loading-text">Analyzing your profile and generating personalized career recommendations...</p>
-        <p className="loading-subtext">This may take a moment while we match your skills and interests to optimal career paths.</p>
-      </div>
+        <p className="workspace-eyebrow">AI career guidance</p>
+        <h1 className="loading-text">Finding directions with real fit.</h1>
+        <p className="loading-subtext">We are weighing your profile, ambitions, and practical entry points to surface three worthwhile paths.</p>
+      </section>
     )}
     
     {error && (
-      <div className="error-message">
+      <section className="guidance-state guidance-state--error error-message" role="alert">
+        <p className="workspace-eyebrow">Something interrupted the search</p>
         <p>{error}</p>
         <button onClick={getCareerRecommendation} className="retry-button">
           <FiRefreshCw className="retry-icon" />
           Try Again
         </button>
-      </div>
+      </section>
     )}
 
     {!loading && !error && careerPaths.length > 0 && (
       <div className="recommendation-container" ref={cardRef}>
         <div className="recommendation-header">
           <div className="header-content">
-            <h2>Your AI-Generated Career Recommendation</h2>
+            <p className="workspace-eyebrow">AI career guidance</p>
+            <h1>Three directions with genuine momentum.</h1>
+            <p className="guidance-description">A grounded starting point for your next career decision—built around your profile, not a generic role list.</p>
             
             <div className="user-profile-summary">
-              <div className="profile-item">
-                <span className="profile-label">Personality:</span>
-                <span className="profile-value">INTJ</span>
-              </div>
-              <div className="profile-item">
-                <span className="profile-label">Education:</span>
-                <span className="profile-value">Bachelor's in CS</span>
-              </div>
-              <div className="profile-item">
-                <span className="profile-label">Experience:</span>
-                <span className="profile-value">1 year</span>
-              </div>
+              {profileHighlights.map((item) => (
+                <div className="profile-item" key={item.label}>
+                  <span className="profile-label">{item.label}</span>
+                  <span className="profile-value">{item.value}</span>
+                </div>
+              ))}
             </div>
           </div>
+
+          <aside className="guidance-result-count" aria-label={`${careerPaths.length} career recommendations`}>
+            <span>{String(careerPaths.length).padStart(2, '0')}</span>
+            <small>considered<br />directions</small>
+          </aside>
           
           <div className="action-buttons" ref={actionButtonsRef}>
             <button className="action-button save-button" onClick={saveRecommendation} title="Save Recommendation">
@@ -1635,6 +1657,14 @@ return (
         </div>
       </div>
     )}
+    {!loading && !error && careerPaths.length === 0 && (
+      <section className="guidance-state guidance-state--waiting">
+        <p className="workspace-eyebrow">Career guidance</p>
+        <h1>Your next direction starts with your profile.</h1>
+        <p>Complete your guidance profile, then come back here for three considered options.</p>
+      </section>
+    )}
+    </main>
   </div>
 );
 };

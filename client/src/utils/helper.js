@@ -1,6 +1,7 @@
 import axios from "axios";
 import gsap from "gsap";
 import { API_BASE_URL } from "../config/api";
+import { toast } from 'react-toastify';
 
 axios.defaults.withCredentials = true;
 
@@ -11,12 +12,12 @@ export const resendOTP = async () => {
     const response = await axios.post(`${API_BASE_URL}/otp/request-otp`);
 
     if (response.data.success) {
-      alert('OTP sent to your email.');
+      toast.success('A new verification code has been sent.');
     } else {
-      alert('Failed to send OTP. Please try again.');
+      toast.error('We could not send a code. Please try again.');
     }
   } catch (err) {
-    alert('Error sending OTP. Please try again later.');
+    toast.error('We could not send a code right now. Please try again later.');
     console.error(err);
   }
 };
@@ -77,7 +78,12 @@ export async function getUserDetail(token,navigate,BASE_URL,setUserData) {
       name: response.data.name || "",
       title: response.data.title || "",
       location: response.data.location || "",
-      education: response.data.education || "",
+      education: {
+        highestLevel: response.data.education?.highestLevel || "",
+        institution: response.data.education?.institution || "",
+        graduationYear: response.data.education?.graduationYear || "",
+        fieldOfStudy: response.data.education?.fieldOfStudy || ""
+      },
       email: response.data.email || "",
       profileImage: response.data.profilePicture || "",
       interests: response.data.interests || [],
@@ -234,23 +240,20 @@ export const updatePassword = async (e, passwordData, setError, setSuccessMessag
   }
 };
 
-export const deleteAccount = async (setError) => {
-  const confirmDelete = window.confirm(
-    'Are you sure you want to delete your account? This action cannot be undone.'
-  );
-  
-  if (confirmDelete) {
-    try {
-      const token = sessionStorage.getItem('authToken');
-      await axios.delete(`${API_BASE_URL}/api/users/delete-account`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      sessionStorage.clear();
-      window.location.href = '/login';
-    } catch {
-      setError('Failed to delete account');
-    }
+export const deleteAccount = async (setError, confirmed = false) => {
+  // The caller must collect an explicit confirmation before this irreversible request.
+  if (!confirmed) return false;
+
+  try {
+    const token = sessionStorage.getItem('authToken');
+    await axios.delete(`${API_BASE_URL}/api/users/delete-account`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    sessionStorage.clear();
+    return true;
+  } catch {
+    setError('Failed to delete account. Please try again.');
+    return false;
   }
 };
 
@@ -269,12 +272,12 @@ export const updateProfile = async (e, userData, setError, setSuccessMessage,set
     
     setSuccessMessage('Profile updated successfully');
     setError('');
+    navigate('/profile/user-profile');
   } catch (err) {
     setError('Failed to update profile',err);
     setSuccessMessage('');
   } finally{
     setLoading(false);
-    navigate('/profile/user-profile')
   }
 };
 
@@ -314,11 +317,16 @@ export const handleStepChange = (formRef, setStep, step, direction, setError = n
     }
     setError && setError("");
 
-    if (step === 1 && profileData && !profileData.education) {
+    if (step === 1 && profileData && !profileData.education?.fieldOfStudy?.trim()) {
       setError && setError("Education is required");
       return;
     }
     setError && setError("");
+
+    if (step === 2 && profileData && !profileData.location?.trim()) {
+      setError && setError("Please choose your location to continue");
+      return;
+    }
   }
 
   gsap.to(formRef.current, {
@@ -369,7 +377,7 @@ export const addInterest = (interest, userData, setUserData, setInputValue, setS
   if (!userData?.interests || !Array.isArray(userData.interests)) {
     setUserData(prev => ({
       ...prev,
-      interests:  interest
+      interests: [interest]
     }));
   } else if (!userData.interests.includes(interest)) {
     setUserData(prev => ({

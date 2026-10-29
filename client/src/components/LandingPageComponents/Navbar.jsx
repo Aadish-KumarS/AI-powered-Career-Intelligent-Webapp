@@ -8,6 +8,7 @@ import SettingsDropdown from './SettingsDropdown';
 
 export default function Navbar({ variant = 'default' }) {
   const [showServicesDropdown, setShowServicesDropdown] = useState(false);
+  const isSignedIn = Boolean(sessionStorage.getItem('authToken'));
 
   useEffect(() => {
     gsap.fromTo(
@@ -16,6 +17,15 @@ export default function Navbar({ variant = 'default' }) {
       { opacity: 1, y: 0, duration: 1, stagger: 0.2 }
     );
   }, []);
+
+  useEffect(() => {
+    if (!showServicesDropdown) return undefined;
+
+    const closeOnScroll = () => setShowServicesDropdown(false);
+    window.addEventListener('scroll', closeOnScroll, { passive: true });
+
+    return () => window.removeEventListener('scroll', closeOnScroll);
+  }, [showServicesDropdown]);
 
   const toggleServicesDropdown = () => {
     setShowServicesDropdown(!showServicesDropdown);
@@ -43,20 +53,20 @@ export default function Navbar({ variant = 'default' }) {
             <div className="dropdown-content" role="menu">
               <div className="dropdown-category">
                 <h3>Macro Services</h3>
-                <Link to="/services/career-guid/career-recommendation">AI Career Guidance &amp; Recommendation</Link>
-                <Link to="/services/career-guid/career-analysis">AI Career Analysis</Link>
+                <Link to="/services/career-guid/onboarding" onClick={() => setShowServicesDropdown(false)}>AI Career Guidance &amp; Recommendation</Link>
+                <Link to="/services/career-guid/career-analysis" onClick={() => setShowServicesDropdown(false)}>AI Career Analysis</Link>
                 <h3>Micro Services</h3>
-                <Link to="/services/generate-roadmap">AI Roadmap Generator </Link>
-                <Link to="/services/exam-certification">Exam Certification AI Recommondation</Link>
-                <Link to="/services/learning-path">Learning Progession Tracker</Link>
+                <Link to="/services/generate-roadmap" onClick={() => setShowServicesDropdown(false)}>AI Roadmap Generator </Link>
+                <Link to="/services/exam-certification" onClick={() => setShowServicesDropdown(false)}>Exam Certification AI Recommondation</Link>
+                <Link to="/services/learning-path" onClick={() => setShowServicesDropdown(false)}>Learning Progession Tracker</Link>
               </div>
             </div>
           )}
         </li>
       </ul>
       <div className='center'>
-        <Link to="/signup">
-          <div className='user-profile center' aria-label="Create an account">
+        <Link to={isSignedIn ? "/profile/user-profile" : "/signup"}>
+          <div className='user-profile center' aria-label={isSignedIn ? "Open your profile" : "Create an account"}>
             <FaRegUser />
           </div>
         </Link>

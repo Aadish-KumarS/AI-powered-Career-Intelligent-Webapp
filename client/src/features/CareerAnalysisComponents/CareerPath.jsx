@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import React, { useState } from 'react';
 import '../../styles/Career analysis styles/CareerPath.css';
+import AppState from '../../components/AppState';
 
 const asArray = (value) => Array.isArray(value) ? value : value ? [value] : [];
 const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
@@ -9,80 +9,11 @@ const CareerPath = ({ careerPathResults }) => {
   const [activeSection, setActiveSection] = useState('short');
   const [activeSkillTab, setActiveSkillTab] = useState('technical');
   const [expandedItem, setExpandedItem] = useState(null);
-  const sectionRefs = {
-    short: useRef(null),
-    mid: useRef(null),
-    long: useRef(null)
-  };
-  
-  useEffect(() => {
-    if (!careerPathResults) return;
-    
-    // Initial animations
-    gsap.fromTo(
-      '.career-path-container',
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }
-    );
-    
-    // Animate in timeline dots
-    gsap.fromTo(
-      '.timeline-dot',
-      { scale: 0, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, stagger: 0.2, ease: 'back.out(1.7)' }
-    );
-  }, [careerPathResults]);
-  
-  useEffect(() => {
-    // Animate section change
-    Object.keys(sectionRefs).forEach(key => {
-      const element = sectionRefs[key].current;
-      if (!element) return;
-      
-      if (key === activeSection) {
-        gsap.fromTo(
-          element,
-          { opacity: 0, x: 20 },
-          { opacity: 1, x: 0, duration: 0.7, ease: 'power2.out' }
-        );
-      } else {
-        gsap.to(element, { opacity: 0, x: -20, duration: 0.3 });
-      }
-    });
-  }, [activeSection]);
-  
   const handleItemClick = (itemKey) => {
-    if (expandedItem === itemKey) {
-      // Close the expanded item
-      setExpandedItem(null);
-      gsap.to(`.item-content-${itemKey}`, { 
-        height: 0, 
-        opacity: 0, 
-        duration: 0.5, 
-        ease: 'power2.out' 
-      });
-    } else {
-      // Close previous expanded item if exists
-      if (expandedItem) {
-        gsap.to(`.item-content-${expandedItem}`, { 
-          height: 0, 
-          opacity: 0, 
-          duration: 0.3, 
-          ease: 'power2.out' 
-        });
-      }
-      
-      // Expand new item
-      setExpandedItem(itemKey);
-      gsap.fromTo(
-        `.item-content-${itemKey}`,
-        { height: 0, opacity: 0 },
-        { height: 'auto', opacity: 1, duration: 0.5, ease: 'power2.out' }
-      );
-    }
+    setExpandedItem((currentItem) => currentItem === itemKey ? null : itemKey);
   };
   
-  if (!careerPathResults) return <div className="career-path-loading">Loading career path data...</div>;
+  if (!careerPathResults) return <AppState title="Mapping your possible path" description="We’re shaping the next stages of your career." />;
 
   const { result = {} } = careerPathResults;
   const {
@@ -96,9 +27,7 @@ const CareerPath = ({ careerPathResults }) => {
   // Only the suggest-career-path endpoint returns the fields required by CareerPath.
   if (!careerPathway || !skillDevelopmentRoadmap) {
     return (
-      <div className="career-path-loading">
-        Career-path data is unavailable. Generate a career-path recommendation to view this tab.
-      </div>
+      <AppState type="error" title="Career path unavailable" description="Generate a career-path recommendation to view this tab." />
     );
   }
 
@@ -118,12 +47,17 @@ const CareerPath = ({ careerPathResults }) => {
     
     return (
       <div key={itemKey} className={`timeline-item ${isExpanded ? 'expanded' : ''}`}>
-        <div className="timeline-item-header" onClick={() => handleItemClick(itemKey)}>
+        <button
+          type="button"
+          className="timeline-item-header"
+          onClick={() => handleItemClick(itemKey)}
+          aria-expanded={isExpanded}
+        >
           <div className="timeline-dot"></div>
-          <h3>{item[timeframeKey]}</h3>
+          <span className="timeline-item-title">{item[timeframeKey]}</span>
           <div className="expand-icon">{isExpanded ? '−' : '+'}</div>
-        </div>
-        <div className={`timeline-item-content item-content-${itemKey}`}>
+        </button>
+        {isExpanded && <div className="timeline-item-content">
           {type === 'short' && (
             <>
               <div className="focus-areas">
@@ -226,43 +160,35 @@ const CareerPath = ({ careerPathResults }) => {
               )}
             </>
           )}
-        </div>
+        </div>}
       </div>
     );
   };
   
   const renderSkillsSection = () => {
-    const handleTabClick = (tab) => {
-      setActiveSkillTab(tab);
-      
-      // Animate tab change
-      gsap.fromTo(
-        '.skill-content-active',
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.5 }
-      );
-    };
-    
     return (
       <div className="skills-development-section">
         <h2>Skills Development</h2>
         
         <div className="skill-tabs">
           <button 
+            type="button"
             className={`skill-tab ${activeSkillTab === 'technical' ? 'active' : ''}`}
-            onClick={() => handleTabClick('technical')}
+            onClick={() => setActiveSkillTab('technical')}
           >
             Technical Skills
           </button>
           <button 
+            type="button"
             className={`skill-tab ${activeSkillTab === 'soft' ? 'active' : ''}`}
-            onClick={() => handleTabClick('soft')}
+            onClick={() => setActiveSkillTab('soft')}
           >
             Soft Skills
           </button>
           <button 
+            type="button"
             className={`skill-tab ${activeSkillTab === 'domain' ? 'active' : ''}`}
-            onClick={() => handleTabClick('domain')}
+            onClick={() => setActiveSkillTab('domain')}
           >
             Domain Knowledge
           </button>
@@ -413,20 +339,26 @@ const CareerPath = ({ careerPathResults }) => {
         <h1>Your Career Pathway</h1>
         <div className="timeline-navigation">
           <button 
+            type="button"
             className={`timeline-nav-btn ${activeSection === 'short' ? 'active' : ''}`}
             onClick={() => setActiveSection('short')}
+            aria-pressed={activeSection === 'short'}
           >
             Short-term
           </button>
           <button 
+            type="button"
             className={`timeline-nav-btn ${activeSection === 'mid' ? 'active' : ''}`}
             onClick={() => setActiveSection('mid')}
+            aria-pressed={activeSection === 'mid'}
           >
             Mid-term
           </button>
           <button 
+            type="button"
             className={`timeline-nav-btn ${activeSection === 'long' ? 'active' : ''}`}
             onClick={() => setActiveSection('long')}
+            aria-pressed={activeSection === 'long'}
           >
             Long-term
           </button>
@@ -434,17 +366,17 @@ const CareerPath = ({ careerPathResults }) => {
       </div>
       
       <div className="timeline-container">
-        <div ref={sectionRefs.short} className={`timeline-section ${activeSection === 'short' ? 'active' : ''}`}>
+        <div className={`timeline-section ${activeSection === 'short' ? 'active' : ''}`}>
           <h2>Short-term Goals (0-12 months)</h2>
           {asArray(career_pathway.short_term_goals).map((goal, index) => renderTimelineItem(asRecord(goal), index, 'short'))}
         </div>
         
-        <div ref={sectionRefs.mid} className={`timeline-section ${activeSection === 'mid' ? 'active' : ''}`}>
+        <div className={`timeline-section ${activeSection === 'mid' ? 'active' : ''}`}>
           <h2>Mid-term Goals (1-3 years)</h2>
           {asArray(career_pathway.mid_term_goals).map((goal, index) => renderTimelineItem(asRecord(goal), index, 'mid'))}
         </div>
         
-        <div ref={sectionRefs.long} className={`timeline-section ${activeSection === 'long' ? 'active' : ''}`}>
+        <div className={`timeline-section ${activeSection === 'long' ? 'active' : ''}`}>
           <h2>Long-term Goals (3+ years)</h2>
           {asArray(career_pathway.long_term_goals).map((goal, index) => renderTimelineItem(asRecord(goal), index, 'long'))}
         </div>

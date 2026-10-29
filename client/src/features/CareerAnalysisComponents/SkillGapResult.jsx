@@ -1,23 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
+import React, { useEffect, useState } from 'react';
 import '../../styles/Career analysis styles/SkillGapResult.css';
+import AppState from '../../components/AppState';
 
 const asArray = (value) => Array.isArray(value) ? value : [];
 const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 
 const SkillGapResult = ({ analysisData }) => {
-  // Refs for GSAP animations
-  const componentRef = useRef(null);
-  const strengthsRef = useRef(null);
-  const skillLevelsRef = useRef(null);
-  const transferableSkillsRef = useRef(null);
-  const skillGapsRef = useRef(null);
-  const learningPathRef = useRef(null);
-  const insightsRef = useRef(null);
-  const careerRef = useRef(null);
-  const networkingRef = useRef(null);
-  const portfolioRef = useRef(null);
-
   // State for expandable sections
   const [expandedSections, setExpandedSections] = useState({
     strengths: false,
@@ -36,63 +24,30 @@ const SkillGapResult = ({ analysisData }) => {
   useEffect(() => {
     if (!analysisData) return;
     
-    setIsLoading(false);
-    
-    // Initialize expanded sections for dynamic roles and learning paths
-    const updatedExpandedSections = { ...expandedSections };
-    console.log(analysisData);
-    
-    // Add skill gaps sections for each desired role
     const result = asRecord(analysisData?.result);
     const assessment = asRecord(result.skill_assessment);
-    Object.keys(asRecord(assessment.skill_gaps)).forEach(roleKey => {
-      updatedExpandedSections.skillGaps[roleKey] = false;
+    const skillGaps = Object.keys(asRecord(assessment.skill_gaps)).reduce((sections, roleKey) => {
+      sections[roleKey] = false;
+      return sections;
+    }, {});
+    const learningPath = Object.keys(asRecord(result.learning_path)).reduce((sections, pathKey) => {
+      sections[pathKey] = false;
+      return sections;
+    }, {});
+
+    setExpandedSections({
+      strengths: false,
+      skillLevels: false,
+      transferableSkills: false,
+      skillGaps,
+      learningPath,
+      insights: false,
+      career: false,
+      networking: false,
+      portfolio: false
     });
-    
-    // Add learning path sections
-    Object.keys(asRecord(result.learning_path)).forEach(path => {
-      updatedExpandedSections.learningPath[path] = false;
-    });
-    
-    setExpandedSections(updatedExpandedSections);
+    setIsLoading(false);
   }, [analysisData]);
-
-  useEffect(() => {
-    if (isLoading || !analysisData) return;
-
-    // Main animation for component entrance
-    gsap.fromTo(
-      componentRef.current,
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
-    );
-
-    // Staggered animations for sections
-    const sections = [
-      strengthsRef.current,
-      skillLevelsRef.current,
-      transferableSkillsRef.current,
-      skillGapsRef.current,
-      learningPathRef.current,
-      insightsRef.current,
-      careerRef.current,
-      networkingRef.current,
-      portfolioRef.current
-    ];
-
-    gsap.fromTo(
-      sections,
-      { opacity: 0, x: -30 },
-      { 
-        opacity: 1, 
-        x: 0, 
-        duration: 0.5, 
-        stagger: 0.1, 
-        ease: "power2.out",
-        delay: 0.3
-      }
-    );
-  }, [isLoading, analysisData]);
 
   const toggleSection = (section, subsection = null) => {
     if (subsection) {
@@ -112,11 +67,11 @@ const SkillGapResult = ({ analysisData }) => {
   };
 
   if (isLoading) {
-    return <div className="skill-gap-loading">Loading your skill assessment results...</div>;
+    return <AppState title="Reading your skill assessment" description="We’re organizing strengths, gaps, and next steps." />;
   }
 
   if (!analysisData) {
-    return <div className="skill-gap-loading">Unable to display skill assessment. Please try again.</div>;
+    return <AppState type="error" title="Skill assessment unavailable" description="Please run the analysis again to see this view." />;
   }
 
   const result = asRecord(analysisData.result);
@@ -145,11 +100,11 @@ const SkillGapResult = ({ analysisData }) => {
   const portfolio_recommendations = asArray(result.portfolio_recommendations);
 
   return (
-    <div className="skill-gap-container" ref={componentRef}>
+    <div className="skill-gap-container">
       <h1 className="skill-gap-title">Your Skill Assessment Results</h1>
       
       {/* Current Strengths Section */}
-      <div className="skill-gap-section" ref={strengthsRef}>
+      <div className="skill-gap-section">
         <div 
           className="section-header" 
           onClick={() => toggleSection('strengths')}
@@ -172,7 +127,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Current Skill Levels Section */}
-      <div className="skill-gap-section" ref={skillLevelsRef}>
+      <div className="skill-gap-section">
         <div 
           className="section-header" 
           onClick={() => toggleSection('skillLevels')}
@@ -207,7 +162,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Transferable Skills Section */}
-      <div className="skill-gap-section" ref={transferableSkillsRef}>
+      <div className="skill-gap-section">
         <div 
           className="section-header" 
           onClick={() => toggleSection('transferableSkills')}
@@ -228,7 +183,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Skill Gaps Section */}
-      <div className="skill-gap-section skill-gaps-container" ref={skillGapsRef}>
+      <div className="skill-gap-section skill-gaps-container">
         <div className="section-header">
           <h2>Skill Gaps</h2>
         </div>
@@ -299,7 +254,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Learning Path Section */}
-      <div className="skill-gap-section" ref={learningPathRef}>
+      <div className="skill-gap-section">
         <div className="section-header">
           <h2>Learning Path</h2>
         </div>
@@ -372,7 +327,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Industry Insights Section */}
-      <div className="skill-gap-section" ref={insightsRef}>
+      <div className="skill-gap-section">
         <div 
           className="section-header" 
           onClick={() => toggleSection('insights')}
@@ -416,7 +371,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Career Trajectory Section */}
-      <div className="skill-gap-section" ref={careerRef}>
+      <div className="skill-gap-section">
         <div 
           className="section-header" 
           onClick={() => toggleSection('career')}
@@ -465,7 +420,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Networking Recommendations Section */}
-      <div className="skill-gap-section" ref={networkingRef}>
+      <div className="skill-gap-section">
         <div 
           className="section-header" 
           onClick={() => toggleSection('networking')}
@@ -486,7 +441,7 @@ const SkillGapResult = ({ analysisData }) => {
       </div>
 
       {/* Portfolio Recommendations Section */}
-      <div className="skill-gap-section" ref={portfolioRef}>
+      <div className="skill-gap-section">
         <div 
           className="section-header" 
           onClick={() => toggleSection('portfolio')}

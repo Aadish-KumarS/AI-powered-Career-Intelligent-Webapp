@@ -7,7 +7,7 @@ import { resendOTP } from '../../utils/helper';
 export default function EmailVerification() {
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -17,7 +17,7 @@ export default function EmailVerification() {
   };
 
   const handleSubmit = async (e) => {
-    handleSubmitEmailVerification(e,verificationCode,setError,navigate,location)
+    handleSubmitEmailVerification(e, verificationCode, setError, setLoading, navigate, location)
   };
   
   return (

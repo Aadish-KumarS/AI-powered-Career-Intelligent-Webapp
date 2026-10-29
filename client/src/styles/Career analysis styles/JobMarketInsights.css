@@ -1,874 +1,380 @@
-
-/* Main Container */
 .job-market-insights {
-  font-family: 'Roboto', sans-serif;
-  color: #333;
-  background-color: #fdfdfd;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  display: grid;
+  gap: 1rem;
   width: 100%;
-  position: relative;
-  transition: all 0.5s ease;
-  border-radius: 1rem;
-
+  min-width: 0;
+  color: var(--rt-ink);
+  font-family: 'Manrope', sans-serif;
 }
 
-/* Header */
-.insights-header {
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-  padding: 28px 32px;
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-
-.insights-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -10%;
-  width: 120%;
-  height: 200%;
-  background: radial-gradient(circle, #ffffff62 5%, transparent 15%);
-  background-size: 30px 30px;
-  opacity: 0.1;
-  transform: rotate(12deg);
-}
-
-.insights-header h1 {
-  margin: 0;
-  font-size: 2.3rem;
-  font-weight: 500;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 2;
-}
-
-.insight-date {
-  font-size: 1rem;
-  opacity: 0.8;
-  margin-top: 8px;
-  position: relative;
-  z-index: 2;
-}
-
-/* Navigation */
-.insights-nav {
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #eaeaea;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.insights-nav ul {
+.job-market-insights .insights-header {
   display: flex;
-  list-style: none;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid var(--rt-ink);
+  border-radius: 1rem;
+  background: var(--rt-ink);
+}
+
+.job-market-insights .insights-header h1 {
+  margin: 0;
+  color: var(--rt-paper);
+  font: 400 clamp(1.8rem, 3.2vw, 2.75rem)/.98 'DM Serif Display', Georgia, serif;
+  letter-spacing: -.055em;
+}
+
+.job-market-insights .insight-date {
+  color: var(--rt-gold);
+  font: 700 .61rem/1.35 'DM Mono', monospace;
+  letter-spacing: .08em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.job-market-insights .insights-nav {
+  overflow-x: auto;
+  padding: .4rem;
+  border: 1px solid var(--rt-line);
+  border-radius: .9rem;
+  background: var(--rt-paper);
+}
+
+.job-market-insights .insights-nav ul {
+  display: flex;
+  gap: .4rem;
+  width: max-content;
+  min-width: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #ff7e5f #f9f9f9;
+  list-style: none;
 }
 
-.insights-nav ul::-webkit-scrollbar {
-  height: 6px;
-}
-
-.insights-nav ul::-webkit-scrollbar-track {
-  background: #f9f9f9;
-}
-
-.insights-nav ul::-webkit-scrollbar-thumb {
-  background-color: #feb47b;
-  border-radius: 10px;
-}
-
-.insights-nav ul::-webkit-scrollbar-thumb:hover {
-  background-color: #ff7e5f;
-}
-
-.insights-nav li {
-  margin: 0;
-  position: relative;
-}
-
-.insights-nav li.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-}
-
-.insights-nav button {
-  padding: 16px 24px;
-  font-size: 1rem;
-  background: none;
-  border: none;
-  font-weight: 500;
-  color: #555;
+.job-market-insights .insights-nav button {
+  min-height: 2.3rem;
+  padding: .55rem .72rem;
+  border: 1px solid transparent;
+  border-radius: .6rem;
+  background: transparent;
+  color: var(--rt-muted);
   cursor: pointer;
-  transition: all 0.25s ease;
+  font: 800 .67rem/1 'Manrope', sans-serif;
+  transition: color .18s ease, background .18s ease, border-color .18s ease;
   white-space: nowrap;
 }
 
-.insights-nav li.active button {
-  color: #f1542d;
+.job-market-insights .insights-nav button:hover {
+  background: var(--rt-sage);
+  color: var(--rt-ink);
 }
 
-.insights-nav button:hover {
-  color: #ff6f61;
-  background-color: #ffffff62;
+.job-market-insights .insights-nav li.active button {
+  border-color: var(--rt-ink);
+  background: var(--rt-ink);
+  color: var(--rt-paper);
 }
 
-/* Content Section */
-.insights-content {
-  position: relative;
-  min-height: 500px;
+.job-market-insights .insights-content {
+  min-width: 0;
 }
 
-.insights-section {
-  padding: 35px;
-  opacity: 0;
+.job-market-insights .insights-section {
   display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  transform: scale(0.95);
 }
 
-.insights-section.active {
-  opacity: 1;
+.job-market-insights .insights-section.active {
   display: block;
-  position: relative;
-  transform: scale(1);
 }
 
-/* Common Section Layouts */
-.section-grid {
+.job-market-insights .section-grid,
+.job-market-insights .roles-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: .75rem;
 }
 
-.full-width {
+.job-market-insights .full-width {
   grid-column: 1 / -1;
 }
 
-.grid-item {
-  background-color: #fcfcfc;
-  border-radius: 16px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  padding: 24px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid #eaeaea;
+.job-market-insights .grid-item,
+.job-market-insights .role-card {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--rt-line);
+  border-radius: .9rem;
+  background: var(--rt-paper);
+  box-shadow: 0 7px 19px rgba(48, 60, 47, .05);
 }
 
-.grid-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09);
+.job-market-insights .grid-item {
+  border-top: 3px solid var(--rt-sage-deep);
 }
 
-.grid-item h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  color: #444;
-  font-size: 1.4rem;
-  position: relative;
-  padding-bottom: 8px;
+.job-market-insights .role-card {
+  border-top: 3px solid var(--rt-clay);
 }
 
-.grid-item h2::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-  border-radius: 2px;
+.job-market-insights .grid-item h2,
+.job-market-insights .role-card h3 {
+  margin: 0 0 .85rem;
+  color: var(--rt-ink);
+  font: 400 1.35rem/1.05 'DM Serif Display', Georgia, serif;
+  letter-spacing: -.035em;
 }
 
-/* Skills Section Styles */
-.skills-list {
-  display: f,
-  lex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.job-market-insights  .skill-item, .emerging-skill-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 16px;
-  background-color: #f7f7f7;
-  border-radius: 10px;
-  transition: all 0.2s ease;
-  height: fit-content;
-}
-
-
-
-.skill-item:hover, .emerging-skill-item:hover {
-  background-color: #f0f0f0;
-  transform: translateX(5px);
-}
-
-.skill-name {
-  font-weight: 500;
-  color: #333;
-}
-
-.demand-bar-container, .growth-bar-container {
-  height: 12px;
-  width: 100%;
-  background-color: #e0e0e0;
-  border-radius: 6px;
-  overflow: hidden;
-  position: relative;
-}
-
-.demand-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-  border-radius: 6px;
-  transition: width 1s ease-in-out;
-}
-
-.growth-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #f1542d 0%, #ff7e5f 100%);
-  border-radius: 6px;
-  transition: width 1s ease-in-out;
-}
-
-.demand-rating, .growth-percentage {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #333;
-}
-
-.skills-balance {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #555;
-}
-
-/* Roles Section Styles */
-.roles-container {
+.job-market-insights .skills-list,
+.job-market-insights .salary-levels,
+.job-market-insights .channel-list,
+.job-market-insights .benefits-list,
+.job-market-insights .leverage-list,
+.job-market-insights .hybrid-roles-list,
+.job-market-insights .reskilling-list,
+.job-market-insights .assessment-list,
+.job-market-insights .criteria-list,
+.job-market-insights .sectors-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 24px;
-  padding: 10px;
+  gap: .55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.role-card {
-  background-color: #fcfcfc;
-  border-radius: 16px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  padding: 24px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid #eaeaea;
+.job-market-insights .skill-item,
+.job-market-insights .emerging-skill-item,
+.job-market-insights .salary-level,
+.job-market-insights .sector-item,
+.job-market-insights .benefit-item,
+.job-market-insights .leverage-item,
+.job-market-insights .hybrid-role-item,
+.job-market-insights .reskilling-item,
+.job-market-insights .channel-item,
+.job-market-insights .assessment-item,
+.job-market-insights .criterion-item,
+.job-market-insights .projection-box,
+.job-market-insights .risk-box,
+.job-market-insights .trends-chart,
+.job-market-insights .success-rate,
+.job-market-insights .stage-name {
+  min-width: 0;
+  padding: .7rem .75rem;
+  border: 1px solid var(--rt-line);
+  border-radius: .7rem;
+  background: #fffefa;
+  color: var(--rt-ink-soft);
+  font-size: .75rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.job-market-insights .skill-item,
+.job-market-insights .emerging-skill-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(7rem, .8fr);
+  align-items: center;
+  gap: .7rem;
+}
+
+.job-market-insights .skill-name,
+.job-market-insights .role-title {
+  color: var(--rt-ink);
+  font-weight: 800;
+}
+
+.job-market-insights .demand-bar-container,
+.job-market-insights .growth-bar-container,
+.job-market-insights .rate-display {
   position: relative;
+  height: .6rem;
   overflow: hidden;
+  border-radius: 999px;
+  background: #e3ebe0;
 }
 
-.role-card::before {
-  content: '';
+.job-market-insights .demand-bar,
+.job-market-insights .growth-bar,
+.job-market-insights .rate-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--rt-clay);
+}
+
+.job-market-insights .demand-rating,
+.job-market-insights .growth-percentage,
+.job-market-insights .rate-value {
+  color: var(--rt-clay);
+  font: 800 .62rem/1 'DM Mono', monospace;
+}
+
+.job-market-insights .demand-rating,
+.job-market-insights .growth-percentage {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
+  top: 50%;
+  right: .35rem;
+  transform: translateY(-50%);
 }
 
-.role-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.1);
+.job-market-insights .role-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem;
+  margin-bottom: .85rem;
 }
 
-.role-title {
-  margin-top: 10px;
-  margin-bottom: 20px;
-  color: #444;
-  font-size: 1.6rem;
+.job-market-insights .stat-item {
+  padding: .6rem;
+  border-radius: .65rem;
+  background: var(--rt-sage);
 }
 
-.role-stats {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+.job-market-insights .stat-label {
+  display: block;
+  color: var(--rt-muted);
+  font-size: .63rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.job-market-insights .stat-value,
+.job-market-insights .salary-amount {
+  display: block;
+  margin-top: .22rem;
+  color: var(--rt-clay);
+  font: 400 1.2rem/1 'DM Serif Display', Georgia, serif;
 }
 
-.stat-label {
-  font-size: 0.85rem;
-  color: #777;
+.job-market-insights .role-requirements h4,
+.job-market-insights .role-titles h4,
+.job-market-insights .distribution-chart h4,
+.job-market-insights .salary-level h4 {
+  margin: .8rem 0 .4rem;
+  color: var(--rt-ink);
+  font: 700 .62rem/1.2 'DM Mono', monospace;
+  letter-spacing: .07em;
+  text-transform: uppercase;
 }
 
-.stat-value {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #333;
+.job-market-insights .role-requirements ul {
+  display: grid;
+  gap: .35rem;
+  margin: 0;
+  padding-left: 1rem;
 }
 
-.role-requirements h4, .role-titles h4 {
-  margin-bottom: 12px;
-  color: #555;
-  font-size: 1.05rem;
+.job-market-insights .role-requirements li {
+  color: var(--rt-ink-soft);
+  font-size: .74rem;
+  line-height: 1.5;
 }
 
-.role-requirements ul {
-  padding-left: 18px;
-  margin-bottom: 20px;
-  color: #555;
-}
-
-.role-requirements li {
-  margin-bottom: 8px;
-}
-
-.title-tags {
+.job-market-insights .title-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: .35rem;
 }
 
-.title-tag {
-  padding: 6px 12px;
-  background-color: #f7f7f7;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  color: #555;
-  transition: all 0.2s ease;
+.job-market-insights .title-tag {
+  padding: .32rem .45rem;
+  border: 1px solid var(--rt-sage-deep);
+  border-radius: 999px;
+  background: var(--rt-sage);
+  color: var(--rt-ink);
+  font-size: .65rem;
+  font-weight: 800;
 }
 
-.title-tag:hover {
-  background-color: #e5e5e5;
-  transform: translateY(-2px);
-}
-
-.distribution-chart h4 {
-  margin-bottom: 12px;
-}
-
-.distribution-bar {
+.job-market-insights .distribution-bar {
   display: flex;
-  height: 24px;
-  border-radius: 12px;
+  min-height: 1.5rem;
   overflow: hidden;
-  margin-bottom: 8px;
+  border-radius: .45rem;
+  background: #e3ebe0;
 }
 
-.distribution-segment {
-  height: 100%;
+.job-market-insights .distribution-segment {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  padding: .15rem;
+  background: var(--rt-sage-deep);
+}
+
+.job-market-insights .distribution-segment:nth-child(2) { background: var(--rt-gold); }
+.job-market-insights .distribution-segment:nth-child(3) { background: var(--rt-clay); }
+.job-market-insights .distribution-segment:nth-child(4) { background: #5e7368; }
+.job-market-insights .segment-label { overflow: hidden; color: var(--rt-paper); font-size: .56rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+
+.job-market-insights .sectors-list.growing .sector-item { border-left: 3px solid #557a63; }
+.job-market-insights .sectors-list.declining .sector-item { border-left: 3px solid var(--rt-clay); }
+
+.job-market-insights .map-container {
   position: relative;
-  transition: all 0.3s ease;
+  min-height: 12rem;
+  overflow: hidden;
+  border: 1px solid var(--rt-line);
+  border-radius: .75rem;
+  background: linear-gradient(135deg, #edf2ea, #fffefa);
 }
 
-.distribution-segment:hover {
-  transform: scaleY(1.1);
-}
-
-.distribution-segment.junior {
-  background-color: #64b5f6;
-}
-
-.distribution-segment.mid-level {
-  background-color: #feb47b;
-}
-
-.distribution-segment.senior {
-  background-color: #ff7e5f;
-}
-
-.distribution-segment.leadership {
-  background-color: #f1542d;
-}
-
-.segment-label {
+.job-market-insights .hotspot-marker {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 500;
+  width: .75rem;
+  height: .75rem;
+  border-radius: 50%;
+  background: var(--rt-clay);
+  box-shadow: 0 0 0 4px rgba(179, 90, 60, .16);
+}
+
+.job-market-insights .hotspot-label {
+  position: absolute;
+  left: .8rem;
+  top: -.4rem;
+  padding: .24rem .4rem;
+  border: 1px solid var(--rt-line);
+  border-radius: .35rem;
+  background: var(--rt-paper);
+  color: var(--rt-ink);
+  font-size: .62rem;
+  font-weight: 800;
   white-space: nowrap;
 }
 
-/* Industry Section Styles */
-.sectors-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.job-market-insights .stages-timeline {
+  display: grid;
+  gap: .55rem;
 }
 
-.sector-item {
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  color: #555;
-  font-weight: 500;
-  position: relative;
-  padding-left: 30px;
-  transition: all 0.2s ease;
-}
-
-.sector-item::before {
-  content: '';
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.sectors-list.growing .sector-item::before {
-  background-color: #8bc34a;
-}
-
-.sectors-list.declining .sector-item::before {
-  background-color: #e53935;
-}
-
-.sector-item:hover {
-  background-color: #f0f0f0;
-  transform: translateX(5px);
-}
-
-.map-container {
-  position: relative;
-  width: 100%;
-  height: 250px;
-  background-color: #f7f9fc;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #eaeaea;
-}
-
-.map-container::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e0e0e0' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
-  opacity: 0.5;
-}
-
-.hotspot-marker {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-  box-shadow: 0 0 0 4px rgba(255, 126, 95, 0.3);
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  z-index: 2;
-  transition: all 0.3s ease;
-}
-
-.hotspot-marker:hover {
-  transform: translate(-50%, -50%) scale(1.2);
-  box-shadow: 0 0 0 6px rgba(255, 126, 95, 0.4);
-}
-
-.hotspot-label {
-  position: absolute;
-  bottom: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  background-color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  transition: all 0.2s ease;
-}
-
-.hotspot-marker:hover .hotspot-label {
-  opacity: 1;
-  transform: translateX(-50%) translateY(-5px);
-}
-
-/* Compensation Section Styles */
-.salary-levels {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.salary-level {
-  background-color: #f7f7f7;
-  padding: 16px 20px;
-  border-radius: 12px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.salary-level::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 4px;
-  background: linear-gradient(to bottom, #ff7e5f, #feb47b);
-}
-
-.salary-level:hover {
-  transform: translateX(5px);
-  background-color: #f0f0f0;
-}
-
-.salary-level h4 {
-  margin: 0 0 8px 0;
-  color: #555;
-  font-size: 1rem;
-}
-
-.salary-amount {
-  font-size: 1.3rem;
-  font-weight: 500;
-  color: #333;
-}
-
-.trends-chart {
-  padding: 16px;
-  background-color: #f7f7f7;
-  border-radius: 12px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #555;
-  text-align: center;
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.benefits-list, .leverage-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.benefit-item, .leverage-item {
-  background-color: #f7f7f7;
-  margin-bottom: 10px;
-  padding: 14px 18px;
-  border-radius: 10px;
-  color: #555;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  position: relative;
-  padding-left: 36px;
-}
-
-.benefit-item::before, .leverage-item::before {
-  content: '✓';
-  position: absolute;
-  left: 15px;
-  color: #ff6f61;
-  font-weight: bold;
-}
-
-.benefit-item:hover, .leverage-item:hover {
-  background-color: #f0f0f0;
-  transform: translateX(5px);
-}
-
-/* Future Outlook Section Styles */
-.projection-box, .risk-box {
-  background-color: #f7f7f7;
-  border-radius: 12px;
-  padding: 20px;
-  font-size: 1.1rem;
-  color: #555;
-  line-height: 1.6;
-  position: relative;
-  overflow: hidden;
-  min-height: 100px;
-  display: flex;
+.job-market-insights .stage-item {
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr);
+  gap: .55rem;
   align-items: center;
 }
 
-.projection-box::before, .risk-box::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 100px;
-  height: 100px;
+.job-market-insights .stage-marker {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
   border-radius: 50%;
-  background: linear-gradient(45deg, transparent, rgba(255, 126, 95, 0.1));
+  background: var(--rt-ink);
+  color: var(--rt-paper);
+  font: 800 .66rem/1 'DM Mono', monospace;
 }
 
-.hybrid-roles-list, .reskilling-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.hybrid-role-item, .reskilling-item {
-  position: relative;
-  background-color: #f7f7f7;
-  padding: 14px 18px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  color: #555;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border-left: 4px solid #ff7e5f;
-}
-
-.hybrid-role-item:hover, .reskilling-item:hover {
-  background-color: #f0f0f0;
-  transform: translateX(5px);
-}
-
-/* Hiring Channels Section Styles */
-.channel-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.channel-item {
-  display: flex;
-  align-items: center;
-  padding: 14px 18px;
-  background-color: #f7f7f7;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  color: #555;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  position: relative;
-  padding-left: 40px;
-}
-
-.channel-item::before {
-  content: '';
-  position: absolute;
-  left: 15px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-}
-
-.channel-item:hover {
-  background-color: #f0f0f0;
-  transform: translateX(5px);
-}
-
-.success-rate {
-  padding: 20px;
-  background-color: #f7f7f7;
-  border-radius: 12px;
-}
-
-.rate-display {
-  height: 24px;
-  background-color: #e0e0e0;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  margin-top: 15px;
-}
-
-.rate-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-  border-radius: 12px;
-  transition: width 1s ease-in-out;
-}
-
-.rate-value {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #333;
-}
-
-/* Interview Process Section Styles */
-.assessment-list, .criteria-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.assessment-item, .criterion-item {
-  background-color: #f7f7f7;
-  padding: 14px 18px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  color: #555;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  position: relative;
-  padding-left: 40px;
-}
-
-.assessment-item::before, .criterion-item::before {
-  content: '';
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-  border-radius: 4px;
-}
-
-.assessment-item:hover, .criterion-item:hover {
-  background-color: #f0f0f0;
-  transform: translateX(5px);
-}
-
-.stages-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  position: relative;
-  padding: 10px 0;
-}
-
-.stages-timeline::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20px;
-  height: 100%;
-  width: 2px;
-  background: linear-gradient(to bottom, #ff7e5f, #feb47b);
-}
-
-.stage-item {
-  display: flex;
-  align-items: center;
-  padding-left: 50px;
-  position: relative;
-  min-height: 40px;
-}
-
-.stage-marker {
-  position: absolute;
-  left: 11px;
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 700;
-  box-shadow: 0 0 0 4px #f7f7f7;
-  z-index: 1;
-}
-
-.stage-name {
-  font-weight: 500;
-  color: #555;
-  background-color: #f7f7f7;
-  padding: 10px 16px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.stage-name:hover {
-  background-color: #f0f0f0;
-  transform: translateX(5px);
-}
-
-/* Loading State */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 400px;
-  background-color: #fcfcfc;
-  border-radius: 16px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
-}
-
-.loading-container::after {
-  content: '';
-  width: 45px;
-  height: 45px;
-  border: 4px solid rgba(0, 0, 0, 0.08);
-  border-radius: 50%;
-  border-top-color: #ff7e5f;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+@media (max-width: 600px) {
+  .job-market-insights .insights-header {
+    align-items: start;
+    flex-direction: column;
   }
-}
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .section-grid {
+  .job-market-insights .insight-date {
+    text-align: left;
+  }
+
+  .job-market-insights .skill-item,
+  .job-market-insights .emerging-skill-item {
     grid-template-columns: 1fr;
   }
-  
-  .roles-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .insights-section {
-    padding: 20px;
-  }
-}
-
-/* GSAP Animation Classes */
-.fade-in {
-  opacity: 0;
-}
-
-.slide-up {
-  transform: translateY(30px);
-  opacity: 0;
-}
-
-.scale-in {
-  transform: scale(0.95);
-  opacity: 0;
 }

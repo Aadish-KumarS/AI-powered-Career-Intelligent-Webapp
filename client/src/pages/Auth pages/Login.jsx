@@ -65,7 +65,7 @@ export default function Login() {
             {loading ? 'Logging in...' : 'Log In'}
           </button>
 
-          <button className="btn-google authForm-btn" onClick={handleGoogleLogin}>
+          <button type="button" className="btn-google authForm-btn" onClick={handleGoogleLogin}>
             <FaGoogle /> Continue with Google
           </button>
         </form>

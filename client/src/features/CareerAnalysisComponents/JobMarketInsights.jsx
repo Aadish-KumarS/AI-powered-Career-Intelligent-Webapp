@@ -1,58 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import React, { useState } from 'react';
 import '../../styles/Career analysis styles/JobMarketInsights.css';
+import AppState from '../../components/AppState';
+
+const asArray = (value) => Array.isArray(value) ? value : [];
+const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 
 const JobMarketInsights = ({ jobMarketInsights }) => {
-  // Refs for GSAP animations
-  const componentRef = useRef(null);
-  const skillsRef = useRef(null);
-  const rolesRef = useRef(null);
-  const industryRef = useRef(null);
-  const compensationRef = useRef(null);
-  const futureRef = useRef(null);
-  const hiringRef = useRef(null);
-  const interviewRef = useRef(null);
-
-  // State for active section
-  const [activeSection, setActiveSection] = React.useState('skills');
-
-  useEffect(() => {
-    if (!jobMarketInsights?.result) return undefined;
-    // Main component animation
-    gsap.fromTo(
-      componentRef.current,
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1 }
-    );
-
-    // Animate the active section
-    const sectionMap = {
-      skills: skillsRef,
-      roles: rolesRef,
-      industry: industryRef,
-      compensation: compensationRef,
-      future: futureRef,
-      hiring: hiringRef,
-      interview: interviewRef
-    };
-
-    Object.keys(sectionMap).forEach(section => {
-      if (sectionMap[section].current) {
-        if (section === activeSection) {
-          gsap.fromTo(
-            sectionMap[section].current,
-            { opacity: 0, scale: 0.9 },
-            { opacity: 1, scale: 1, duration: 0.6 }
-          );
-        } else {
-          gsap.to(sectionMap[section].current, { opacity: 0, scale: 0.9, duration: 0.3 });
-        }
-      }
-    });
-  }, [activeSection, jobMarketInsights]);
+  const [activeSection, setActiveSection] = useState('skills');
 
   if (!jobMarketInsights?.result) {
-    return <div className="loading-container">Loading market insights...</div>;
+    return <AppState title="Reading the market" description="We’re organizing demand, roles, and hiring signals." />;
   }
 
   const {
@@ -64,6 +21,14 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
     hiring_channel_effectiveness,
     interview_process_insights
   } = jobMarketInsights.result;
+  const marketDemandAnalysis = asRecord(market_demand_analysis);
+  const roleInsights = asArray(role_insights);
+  const industryLandscape = asRecord(industry_landscape);
+  const compensationInsights = asRecord(compensation_insights);
+  const salaryRanges = asRecord(compensationInsights.salary_ranges);
+  const futureOutlook = asRecord(future_outlook);
+  const hiringChannelEffectiveness = asRecord(hiring_channel_effectiveness);
+  const interviewProcessInsights = asRecord(interview_process_insights);
 
   // Handler for section changes
   const handleSectionChange = (section) => {
@@ -115,7 +80,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
       <div className="role-requirements">
         <h4>Requirements</h4>
         <ul>
-          {role.common_requirements.map((req, i) => (
+        {asArray(role.common_requirements).map((req, i) => (
             <li key={i}>{req}</li>
           ))}
         </ul>
@@ -123,7 +88,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
       <div className="role-titles">
         <h4>Common Titles</h4>
         <div className="title-tags">
-          {role.common_titles.map((title, i) => (
+          {asArray(role.common_titles).map((title, i) => (
             <span className="title-tag" key={i}>{title}</span>
           ))}
         </div>
@@ -131,7 +96,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
       <div className="distribution-chart">
         <h4>Level Distribution</h4>
         <div className="distribution-bar">
-          {role.entry_vs_senior_distribution.split(', ').map((level, i) => {
+          {String(role.entry_vs_senior_distribution || '').split(', ').filter(Boolean).map((level, i) => {
             const [percentage, levelType] = level.split(' ');
             return (
               <div 
@@ -149,7 +114,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
   );
 
   return (
-    <div className="job-market-insights" ref={componentRef}>
+    <div className="job-market-insights">
       <header className="insights-header">
         <h1>Job Market Insights</h1>
         <div className="insight-date">
@@ -160,25 +125,25 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
       <nav className="insights-nav">
         <ul>
           <li className={activeSection === 'skills' ? 'active' : ''}>
-            <button onClick={() => handleSectionChange('skills')}>Skills Demand</button>
+            <button type="button" onClick={() => handleSectionChange('skills')} aria-pressed={activeSection === 'skills'}>Skills Demand</button>
           </li>
           <li className={activeSection === 'roles' ? 'active' : ''}>
-            <button onClick={() => handleSectionChange('roles')}>Roles</button>
+            <button type="button" onClick={() => handleSectionChange('roles')} aria-pressed={activeSection === 'roles'}>Roles</button>
           </li>
           <li className={activeSection === 'industry' ? 'active' : ''}>
-            <button onClick={() => handleSectionChange('industry')}>Industry</button>
+            <button type="button" onClick={() => handleSectionChange('industry')} aria-pressed={activeSection === 'industry'}>Industry</button>
           </li>
           <li className={activeSection === 'compensation' ? 'active' : ''}>
-            <button onClick={() => handleSectionChange('compensation')}>Compensation</button>
+            <button type="button" onClick={() => handleSectionChange('compensation')} aria-pressed={activeSection === 'compensation'}>Compensation</button>
           </li>
           <li className={activeSection === 'future' ? 'active' : ''}>
-            <button onClick={() => handleSectionChange('future')}>Future Outlook</button>
+            <button type="button" onClick={() => handleSectionChange('future')} aria-pressed={activeSection === 'future'}>Future Outlook</button>
           </li>
           <li className={activeSection === 'hiring' ? 'active' : ''}>
-            <button onClick={() => handleSectionChange('hiring')}>Hiring Channels</button>
+            <button type="button" onClick={() => handleSectionChange('hiring')} aria-pressed={activeSection === 'hiring'}>Hiring Channels</button>
           </li>
           <li className={activeSection === 'interview' ? 'active' : ''}>
-            <button onClick={() => handleSectionChange('interview')}>Interview Process</button>
+            <button type="button" onClick={() => handleSectionChange('interview')} aria-pressed={activeSection === 'interview'}>Interview Process</button>
           </li>
         </ul>
       </nav>
@@ -186,55 +151,52 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
       <div className="insights-content">
         {/* Skills Demand Section */}
         <section 
-          ref={skillsRef}
           className={`insights-section skills-section ${activeSection === 'skills' ? 'active' : ''}`}
         >
           <div className="section-grid">
             <div className="grid-item">
               <h2>High Demand Skills</h2>
               <div className="skills-list">
-                {market_demand_analysis.high_demand_skills.map(renderSkillDemand)}
+                {asArray(marketDemandAnalysis.high_demand_skills).map(renderSkillDemand)}
               </div>
             </div>
             <div className="grid-item">
               <h2>Saturated Skills</h2>
               <div className="skills-list">
-                {market_demand_analysis.saturated_skills.map(renderSkillDemand)}
+                {asArray(marketDemandAnalysis.saturated_skills).map(renderSkillDemand)}
               </div>
             </div>
             <div className="grid-item">
               <h2>Emerging Skills</h2>
               <div className="skills-list">
-                {market_demand_analysis.emerging_skills.map(renderEmergingSkill)}
+                {asArray(marketDemandAnalysis.emerging_skills).map(renderEmergingSkill)}
               </div>
             </div>
             <div className="grid-item skills-balance">
               <h2>Skills Balance</h2>
-              <p>{market_demand_analysis.technical_vs_soft_skills_balance}</p>
+              <p>{marketDemandAnalysis.technical_vs_soft_skills_balance}</p>
             </div>
           </div>
         </section>
 
         {/* Roles Section */}
         <section 
-          ref={rolesRef}
           className={`insights-section roles-section ${activeSection === 'roles' ? 'active' : ''}`}
         >
           <div className="roles-container">
-            {role_insights.map(renderRoleCard)}
+            {roleInsights.map(renderRoleCard)}
           </div>
         </section>
 
         {/* Industry Section */}
         <section 
-          ref={industryRef}
           className={`insights-section industry-section ${activeSection === 'industry' ? 'active' : ''}`}
         >
           <div className="section-grid">
             <div className="grid-item">
               <h2>Growing Sectors</h2>
               <ul className="sectors-list growing">
-                {industry_landscape.growing_sectors.map((sector, i) => (
+                {asArray(industryLandscape.growing_sectors).map((sector, i) => (
                   <li key={i} className="sector-item">{sector}</li>
                 ))}
               </ul>
@@ -242,7 +204,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             <div className="grid-item">
               <h2>Declining Sectors</h2>
               <ul className="sectors-list declining">
-                {industry_landscape.declining_sectors.map((sector, i) => (
+                {asArray(industryLandscape.declining_sectors).map((sector, i) => (
                   <li key={i} className="sector-item">{sector}</li>
                 ))}
               </ul>
@@ -252,7 +214,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
               <div className="hotspots-map">
                 {/* Simplified map visualization */}
                 <div className="map-container">
-                  {industry_landscape.geographical_hotspots.map((hotspot, i) => (
+                  {asArray(industryLandscape.geographical_hotspots).map((hotspot, i) => (
                     <div 
                       key={i}
                       className="hotspot-marker"
@@ -269,14 +231,13 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             </div>
             <div className="grid-item">
               <h2>Startup vs Enterprise</h2>
-              <p>{industry_landscape.startup_vs_enterprise}</p>
+              <p>{industryLandscape.startup_vs_enterprise}</p>
             </div>
           </div>
         </section>
 
         {/* Compensation Section */}
         <section 
-          ref={compensationRef}
           className={`insights-section compensation-section ${activeSection === 'compensation' ? 'active' : ''}`}
         >
           <div className="section-grid">
@@ -285,28 +246,28 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
               <div className="salary-levels">
                 <div className="salary-level">
                   <h4>Entry Level</h4>
-                  <div className="salary-amount">{compensation_insights.salary_ranges.entry_level}</div>
+                  <div className="salary-amount">{salaryRanges.entry_level}</div>
                 </div>
                 <div className="salary-level">
                   <h4>Mid Level</h4>
-                  <div className="salary-amount">{compensation_insights.salary_ranges.mid_level}</div>
+                  <div className="salary-amount">{salaryRanges.mid_level}</div>
                 </div>
                 <div className="salary-level">
                   <h4>Senior Level</h4>
-                  <div className="salary-amount">{compensation_insights.salary_ranges.senior_level}</div>
+                  <div className="salary-amount">{salaryRanges.senior_level}</div>
                 </div>
               </div>
             </div>
             <div className="grid-item">
               <h2>Compensation Trends</h2>
               <div className="trends-chart">
-                <p>{compensation_insights.compensation_trends}</p>
+                <p>{compensationInsights.compensation_trends}</p>
               </div>
             </div>
             <div className="grid-item">
               <h2>Benefits Trends</h2>
               <ul className="benefits-list">
-                {compensation_insights.benefits_trends.map((benefit, i) => (
+                {asArray(compensationInsights.benefits_trends).map((benefit, i) => (
                   <li key={i} className="benefit-item">{benefit}</li>
                 ))}
               </ul>
@@ -314,7 +275,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             <div className="grid-item">
               <h2>Negotiation Leverage</h2>
               <ul className="leverage-list">
-                {compensation_insights.negotiation_leverage_points.map((point, i) => (
+                {asArray(compensationInsights.negotiation_leverage_points).map((point, i) => (
                   <li key={i} className="leverage-item">{point}</li>
                 ))}
               </ul>
@@ -324,26 +285,25 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
 
         {/* Future Outlook Section */}
         <section 
-          ref={futureRef}
           className={`insights-section future-section ${activeSection === 'future' ? 'active' : ''}`}
         >
           <div className="section-grid">
             <div className="grid-item">
               <h2>5-Year Projection</h2>
               <div className="projection-box">
-                <p>{future_outlook.five_year_projection}</p>
+                <p>{futureOutlook.five_year_projection}</p>
               </div>
             </div>
             <div className="grid-item">
               <h2>Automation Risk</h2>
               <div className="risk-box">
-                <p>{future_outlook.automation_risk}</p>
+                <p>{futureOutlook.automation_risk}</p>
               </div>
             </div>
             <div className="grid-item">
               <h2>Emerging Hybrid Roles</h2>
               <ul className="hybrid-roles-list">
-                {future_outlook.emerging_hybrid_roles.map((role, i) => (
+                {asArray(futureOutlook.emerging_hybrid_roles).map((role, i) => (
                   <li key={i} className="hybrid-role-item">{role}</li>
                 ))}
               </ul>
@@ -351,7 +311,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             <div className="grid-item">
               <h2>Reskilling Opportunities</h2>
               <ul className="reskilling-list">
-                {future_outlook.reskilling_opportunities.map((skill, i) => (
+                {asArray(futureOutlook.reskilling_opportunities).map((skill, i) => (
                   <li key={i} className="reskilling-item">{skill}</li>
                 ))}
               </ul>
@@ -361,14 +321,13 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
 
         {/* Hiring Channels Section */}
         <section 
-          ref={hiringRef}
           className={`insights-section hiring-section ${activeSection === 'hiring' ? 'active' : ''}`}
         >
           <div className="section-grid">
             <div className="grid-item">
               <h2>Job Boards</h2>
               <ul className="channel-list">
-                {hiring_channel_effectiveness.job_boards.map((board, i) => (
+                {asArray(hiringChannelEffectiveness.job_boards).map((board, i) => (
                   <li key={i} className="channel-item">{board}</li>
                 ))}
               </ul>
@@ -376,7 +335,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             <div className="grid-item">
               <h2>Networking Platforms</h2>
               <ul className="channel-list">
-                {hiring_channel_effectiveness.networking_platforms.map((platform, i) => (
+                {asArray(hiringChannelEffectiveness.networking_platforms).map((platform, i) => (
                   <li key={i} className="channel-item">{platform}</li>
                 ))}
               </ul>
@@ -384,7 +343,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             <div className="grid-item">
               <h2>Recruitment Agencies</h2>
               <ul className="channel-list">
-                {hiring_channel_effectiveness.recruitment_agencies.map((agency, i) => (
+                {asArray(hiringChannelEffectiveness.recruitment_agencies).map((agency, i) => (
                   <li key={i} className="channel-item">{agency}</li>
                 ))}
               </ul>
@@ -395,9 +354,9 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
                 <div className="rate-display">
                   <div 
                     className="rate-fill"
-                    style={{ width: hiring_channel_effectiveness.direct_application_success_rate }}
+                    style={{ width: hiringChannelEffectiveness.direct_application_success_rate }}
                   ></div>
-                  <span className="rate-value">{hiring_channel_effectiveness.direct_application_success_rate}</span>
+                  <span className="rate-value">{hiringChannelEffectiveness.direct_application_success_rate}</span>
                 </div>
               </div>
             </div>
@@ -406,14 +365,13 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
 
         {/* Interview Process Section */}
         <section 
-          ref={interviewRef}
           className={`insights-section interview-section ${activeSection === 'interview' ? 'active' : ''}`}
         >
           <div className="section-grid">
             <div className="grid-item">
               <h2>Common Assessments</h2>
               <ul className="assessment-list">
-                {interview_process_insights.common_assessments.map((assessment, i) => (
+                {asArray(interviewProcessInsights.common_assessments).map((assessment, i) => (
                   <li key={i} className="assessment-item">{assessment}</li>
                 ))}
               </ul>
@@ -421,7 +379,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             <div className="grid-item">
               <h2>Interview Stages</h2>
               <div className="stages-timeline">
-                {interview_process_insights.interview_stages.map((stage, i) => (
+                {asArray(interviewProcessInsights.interview_stages).map((stage, i) => (
                   <div key={i} className="stage-item">
                     <div className="stage-marker">{i + 1}</div>
                     <div className="stage-name">{stage}</div>
@@ -432,7 +390,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             <div className="grid-item">
               <h2>Key Evaluation Criteria</h2>
               <ul className="criteria-list">
-                {interview_process_insights.key_evaluation_criteria.map((criterion, i) => (
+                {asArray(interviewProcessInsights.key_evaluation_criteria).map((criterion, i) => (
                   <li key={i} className="criterion-item">{criterion}</li>
                 ))}
               </ul>

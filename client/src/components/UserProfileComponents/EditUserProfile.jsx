@@ -8,8 +8,10 @@ import L from 'leaflet';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import '../../styles/UserProfile Styles/EditProfile.css'
+import '../../styles/Global Styles/profile-theme.css';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
+import AppDialog from '../AppDialog';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -56,6 +58,7 @@ export default function EditProfile() {
   const dropdownRef = useRef(null);
   const pictureRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const sideMenuRef = useRef(null);
   
 
@@ -173,6 +176,14 @@ export default function EditProfile() {
       setPasswordData,
       setLoading
     );
+  };
+
+  const handleDeleteAccount = async () => {
+    setLoading(true);
+    const deleted = await deleteAccount(setError, true);
+    setLoading(false);
+    setShowDeleteDialog(false);
+    if (deleted) navigate('/login', { replace: true });
   };
 
   return (
@@ -351,7 +362,7 @@ export default function EditProfile() {
                   <p>Warning: This action cannot be undone. All your data will be permanently deleted.</p>
                 </div>
                 <button 
-                  onClick={() => deleteAccount(setError)}
+                  onClick={() => setShowDeleteDialog(true)}
                   className="delete-account-btn center"
                   disabled={loading}
                 >
@@ -365,6 +376,16 @@ export default function EditProfile() {
           {successMessage && <div className="success-message">{successMessage}</div>}
         </main>
       </div>
+      <AppDialog
+        open={showDeleteDialog}
+        title="Delete your account?"
+        description="This permanently removes your profile and saved data. This action cannot be undone."
+        confirmLabel="Delete account"
+        onCancel={() => setShowDeleteDialog(false)}
+        onConfirm={handleDeleteAccount}
+        busy={loading}
+        tone="danger"
+      />
     </div>
   );
 }

@@ -84,9 +84,9 @@ const SettingsDropdown = () => {
             <FiEdit className="dropdown-icon" />
             <span>Edit Profile</span>
           </Link>
-          <Link to="/forgot-password" className="dropdown-item">
+          <Link to="/profile/edit-profile" className="dropdown-item">
             <FiLock className="dropdown-icon" />
-            <span>Forgot Password</span>
+            <span>Account security</span>
           </Link>
           <div onClick={() => logoutUser(navigate)} className="dropdown-item">
             <FiLogOut className="dropdown-icon" />

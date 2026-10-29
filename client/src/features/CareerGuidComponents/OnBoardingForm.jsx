@@ -125,6 +125,26 @@ const OnboardingForm = () => {
 
   const errorFor = (key) => fieldErrors[key];
 
+  useEffect(() => {
+    setFieldErrors((previous) => {
+      const next = { ...previous };
+      if (formData.name.trim()) delete next.name;
+      if (formData.education.highestLevel) delete next['education.highestLevel'];
+      if (formData.education.fieldOfStudy.trim()) delete next['education.fieldOfStudy'];
+      if (formData.skills.selectedSkills.length) delete next.skills;
+      if (formData.careerInfo.careerStage) delete next['careerInfo.careerStage'];
+      if (formData.careerInfo.desiredRoles.length) delete next['careerInfo.desiredRoles'];
+      return Object.keys(next).length === Object.keys(previous).length ? previous : next;
+    });
+  }, [
+    formData.name,
+    formData.education.highestLevel,
+    formData.education.fieldOfStudy,
+    formData.skills.selectedSkills.length,
+    formData.careerInfo.careerStage,
+    formData.careerInfo.desiredRoles.length,
+  ]);
+
   const addCustomSkill = () => {
     const skillName = customSkillName.trim();
     if (!skillName) return;
@@ -301,7 +321,7 @@ const OnboardingForm = () => {
     const hoverAnimation = gsap.timeline({ paused: true })
       .to(button, {
         scale: 1.05,
-        backgroundColor: '#0056b3',
+        backgroundColor: '#30443e',
         duration: 0.3,
         ease: "power2.out"
       });
@@ -1024,7 +1044,7 @@ const OnboardingForm = () => {
 
   return (
     <div className="onboarding-container">
-      <Navbar />
+      <Navbar variant="app" />
       <form ref={formRef} onSubmit={handleSubmit} className="onboarding-form" noValidate>
         <div className="form-header">
           <h2>Career Guidance Profile</h2>
@@ -1052,7 +1072,7 @@ const OnboardingForm = () => {
           
           <div className="completion-indicator">
             <div className="completion-circle" style={{
-              background: `conic-gradient(#4CAF50 ${calculateCompletion()}%, #f3f3f3 0)`
+              background: `conic-gradient(#b35a3c ${calculateCompletion()}%, #e8ece5 0)`
             }}>
               <div className="completion-inner">
                 <span className="completion-percent">{calculateCompletion()}%</span>

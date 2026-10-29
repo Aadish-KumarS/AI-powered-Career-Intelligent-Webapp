@@ -2,18 +2,21 @@ import axios from "axios";
 import gsap from "gsap";
 import { getIsFirstTime } from "./helper";
 import { API_BASE_URL } from "../config/api";
+import { toast } from 'react-toastify';
 
 axios.defaults.withCredentials = true;
 
 //EMAIL VERIFICATION
-export const handleSubmitEmailVerification = async (e, verificationCode, setError,navigate,location) => {
+export const handleSubmitEmailVerification = async (e, verificationCode, setError, setLoading, navigate, location) => {
   e.preventDefault();
+  setError('');
 
   if (verificationCode.length !== 6) {
     setError('Invalid verification code');
     return;
   }
 
+  setLoading(true);
   try {
     const response = await axios.post(`${API_BASE_URL}/otp/verify-otp`, {
       otp: verificationCode,
@@ -22,10 +25,10 @@ export const handleSubmitEmailVerification = async (e, verificationCode, setErro
     const purpose = location?.state?.purpose;
     if (response.data.success) {
       if (purpose === 'forgot-password') {
-        alert('Email verified successfully!');
+        toast.success('Email verified successfully. Choose a new password.');
         navigate('/reset-password')
       } else {
-        alert('Email verified successfully!');
+        toast.success('Email verified successfully. You can now sign in.');
         navigate('/login');
       }
     } else {
@@ -34,6 +37,8 @@ export const handleSubmitEmailVerification = async (e, verificationCode, setErro
   } catch (err) {
     console.error('Error during OTP verification:', err.response ? err.response.data : err);
     setError('An error occurred. Please try again later.');
+  } finally {
+    setLoading(false);
   }
 };
 

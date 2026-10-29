@@ -73,12 +73,6 @@
   transition: background-color 0.2s ease;
 }
 
-div.dropdown-item:nth-of-type(1){
-  color: rgb(251, 47, 47);
-  background-color: #fd48482b;
-  cursor: pointer;
-}
-
 .dropdown-item:hover {
   background-color: #f5f5f5;
 }
@@ -88,3 +82,12 @@ div.dropdown-item:nth-of-type(1){
   width: 16px;
   height: 16px;
 }
+
+/* Shared warm application shell. */
+.navbar--landing .settings-dropdown,
+.navbar--app .settings-dropdown { top:calc(100% + .65rem); width:13.5rem; padding:.45rem; border:1px solid rgba(68,83,70,.15); border-radius:.85rem; background:#fffdf9; box-shadow:0 18px 44px rgba(61,55,39,.16); overflow:visible; }
+.navbar--landing .dropdown-item,
+.navbar--app .dropdown-item { margin:0; padding:.6rem .65rem; border-radius:.52rem; color:#355046; font-family:'Manrope',sans-serif; font-size:.73rem; font-weight:700; }.navbar--landing .dropdown-item:hover,
+.navbar--app .dropdown-item:hover { background:#eef1e7; color:#1d302b; }.navbar--landing .dropdown-item:last-child,
+.navbar--app .dropdown-item:last-child { margin-top:.25rem; border-top:1px solid #e6e9e3; color:#a84132; }.navbar--landing .dropdown-icon,
+.navbar--app .dropdown-icon { color:#a0543d; }

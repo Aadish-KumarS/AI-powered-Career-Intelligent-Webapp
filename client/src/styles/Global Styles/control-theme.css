@@ -1,0 +1,55 @@
+/* Interaction controls shared by all authenticated workspaces. */
+:is(.onboarding-container,.career-recommendation-container,.roadmap-generator-container,.learning-path-container,.exam-recommendation-container,.create-profile-container,.profile-editor-container) :is(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),select,textarea),
+.career-recommendation-container .comparison-path-select select {
+  min-height:2.85rem!important;
+  padding:.68rem .8rem!important;
+  border:1px solid #cbd6cb!important;
+  border-radius:.72rem!important;
+  background:#fffefa!important;
+  color:var(--rt-ink)!important;
+  box-shadow:none!important;
+  font:600 .78rem/1.45 'Manrope',sans-serif!important;
+  transition:border-color .16s ease,box-shadow .16s ease,background .16s ease!important;
+}
+:is(.onboarding-container,.career-recommendation-container,.roadmap-generator-container,.learning-path-container,.exam-recommendation-container,.create-profile-container,.profile-editor-container) :is(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),select,textarea)::placeholder { color:#97a29a!important; opacity:1; }
+:is(.onboarding-container,.career-recommendation-container,.roadmap-generator-container,.learning-path-container,.exam-recommendation-container,.create-profile-container,.profile-editor-container) :is(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),select,textarea):focus,
+.career-recommendation-container .comparison-path-select select:focus { border-color:var(--rt-clay)!important; outline:0!important; box-shadow:0 0 0 4px rgba(179,90,60,.11)!important; }
+:is(.onboarding-container,.career-recommendation-container,.roadmap-generator-container,.learning-path-container,.exam-recommendation-container,.create-profile-container,.profile-editor-container) textarea { min-height:6.5rem!important; resize:vertical!important; }
+:is(.onboarding-container,.career-recommendation-container,.roadmap-generator-container,.learning-path-container,.exam-recommendation-container,.create-profile-container,.profile-editor-container) label { color:var(--rt-ink-soft)!important; font-size:.72rem!important; font-weight:800!important; letter-spacing:.01em; }
+
+/* Primary actions */
+:is(.custom-skill-form button,.next-button,.generate-btn,.save-roadmap-btn,.load-btn,.create-button,.add-button,.add-step-button,.start-session-button,.end-session-button,.save-changes-btn,.change-password-btn,.save-button,.submit-button,.empty-action-button,.compare-careers-button,.exit-comparison-button,.retry-button) {
+  min-height:2.7rem!important;
+  padding:.62rem .95rem!important;
+  border:1px solid var(--rt-ink)!important;
+  border-radius:999px!important;
+  background:var(--rt-ink)!important;
+  color:var(--rt-paper)!important;
+  box-shadow:none!important;
+  font:800 .72rem/1 'Manrope',sans-serif!important;
+  letter-spacing:.01em;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease!important;
+}
+:is(.custom-skill-form button,.next-button,.generate-btn,.save-roadmap-btn,.load-btn,.create-button,.add-button,.add-step-button,.start-session-button,.end-session-button,.save-changes-btn,.change-password-btn,.save-button,.submit-button,.empty-action-button,.compare-careers-button,.exit-comparison-button,.retry-button):hover:not(:disabled) { transform:translateY(-2px)!important; background:#30443e!important; box-shadow:0 9px 17px rgba(29,48,43,.14)!important; }
+
+/* Quiet supporting actions */
+:is(.prev-button,.fit-view-btn,.path-reset-btn,.view-toggle-btn,.edit-button,.edit-resource-button,.resource-action-button,.cancel-delete,.cancel-button,.action-button,.copy-button,.download-button) {
+  min-height:2.55rem!important;
+  padding:.55rem .8rem!important;
+  border:1px solid var(--rt-line)!important;
+  border-radius:999px!important;
+  background:transparent!important;
+  color:var(--rt-ink)!important;
+  box-shadow:none!important;
+  font:800 .7rem/1 'Manrope',sans-serif!important;
+  transition:transform .18s ease,background .18s ease,border-color .18s ease!important;
+}
+:is(.prev-button,.fit-view-btn,.path-reset-btn,.view-toggle-btn,.edit-button,.edit-resource-button,.resource-action-button,.cancel-delete,.cancel-button,.action-button,.copy-button,.download-button):hover:not(:disabled) { transform:translateY(-1px)!important; border-color:var(--rt-sage-deep)!important; background:var(--rt-sage)!important; }
+
+/* Destructive actions stay obvious but visually integrated. */
+:is(.delete-btn,.delete-button,.delete-account-btn,.delete-resource-button,.delete-step-button,.remove-skill,.remove-role) { border:1px solid #efc0b7!important; border-radius:999px!important; background:#fff1ee!important; color:var(--rt-danger)!important; box-shadow:none!important; font-weight:800!important; }.delete-btn:hover:not(:disabled),.delete-button:hover:not(:disabled),.delete-account-btn:hover:not(:disabled),.delete-resource-button:hover:not(:disabled),.delete-step-button:hover:not(:disabled),.remove-skill:hover,.remove-role:hover { border-color:#d98779!important; background:#ffe6e0!important; color:#873126!important; }
+
+/* Chips and selectable options communicate selection through shape and color—not gradients. */
+:is(.onboarding-container,.learning-path-container,.roadmap-generator-container,.exam-recommendation-container) :is(.selection-item,.skill-option-card,.path-btn,.resource-tag,.tech-tag,.skill-tag,.category-badge,.difficulty-badge,.time-badge) { border:1px solid var(--rt-line)!important; border-radius:999px!important; background:#fffefa!important; color:var(--rt-ink-soft)!important; box-shadow:none!important; font:750 .67rem/1.2 'Manrope',sans-serif!important; }.onboarding-container .selection-item.selected,.roadmap-generator-container .path-btn.active { border-color:var(--rt-ink)!important; background:var(--rt-ink)!important; color:var(--rt-paper)!important; }
+
+@media(max-width:620px){ :is(.custom-skill-form button,.next-button,.generate-btn,.save-roadmap-btn,.load-btn,.create-button,.add-button,.add-step-button,.start-session-button,.end-session-button,.save-changes-btn,.change-password-btn,.save-button,.submit-button,.empty-action-button,.compare-careers-button,.exit-comparison-button,.retry-button) { min-height:2.9rem!important; } }

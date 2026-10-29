@@ -1,0 +1,64 @@
+/* High-touch guidance workspace: keeps the recommendation response model untouched. */
+.career-recommendation-container { min-height: 100vh; padding: 7.2rem clamp(1rem, 4vw, 3.5rem) 4rem; background: radial-gradient(circle at 8% 6%, rgba(223,232,221,.9), transparent 26rem), var(--rt-cream); }
+.guidance-workspace { width: min(1180px, 100%); margin: 0 auto; }
+.career-recommendation-container .recommendation-container { width: 100%; margin: 0; }
+
+.career-recommendation-container .recommendation-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.4rem clamp(1.5rem, 5vw, 5rem);
+  align-items: end;
+  margin: 0;
+  padding: clamp(1.6rem, 4vw, 3.25rem);
+  border: 1px solid rgba(64,82,69,.17);
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: rgba(255,253,249,.93);
+  box-shadow: none;
+}
+.career-recommendation-container .header-content h1 {
+  max-width: 11ch;
+  margin: 0;
+  color: var(--rt-ink);
+  font: 400 clamp(2.65rem, 6vw, 5.3rem)/.91 'DM Serif Display', Georgia, serif;
+  letter-spacing: -.07em;
+}
+.career-recommendation-container .header-content h1::before { display: none; }
+.career-recommendation-container .guidance-description { max-width: 38rem; margin: 1.1rem 0 0; color: var(--rt-ink-soft); font-size: .9rem; line-height: 1.75; }
+.career-recommendation-container .user-profile-summary { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1.3rem; }
+.career-recommendation-container .profile-item { display: inline-flex; gap: .42rem; align-items: center; padding: .48rem .68rem; border: 1px solid var(--rt-line); border-radius: 999px; background: #fffefa; font-size: .68rem; }
+.career-recommendation-container .profile-label { color: var(--rt-muted); font-weight: 700; }
+.career-recommendation-container .profile-value { max-width: 18rem; overflow: hidden; color: var(--rt-ink); font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.guidance-result-count { display: flex; align-items: center; gap: .65rem; padding: .9rem 1rem; border: 1px solid var(--rt-sage-deep); border-radius: 1rem; background: var(--rt-sage); }
+.guidance-result-count span { color: var(--rt-clay); font: 400 2.65rem/.8 'DM Serif Display', Georgia, serif; }
+.guidance-result-count small { color: #456052; font: 700 .62rem/1.35 'Manrope', sans-serif; letter-spacing: .03em; text-transform: uppercase; }
+.career-recommendation-container .action-buttons { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .45rem; padding-top: .15rem; }
+.career-recommendation-container .recommendation-content { padding: clamp(1rem, 3vw, 1.6rem); border: 1px solid rgba(64,82,69,.17); border-top: 1px solid var(--rt-line); border-radius: 0 0 1.5rem 1.5rem; background: rgba(255,253,249,.78); box-shadow: var(--rt-shadow-sm); }
+
+.guidance-state { display: flex; min-height: 32rem; flex-direction: column; align-items: center; justify-content: center; padding: clamp(1.6rem,5vw,3.5rem); border: 1px solid var(--rt-line); border-radius: 1.5rem; background: rgba(255,253,249,.92); box-shadow: var(--rt-shadow-sm); text-align: center; }
+.guidance-state .workspace-eyebrow { margin-bottom: .95rem; }
+.guidance-state h1,.guidance-state .loading-text { max-width: 12ch; margin: 0; color: var(--rt-ink); font: 400 clamp(2.35rem,5vw,4.4rem)/.95 'DM Serif Display', Georgia, serif; letter-spacing: -.06em; }
+.guidance-state > p:not(.workspace-eyebrow):not(.loading-text) { max-width: 34rem; margin: .9rem 0 0; color: var(--rt-muted); font-size: .83rem; line-height: 1.7; }
+.career-recommendation-container .guidance-state .loading-animation { order: -1; margin-bottom: 1.35rem; }
+.career-recommendation-container .guidance-state .loading-animation { display: flex; gap: .42rem; }
+.career-recommendation-container .guidance-state .loading-circle { width: .7rem; height: .7rem; border: 0; border-radius: 50%; background: var(--rt-clay); animation: guidance-pulse 1.05s ease-in-out infinite; }
+.career-recommendation-container .guidance-state .loading-circle:nth-child(2) { animation-delay: .15s; }
+.career-recommendation-container .guidance-state .loading-circle:nth-child(3) { animation-delay: .3s; }
+@keyframes guidance-pulse { 0%,100% { opacity: .32; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-.28rem); } }
+.career-recommendation-container .guidance-state--error { align-items: flex-start; min-height: 0; text-align: left; border-color: #efc0b7; background: #fff5f2; }
+.career-recommendation-container .guidance-state--error p { margin: 0; color: #84392e; }
+.career-recommendation-container .guidance-state--error .retry-button { margin-top: 1rem; }
+
+@media (max-width: 800px) {
+  .career-recommendation-container { padding-top: 5.65rem; }
+  .career-recommendation-container .recommendation-header { grid-template-columns: 1fr; }
+  .guidance-result-count { width: max-content; }
+}
+@media (max-width: 540px) {
+  .career-recommendation-container { padding-right: .8rem; padding-left: .8rem; }
+  .career-recommendation-container .recommendation-header,.career-recommendation-container .recommendation-content { border-radius: 1.1rem; }
+  .career-recommendation-container .recommendation-header { margin-bottom: .75rem; }
+  .career-recommendation-container .recommendation-content { border-top: 1px solid rgba(64,82,69,.17); }
+  .career-recommendation-container .action-buttons { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .career-recommendation-container .action-button,.career-recommendation-container .download-dropdown { width: 100%; }
+  .career-recommendation-container .download-dropdown .download-button { width: 100%; }
+}

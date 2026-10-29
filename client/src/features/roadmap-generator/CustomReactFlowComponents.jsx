@@ -2,9 +2,7 @@ import { Handle, } from 'reactflow';
 
 const CustomNode = ({ data, selected }) => {
   const nodeStyle = {
-    backgroundColor: data.backgroundColor || '#607D8B',
-    borderColor: data.borderColor || '#607D8B',
-    color: data.textColor || '#ffffff'
+    '--node-accent': data.backgroundColor || '#b35a3c'
   };
   
   return (
@@ -64,7 +62,7 @@ const CustomEdge = ({
         className="react-flow__edge-path-bg"
         d={edgePath}
         strokeWidth={7}
-        stroke="#e0e0e0"
+        stroke="#e7ece5"
         fill="none"
       />
       <path
@@ -72,7 +70,7 @@ const CustomEdge = ({
         className="react-flow__edge-path"
         d={edgePath}
         strokeWidth={1.5}
-        stroke={style.stroke || "#ff7e5f"}
+        stroke={style.stroke || "#b35a3c"}
         fill="none"
         markerEnd={markerEnd}
         strokeLinecap="round"
@@ -132,7 +130,7 @@ const CustomEdgeSmartRouting = ({
         className="react-flow__edge-path-bg"
         d={edgePath}
         strokeWidth={7}
-        stroke="#e0e0e0"
+        stroke="#e7ece5"
         fill="none"
       />
       <path
@@ -140,7 +138,7 @@ const CustomEdgeSmartRouting = ({
         className="react-flow__edge-path"
         d={edgePath}
         strokeWidth={1.5}
-        stroke={style.stroke || "#ff7e5f"}
+        stroke={style.stroke || "#b35a3c"}
         fill="none"
         markerEnd={markerEnd}
         strokeLinecap="round"
@@ -187,7 +185,7 @@ const CustomEdgeRounded = ({
         className="react-flow__edge-path-bg"
         d={edgePath}
         strokeWidth={7}
-        stroke="#e0e0e0"
+        stroke="#e7ece5"
         fill="none"
       />
       <path
@@ -195,7 +193,7 @@ const CustomEdgeRounded = ({
         className="react-flow__edge-path"
         d={edgePath}
         strokeWidth={1.5}
-        stroke={style.stroke || "#ff7e5f"}
+        stroke={style.stroke || "#b35a3c"}
         fill="none"
         markerEnd={markerEnd}
         strokeLinecap="round"

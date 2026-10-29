@@ -10,9 +10,12 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import '../../styles/Roadmap genarator/Roadmap.css';
+import '../../styles/Global Styles/service-theme.css';
+import '../../styles/Global Styles/roadmap-workspace.css';
 import { CustomEdge, CustomNode } from './CustomReactFlowComponents';
 import gsap from 'gsap';
 import Navbar from '../../components/LandingPageComponents/Navbar'
+import { FiArrowUpRight, FiBookmark, FiClock, FiCompass, FiMap, FiMaximize2, FiTrash2 } from 'react-icons/fi';
 import { roadmapMockData } from '../../constants/mockData';
 import { ROADMAP_API_BASE_URL } from '../../config/api';
 
@@ -23,12 +26,11 @@ const RoadmapGenerator = () => {
   const [error, setError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes] = useNodesState([]);
+  const [edges, setEdges] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   const [nodeMap, setNodeMap] = useState({});
   const [viewMode, setViewMode] = useState('default');
-  const [selectedPath, setSelectedPath] = useState(null);
   const [activeTab, setActiveTab] = useState('saved'); // Default tab is 'saved'
   
   // References for GSAP animations
@@ -41,9 +43,6 @@ const RoadmapGenerator = () => {
   const nodeTypes = useMemo(() => ({ custom: CustomNode }), []);
   const edgeTypes = useMemo(() => ({ custom: CustomEdge }), []);
   
-  // Increase padding for better view of all nodes
-  const fitViewOptions = useMemo(() => ({ padding: 0.5 }), []);
-
   // Initialize GSAP animations
   useEffect(() => {
     if (headerRef.current && contentRef.current && tabsRef.current) {
@@ -190,18 +189,19 @@ const RoadmapGenerator = () => {
   };
 
   const categoryColors = {
-    core: 'linear-gradient(135deg, #00f260, #0575e6)',           // Green to blue
-    optional: 'linear-gradient(135deg, #f7971e, #ffd200)',       // Orange to gold
-    advanced: 'linear-gradient(135deg, #8e2de2, #4a00e0)',       // Purple shades
-    beginner: 'linear-gradient(135deg, #56ccf2, #2f80ed)',       // Light to dark blue
-    intermediate: 'linear-gradient(135deg, #fddb92, #d1fdff)',   // Warm beige to soft blue
-    expert: 'linear-gradient(135deg, #f85032, #e73827)',         // Orange-red to deep red
-    default: '#2c3e50  '       // Light to dark gray
-  };  
+    core: '#3c574d',
+    optional: '#b35a3c',
+    advanced: '#6d7668',
+    beginner: '#78937f',
+    intermediate: '#c28b45',
+    expert: '#87483b',
+    default: '#3c574d'
+  };
   
 
   const processRoadmapData = useCallback((data) => {
     if (!data?.nodes || !data?.edges) return;
+    const workingEdges = [...data.edges];
     
     // Create a directed graph structure
     const graph = {
@@ -219,7 +219,7 @@ const RoadmapGenerator = () => {
     });
     
     // Fill the graph with edges
-    data.edges.forEach(edge => {
+    workingEdges.forEach(edge => {
       if (graph.children[edge.source]) {
         graph.children[edge.source].push(edge.target);
       }
@@ -289,7 +289,7 @@ const RoadmapGenerator = () => {
         depths[orphanId] = 1; // Place all orphans at depth 1
         
         // Create a connection from the main root to this orphan
-        data.edges.push({
+        workingEdges.push({
           source: mainRootId,
           target: orphanId,
           type: 'optional'
@@ -373,7 +373,9 @@ const RoadmapGenerator = () => {
     const flowNodes = data.nodes.map((node) => {
       
       const category = (node.category || 'default').toLowerCase();
-      const backgroundColor = categoryColors[node.difficulty] || categoryColors.default;
+      const difficulty = (node.difficulty || '').toLowerCase();
+      const colorKey = categoryColors[difficulty] ? difficulty : category;
+      const backgroundColor = categoryColors[colorKey] || categoryColors.default;
       
       return {
         id: node.id,
@@ -383,19 +385,19 @@ const RoadmapGenerator = () => {
           nodeType: category,
           backgroundColor, 
           borderColor: backgroundColor,
-          textColor: node.difficulty == "intermediate" ? "#000" :  '#ffffff',
+          textColor: '#ffffff',
           category: category,
         },
         position: positions[node.id] || { x: 0, y: 0 },
         className: `roadmap-node node-${category}`,
         style: {
           background: backgroundColor,
-          color:node.difficulty == "intermediate" ? "#000" :  '#ffffff'
+          color: '#ffffff'
         }
       };
     });
     
-    const flowEdges = data.edges.map((edge) => {
+    const flowEdges = workingEdges.map((edge) => {
       const edgeType = edge.type || 'recommended';
       
       return {
@@ -429,89 +431,8 @@ const RoadmapGenerator = () => {
     
   }, []);
 
-  const showCareerPath = (pathName) => {
-    if (!roadmapData || !roadmapData.career_paths) return;
-    
-    const path = roadmapData.career_paths.find(p => p.path_name === pathName);
-    if (!path) return;
-    
-    setSelectedPath(path);
-    
-    // Highlight nodes in this path
-    const updatedNodes = nodes.map(node => {
-      if (path.node_sequence.includes(node.id)) {
-        return {
-          ...node,
-          className: `${node.className || ''} highlighted-node`
-        };
-      } else {
-        return {
-          ...node,
-          className: `${node.className || ''} faded-node`
-        };
-      }
-    });
-    
-    // Highlight edges in this path
-    const pathEdges = [];
-    for (let i = 0; i < path.node_sequence.length - 1; i++) {
-      pathEdges.push(`${path.node_sequence[i]}-${path.node_sequence[i+1]}`);
-    }
-    
-    const updatedEdges = edges.map(edge => {
-      if (pathEdges.includes(edge.id)) {
-        return {
-          ...edge,
-          className: `${edge.className || ''} highlighted-edge`
-        };
-      } else {
-        return {
-          ...edge,
-          className: `${edge.className || ''} faded-edge`
-        };
-      }
-    });
-    
-    setNodes(updatedNodes);
-    setEdges(updatedEdges);
-  };
-
-  const resetPathHighlight = () => {
-    setSelectedPath(null);
-    
-    // Reset node styling by completely removing the highlighted/faded classes
-    const updatedNodes = nodes.map(node => {
-      // Get the base class without highlighted/faded classes
-      const baseClass = (node.className || '')
-        .split(' ')
-        .filter(cls => !cls.includes('highlighted-node') && !cls.includes('faded-node'))
-        .join(' ');
-      
-      return {
-        ...node,
-        className: baseClass
-      };
-    });
-    
-    // Reset edge styling by completely removing the highlighted/faded classes
-    const updatedEdges = edges.map(edge => {
-      // Get the base class without highlighted/faded classes
-      const baseClass = (edge.className || '')
-        .split(' ')
-        .filter(cls => !cls.includes('highlighted-edge') && !cls.includes('faded-edge'))
-        .join(' ');
-      
-      return {
-        ...edge,
-        className: baseClass
-      };
-    });
-    
-    setNodes(updatedNodes);
-    setEdges(updatedEdges);
-  };
-
-  const onNodeClick = useCallback((_, node) => {
+  const onNodeClick = useCallback((event, node) => {
+    event.stopPropagation();
     setSelectedNode(nodeMap[node.id] || null);
   }, [nodeMap]);
 
@@ -612,11 +533,16 @@ const RoadmapGenerator = () => {
 
   return (
     <div className="roadmap-generator-container">
-      <Navbar/>
-      <div className="roadmap-header-section" ref={headerRef}>
+      <Navbar variant="app" />
+      <main className="roadmap-workspace">
+      <section className="roadmap-header-section" ref={headerRef}>
+        <div className="roadmap-composer-copy">
+          <p className="workspace-eyebrow">AI roadmap generator</p>
+          <h1 className="input-title">Make the next chapter tangible.</h1>
+          <p className="input-description">Name the role or skill you are working toward. We will translate it into a visual, practical sequence of learning moves.</p>
+        </div>
+
         <div className="roadmap-input-section">
-          <h3 className="input-title">Learning Roadmap Generator</h3>
-          <p className="input-description">Enter a learning goal to generate a customized roadmap</p>
           
           <form onSubmit={handleSubmit} className="roadmap-form">
             <div className="input-group">
@@ -633,12 +559,24 @@ const RoadmapGenerator = () => {
                 className="generate-btn"
                 disabled={isGenerating}
               >
-                {isGenerating ? 'Generating...' : 'Generate Roadmap'}
+                {isGenerating ? 'Shaping your roadmap…' : <>Generate roadmap <FiArrowUpRight aria-hidden="true" /></>}
               </button>
             </div>
             
             {error && <div className="input-error">{error}</div>}
           </form>
+
+          <aside className="roadmap-composer-note" aria-label="Roadmap generator features">
+            <span className="roadmap-note-mark">↗</span>
+            <div>
+              <strong>A plan you can navigate.</strong>
+              <ul>
+                <li><FiMap aria-hidden="true" /> Linked learning milestones</li>
+                <li><FiCompass aria-hidden="true" /> Useful skills and resources</li>
+                <li><FiClock aria-hidden="true" /> Time-aware next steps</li>
+              </ul>
+            </div>
+          </aside>
         </div>
 
         {/* Tab Navigation */}
@@ -647,23 +585,23 @@ const RoadmapGenerator = () => {
             className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`}
             onClick={() => handleTabChange('saved')}
           >
-            Saved Roadmaps
+            <FiBookmark aria-hidden="true" /> Saved
           </button>
           <button 
             className={`tab-btn ${activeTab === 'generated' ? 'active' : ''}`}
             onClick={() => handleTabChange('generated')}
             disabled={!roadmapData}
           >
-            Generated Roadmap
+            <FiMap aria-hidden="true" /> Current plan
           </button>
           <button 
             className={`tab-btn ${activeTab === 'recent' ? 'active' : ''}`}
             onClick={() => handleTabChange('recent')}
           >
-            Recent Roadmaps
+            <FiClock aria-hidden="true" /> Recent
           </button>
         </div>
-      </div>
+      </section>
 
       {/* Second part - Dynamic Content based on active tab */}
       <div className="roadmap-dynamic-content" ref={contentRef}>
@@ -676,7 +614,10 @@ const RoadmapGenerator = () => {
 
         {!isGenerating && activeTab === 'saved' && (
           <div className="saved-roadmaps-container">
-            <h4 className="section-title">Your Saved Roadmaps</h4>
+            <div className="roadmap-list-heading">
+              <p className="workspace-eyebrow">Your library</p>
+              <h2 className="section-title">Saved roadmaps</h2>
+            </div>
             <div className="roadmaps-grid">
               {getSavedRoadmaps().length > 0 ? (
                 getSavedRoadmaps().map((roadmap, index) => (
@@ -688,13 +629,13 @@ const RoadmapGenerator = () => {
                           className="load-btn"
                           onClick={() => loadRoadmap(roadmap)}
                         >
-                          Load
+                          Open
                         </button>
                         <button 
                           className="delete-btn"
                           onClick={() => deleteSavedRoadmap(index)}
                         >
-                          Delete
+                          <FiTrash2 aria-hidden="true" /> Delete
                         </button>
                       </div>
                     </div>
@@ -709,7 +650,7 @@ const RoadmapGenerator = () => {
                 ))
               ) : (
                 <div className="no-roadmaps-message">
-                  <p>You haven't saved any roadmaps yet. Generate a roadmap and save it to see it here.</p>
+                  <p>Your saved plans will live here. Generate a roadmap, then save the directions you want to keep.</p>
                 </div>
               )}
             </div>
@@ -718,7 +659,10 @@ const RoadmapGenerator = () => {
 
         {!isGenerating && activeTab === 'recent' && (
           <div className="recent-roadmaps-container">
-            <h4 className="section-title">Recently Generated Roadmaps</h4>
+            <div className="roadmap-list-heading">
+              <p className="workspace-eyebrow">Your momentum</p>
+              <h2 className="section-title">Recent roadmaps</h2>
+            </div>
             <div className="roadmaps-grid">
               {getRecentRoadmaps().length > 0 ? (
                 getRecentRoadmaps().map((roadmap, index) => (
@@ -729,7 +673,7 @@ const RoadmapGenerator = () => {
                         className="load-btn"
                         onClick={() => loadRoadmap(roadmap)}
                       >
-                        Load
+                        Open
                       </button>
                     </div>
                     <p className="roadmap-card-desc">{roadmap.description}</p>
@@ -740,7 +684,7 @@ const RoadmapGenerator = () => {
                 ))
               ) : (
                 <div className="no-roadmaps-message">
-                  <p>No recent roadmaps found. Generate a roadmap to see it here.</p>
+                  <p>Your most recent generated plans will appear here.</p>
                 </div>
               )}
             </div>
@@ -748,9 +692,10 @@ const RoadmapGenerator = () => {
         )}
 
         {!isGenerating && activeTab === 'generated' && roadmapData && (
-          <div className={`roadmap-container view-${viewMode}`}>
+            <div className={`roadmap-container view-${viewMode}`}>
             <div className="roadmap-header">
-              <h4 className="roadmap-title">{roadmapData.title}</h4>
+              <p className="workspace-eyebrow">Your learning route</p>
+              <h2 className="roadmap-title">{roadmapData.title}</h2>
               <p className="roadmap-description">{roadmapData.description}</p>
               
               <div className="roadmap-actions">
@@ -758,63 +703,34 @@ const RoadmapGenerator = () => {
                   className="fit-view-btn" 
                   onClick={fitView}
                 >
-                  Fit View
+                  <FiMaximize2 aria-hidden="true" /> Fit canvas
                 </button>
                 <button 
                   className="save-roadmap-btn" 
                   onClick={saveRoadmap}
                   disabled={saveSuccess}
                 >
-                  {saveSuccess ? '✓ Saved!' : 'Save Roadmap'}
+                  {saveSuccess ? 'Saved' : <><FiBookmark aria-hidden="true" /> Save roadmap</>}
                 </button>
               </div>
             </div>
-
-            {/* Display career paths if available */}
-            {roadmapData.career_paths && roadmapData.career_paths.length > 0 && (
-              <div className="career-paths-selector">
-                <h5>Career Paths:</h5>
-                <div className="path-buttons">
-                  {selectedPath && (
-                    <button 
-                      className="path-reset-btn"
-                      onClick={resetPathHighlight}
-                    >
-                      Reset View
-                    </button>
-                  )}
-                  {roadmapData.career_paths.map((path, index) => (
-                    <button 
-                      key={index}
-                      className={`path-btn ${selectedPath?.path_name === path.path_name ? 'active' : ''}`}
-                      onClick={() => showCareerPath(path.path_name)}
-                    >
-                      {path.path_name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <div className="roadmap-layout">
               <div className="roadmap-flow" style={{ width: '100%', height: '700px' }}>
                 <ReactFlow
                   nodes={nodes}
                   edges={edges}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
                   onNodeClick={onNodeClick}
                   nodeTypes={nodeTypes}
                   edgeTypes={edgeTypes}
-                  fitView
-                  fitViewOptions={fitViewOptions}
                   className={`roadmap-flow-container theme-${viewMode}`}
                   onInit={(instance) => { reactFlowInstance.current = instance; }}
                   minZoom={0.2} // Lower min zoom to see more nodes at once
                   maxZoom={2.5}   // Higher max zoom for detailed view
                   nodesDraggable={false} // Disable dragging to maintain fixed layout
                   nodesConnectable={false}
-                  elementsSelectable={true}
+                  elementsSelectable={false}
+                  nodesFocusable={false}
                   connectionLineType="step" // Use step-like connection lines
                   preventScrolling={false} // Fix for dragging glitch - allow scrolling
                   onlyRenderVisibleElements={false} // Render all elements to prevent flickering
@@ -833,15 +749,16 @@ const RoadmapGenerator = () => {
                     zoomable
                     pannable
                     nodeColor={(node) => {
+                      const difficulty = node.data?.difficulty?.toLowerCase();
                       const category = node.data?.nodeType?.toLowerCase() || 'default';
-                      return categoryColors[category] || categoryColors.default;
+                      return categoryColors[difficulty] || categoryColors[category] || categoryColors.default;
                     }}
                   />
                   <Background 
                     variant="dots" 
                     gap={20} 
                     size={1} 
-                    color="#e0e0e0"
+                  color="#cbd9ca"
                     className="roadmap-background"
                   />
                   <Panel position="top-right" className="roadmap-panel">
@@ -861,10 +778,8 @@ const RoadmapGenerator = () => {
                   <div className="node-details">
                     <h4 className="details-title">{selectedNode.title}</h4>
                     <div className="node-metadata">
-                    <span className="difficulty-badge" style={{background: categoryColors[selectedNode.difficulty ]}}>{selectedNode.difficulty || 'N/A'}</span>
-                    <span className="category-badge" style={{ 
-                      backgroundColor: categoryColors[selectedNode.category?.toLowerCase()] || categoryColors.default
-                    }}>{selectedNode.category || 'N/A'}</span>
+                    <span className="difficulty-badge" style={{ '--difficulty-color': categoryColors[String(selectedNode.difficulty || '').toLowerCase()] || categoryColors.default }}>{selectedNode.difficulty || 'N/A'}</span>
+                    <span className="category-badge" style={{ '--category-color': categoryColors[selectedNode.category?.toLowerCase()] || categoryColors.default }}>{selectedNode.category || 'N/A'}</span>
                     <span className="time-badge">{selectedNode.estimated_time || 'N/A'}</span>
                   </div>
                   
@@ -1034,10 +949,11 @@ const RoadmapGenerator = () => {
 
       {!isGenerating && activeTab === 'generated' && !roadmapData && (
         <div className="no-roadmap-message">
-          <p>No roadmap has been generated yet. Enter a learning goal above and click "Generate Roadmap".</p>
+          <p>No roadmap has been generated yet. Enter a learning goal above to create your first visual plan.</p>
         </div>
       )}
     </div>
+    </main>
   </div>
   );
 };

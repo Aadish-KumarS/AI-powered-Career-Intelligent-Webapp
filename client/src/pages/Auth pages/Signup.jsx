@@ -75,10 +75,10 @@ export default function Signup() {
           {error && <p className="error-text">{error}</p>}
           {success && <p className="success-text">{success}</p>}
 
-          <button type="submit" className="signup-btn authForm-btn">
+          <button type="submit" className="signup-btn authForm-btn" disabled={loading}>
             {loading ? 'Signing Up ...' : 'Sign Up '}
           </button>
-          <button className="btn-google authForm-btn" onClick={handleGoogleAuth}>
+          <button type="button" className="btn-google authForm-btn" onClick={handleGoogleAuth}>
             <FaGoogle /> Sign up with Google
           </button>
         </form>

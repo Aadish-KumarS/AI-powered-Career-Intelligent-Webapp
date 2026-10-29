@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import '../../styles/Global Styles/service-theme.css';
 import '../../styles/LearningPath styles/LearningPath.css';
 import Navbar from '../../components/LandingPageComponents/Navbar';
 import { CAREER_API_BASE_URL } from '../../config/api';
@@ -563,7 +564,7 @@ const LearningPath = ({ skillData, onSave }) => {
   if (!data) {
     return (
       <>
-        <Navbar />
+        <Navbar variant="app" />
         <div className="learning-path-container">
           <form onSubmit={handleSubmit} className="learning-path-form">
             <h2>Create Your Learning Path</h2>
@@ -615,7 +616,7 @@ const LearningPath = ({ skillData, onSave }) => {
 
   return (
     <>
-      <Navbar />
+      <Navbar variant="app" />
       <div className="learning-path-container" ref={pathRef}>
         {isEditing ? (
           <div className="learning-path-edit-form">
@@ -942,7 +943,6 @@ const LearningPath = ({ skillData, onSave }) => {
             </div>
 
             <div>
-              {console.log(editingResource && resourceBeingEdited ,editingResource , resourceBeingEdited )}
               {editingResource && resourceBeingEdited ? (
                 <form onSubmit={handleEditResource} className="edit-resource-form">
                   <h3>Edit Resource</h3>

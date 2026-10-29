@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { handleSubmitForgotPassword } from '../../utils/formHanderls';
+import '../../styles/Auth styles/Auth.css';
 
 axios.defaults.withCredentials = true;
 

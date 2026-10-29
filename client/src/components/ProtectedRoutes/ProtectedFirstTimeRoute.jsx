@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import AppState from '../AppState';
 
 const ProtectedFirstTimeRoute = () => {
   const [isFirstTime, setIsFirstTime] = useState(null);
@@ -22,7 +23,7 @@ const ProtectedFirstTimeRoute = () => {
     fetchUserData();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <AppState title="Loading your profile" description="We’re checking where to take you next." />;
 
   return isFirstTime ? <Outlet /> : <Navigate to="/profile/user-profile" replace />;
 };

@@ -9,7 +9,10 @@ import { careerProfileMockData } from '../../constants/mockData';
 import SkillGapResult from './SkillGapResult';
 import JobMarketInsights from './JobMarketInsights';
 import CareerPath from './CareerPath';
+import '../../styles/Global Styles/service-theme.css';
 import '../../styles/Career analysis styles/CareerAnalysis.css';
+import { FiActivity, FiArrowUpRight, FiBarChart2, FiCompass, FiMap } from 'react-icons/fi';
+import analysisIllustration from '../../assets/svg/ai.svg';
 import Navbar from '../../components/LandingPageComponents/Navbar'
 import { API_BASE_URL, CAREER_API_BASE_URL } from '../../config/api';
 
@@ -238,7 +241,7 @@ const CareerAnalysis = () => {
       return (
         <div className="career-empty-state">
           <img 
-            src="/assets/career-analysis.svg" 
+            src={analysisIllustration}
             alt="Career Analysis" 
             className="empty-state-image" 
           />
@@ -278,53 +281,84 @@ const CareerAnalysis = () => {
 
   return (
     <div className="career-analysis-container">
-      <Navbar />
-      <div className="career-analysis-header">
-        <h1>Career Insights</h1>
-        <p>Discover opportunities to grow your career based on your profile, skills, and the job market</p>
-        
-        <button 
-          className={`analyze-btn ${loading ? 'loading' : ''}`} 
-          onClick={analyzeCareer} 
-          disabled={loading || !userProfile}
-        >
-          {loading ? 'Analyzing...' : 'Analyze My Career'}
-        </button>
-        
-        {error && <div className="error-message">{error}</div>}
-      </div>
+      <Navbar variant="app" />
+      <main className="analysis-workspace">
+        <section className="career-analysis-header">
+          <div className="analysis-intro">
+            <p className="workspace-eyebrow">AI career analysis</p>
+            <h1>See the moves that will matter next.</h1>
+            <p>Bring your skills, ambitions, and the market into one clear picture—then turn insight into a considered next step.</p>
+            <button
+              className={`analyze-btn ${loading ? 'loading' : ''}`}
+              onClick={analyzeCareer}
+              disabled={loading || !userProfile}
+            >
+              <FiActivity aria-hidden="true" />
+              {loading ? 'Reading your profile…' : 'Analyze my career'}
+              {!loading && <FiArrowUpRight aria-hidden="true" />}
+            </button>
+          </div>
+          <aside className="analysis-promise" aria-label="What the analysis includes">
+            <span className="analysis-promise-number">03</span>
+            <div>
+              <strong>One profile. Three useful lenses.</strong>
+              <ul>
+                <li><FiCompass aria-hidden="true" /> Skill gap</li>
+                <li><FiMap aria-hidden="true" /> Career direction</li>
+                <li><FiBarChart2 aria-hidden="true" /> Market signal</li>
+              </ul>
+            </div>
+          </aside>
+        </section>
 
-      {(skillGapResults || careerPathResults || jobMarketResults) && (
-        <div className="career-analysis-content">
-          <div className="career-analysis-tabs">
+        {error && <div className="error-message" role="alert">{error}</div>}
+
+        {(skillGapResults || careerPathResults || jobMarketResults) ? (
+          <section className="career-analysis-content">
+            <div className="analysis-results-heading">
+              <p className="workspace-eyebrow">Your report</p>
+              <h2>Explore the evidence.</h2>
+            </div>
+            <div className="career-analysis-tabs" role="tablist" aria-label="Career analysis results">
             <button 
               className={`tab-button ${activeTab === 'skillGap' ? 'active' : ''}`}
               onClick={() => setActiveTab('skillGap')}
+              role="tab"
+              aria-selected={activeTab === 'skillGap'}
             >
-              <span className="tab-icon">⚡</span>
+              <FiCompass className="tab-icon" aria-hidden="true" />
               Skill Gap
             </button>
             <button 
               className={`tab-button ${activeTab === 'careerPath' ? 'active' : ''}`}
               onClick={() => setActiveTab('careerPath')}
+              role="tab"
+              aria-selected={activeTab === 'careerPath'}
             >
-              <span className="tab-icon">🛤️</span>
+              <FiMap className="tab-icon" aria-hidden="true" />
               Career Path
             </button>
             <button 
               className={`tab-button ${activeTab === 'jobMarket' ? 'active' : ''}`}
               onClick={() => setActiveTab('jobMarket')}
+              role="tab"
+              aria-selected={activeTab === 'jobMarket'}
             >
-              <span className="tab-icon">📊</span>
+              <FiBarChart2 className="tab-icon" aria-hidden="true" />
               Job Market
             </button>
-          </div>
+            </div>
           
-          <div className="career-analysis-panel">
+            <div className="career-analysis-panel">
+              {renderTabContent()}
+            </div>
+          </section>
+        ) : (
+          <section className="career-analysis-content analysis-content--empty">
             {renderTabContent()}
-          </div>
-        </div>
-      )}
+          </section>
+        )}
+      </main>
     </div>
   );
 };

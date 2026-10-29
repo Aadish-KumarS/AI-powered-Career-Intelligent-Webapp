@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/UserProfile Styles/CreateProfile.css";
+import '../../styles/Global Styles/profile-theme.css';
 import gsap from "gsap";
 
 import img1 from "../../assets/img1.jpg";

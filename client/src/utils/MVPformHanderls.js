@@ -137,7 +137,7 @@ export const handleAddSkill = (skillName, skillType, level,setFormData) => {
   const targetList = skillType === 'technical' ? 'technicalSkills' : 'softSkills';
   
   setFormData(prev => {
-    if (prev.skills.selectedSkills.some(skill => skill.name.toLowerCase() === name.toLowerCase())) {
+    if (prev.skills.selectedSkills.some(skill => String(skill?.name || '').toLowerCase() === name.toLowerCase())) {
       return prev;
     }
     const newSkill = { name, level };
