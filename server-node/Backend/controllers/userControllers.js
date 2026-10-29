@@ -92,14 +92,36 @@ export const validatePassword = async (req, res, next) => {
 export default validatePassword;
 
 export const updateOnboarding = async (req, res) => {
-  const userId = req.params.id;
-  const onboardingData = req.body;
+  const userId = req.user.id;
+  const allowedFields = ['name', 'personalInfo', 'education', 'skills', 'careerInfo', 'experience', 'insights', 'preferences', 'interests', 'onboardingProgress', 'isFirstTime'];
+  const onboardingData = Object.fromEntries(
+    Object.entries(req.body).filter(([key, value]) => allowedFields.includes(key) && value !== undefined)
+  );
 
   try {
+    // Enforce the same minimum profile that the AI services need. Optional
+    // fields stay optional and the persisted document structure is unchanged.
+    if (onboardingData.isFirstTime === false || onboardingData.onboardingProgress === 100) {
+      const errors = {};
+      if (!onboardingData.name?.trim()) errors.name = 'Full name is required.';
+      if (!onboardingData.education?.highestLevel) errors['education.highestLevel'] = 'Education level is required.';
+      if (!onboardingData.education?.fieldOfStudy?.trim()) errors['education.fieldOfStudy'] = 'Field of study is required.';
+      if (!Array.isArray(onboardingData.skills?.selectedSkills) || onboardingData.skills.selectedSkills.length === 0) {
+        errors.skills = 'Add at least one technical or soft skill.';
+      }
+      if (!onboardingData.careerInfo?.careerStage) errors['careerInfo.careerStage'] = 'Career stage is required.';
+      if (!Array.isArray(onboardingData.careerInfo?.desiredRoles) || onboardingData.careerInfo.desiredRoles.length === 0) {
+        errors['careerInfo.desiredRoles'] = 'Select at least one desired role.';
+      }
+      if (Object.keys(errors).length) {
+        return res.status(422).json({ message: 'Complete the required onboarding fields.', errors });
+      }
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { ...onboardingData },
-      { new: true }
+      { $set: onboardingData },
+      { new: true, runValidators: true }
     );
 
     if (!updatedUser) {

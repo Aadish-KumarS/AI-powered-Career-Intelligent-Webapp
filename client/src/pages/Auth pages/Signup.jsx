@@ -6,12 +6,13 @@ import '../../styles/Auth styles/Auth.css';
 import { useAuthForm } from '../../hooks/useAuthForm';
 import { handleSubmitSignup } from '../../utils/formHanderls';
 import PasswordFields from '../../components/PasswordComponents/PasswordInput';
+import { API_BASE_URL } from '../../config/api';
 axios.defaults.withCredentials = true;
 
 export default function Signup() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const BASE_URL = API_BASE_URL;
 
   const { 
     formData, 

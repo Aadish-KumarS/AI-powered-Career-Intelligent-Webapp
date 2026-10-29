@@ -2,8 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import '../../styles/Career analysis styles/CareerPath.css';
 
+const asArray = (value) => Array.isArray(value) ? value : value ? [value] : [];
+const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+
 const CareerPath = ({ careerPathResults }) => {
   const [activeSection, setActiveSection] = useState('short');
+  const [activeSkillTab, setActiveSkillTab] = useState('technical');
   const [expandedItem, setExpandedItem] = useState(null);
   const sectionRefs = {
     short: useRef(null),
@@ -79,10 +83,34 @@ const CareerPath = ({ careerPathResults }) => {
   };
   
   if (!careerPathResults) return <div className="career-path-loading">Loading career path data...</div>;
-  
-  // console.log(careerPathResults);
-  const {result} = careerPathResults
-  const { career_pathway, skill_development_roadmap, potential_challenges, career_milestones } = result;
+
+  const { result = {} } = careerPathResults;
+  const {
+    career_pathway: careerPathway,
+    skill_development_roadmap: skillDevelopmentRoadmap,
+    potential_challenges: potentialChallenges,
+    career_milestones: careerMilestones,
+  } = result;
+
+  // The skill-gap endpoint returns career_trajectory, not the structure this view renders.
+  // Only the suggest-career-path endpoint returns the fields required by CareerPath.
+  if (!careerPathway || !skillDevelopmentRoadmap) {
+    return (
+      <div className="career-path-loading">
+        Career-path data is unavailable. Generate a career-path recommendation to view this tab.
+      </div>
+    );
+  }
+
+  const career_pathway = asRecord(careerPathway);
+  const rawSkillRoadmap = asRecord(skillDevelopmentRoadmap);
+  const skill_development_roadmap = {
+    technical_skills: asArray(rawSkillRoadmap.technical_skills),
+    soft_skills: asArray(rawSkillRoadmap.soft_skills),
+    domain_knowledge: asArray(rawSkillRoadmap.domain_knowledge),
+  };
+  const potential_challenges = asArray(potentialChallenges);
+  const career_milestones = asArray(careerMilestones);
   
   const renderTimelineItem = (item, index, type, timeframeKey = 'timeframe') => {
     const itemKey = `${type}-${index}`;
@@ -101,7 +129,7 @@ const CareerPath = ({ careerPathResults }) => {
               <div className="focus-areas">
                 <h4>Focus Areas:</h4>
                 <ul>
-                  {item.focus_areas.map((area, i) => (
+                  {asArray(item.focus_areas).map((area, i) => (
                     <li key={i}>{area}</li>
                   ))}
                 </ul>
@@ -110,7 +138,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="action-steps">
                   <h4>Action Steps:</h4>
                   <ul>
-                    {item.actionable_steps.map((step, i) => (
+                    {asArray(item.actionable_steps).map((step, i) => (
                       <li key={i}>{step}</li>
                     ))}
                   </ul>
@@ -120,7 +148,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="projects">
                   <h4>Recommended Projects:</h4>
                   <ul>
-                    {item.project_recommendations.map((project, i) => (
+                    {asArray(item.project_recommendations).map((project, i) => (
                       <li key={i}>{project}</li>
                     ))}
                   </ul>
@@ -135,7 +163,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="potential-roles">
                   <h4>Potential Roles:</h4>
                   <ul>
-                    {item.potential_roles.map((role, i) => (
+                    {asArray(item.potential_roles).map((role, i) => (
                       <li key={i}>{role}</li>
                     ))}
                   </ul>
@@ -145,7 +173,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="responsibilities">
                   <h4>Key Responsibilities:</h4>
                   <ul>
-                    {item.key_responsibilities.map((resp, i) => (
+                    {asArray(item.key_responsibilities).map((resp, i) => (
                       <li key={i}>{resp}</li>
                     ))}
                   </ul>
@@ -155,7 +183,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="strategies">
                   <h4>Advancement Strategies:</h4>
                   <ul>
-                    {item.advancement_strategies.map((strategy, i) => (
+                    {asArray(item.advancement_strategies).map((strategy, i) => (
                       <li key={i}>{strategy}</li>
                     ))}
                   </ul>
@@ -170,7 +198,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="career-positioning">
                   <h4>Career Positioning:</h4>
                   <ul>
-                    {item.career_positioning.map((pos, i) => (
+                    {asArray(item.career_positioning).map((pos, i) => (
                       <li key={i}>{pos}</li>
                     ))}
                   </ul>
@@ -180,7 +208,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="industry-positioning">
                   <h4>Industry Positioning:</h4>
                   <ul>
-                    {item.industry_positioning.map((pos, i) => (
+                    {asArray(item.industry_positioning).map((pos, i) => (
                       <li key={i}>{pos}</li>
                     ))}
                   </ul>
@@ -190,7 +218,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="senior-roles">
                   <h4>Senior Role Opportunities:</h4>
                   <ul>
-                    {item.senior_role_opportunities.map((role, i) => (
+                    {asArray(item.senior_role_opportunities).map((role, i) => (
                       <li key={i}>{role}</li>
                     ))}
                   </ul>
@@ -204,8 +232,6 @@ const CareerPath = ({ careerPathResults }) => {
   };
   
   const renderSkillsSection = () => {
-    const [activeSkillTab, setActiveSkillTab] = useState('technical');
-    
     const handleTabClick = (tab) => {
       setActiveSkillTab(tab);
       
@@ -265,7 +291,7 @@ const CareerPath = ({ careerPathResults }) => {
                   <div className="skill-resources">
                     <h4>Resources:</h4>
                     <ul>
-                      {skill.learning_resources.map((resource, i) => (
+                      {asArray(skill.learning_resources).map((resource, i) => (
                         <li key={i}>{resource}</li>
                       ))}
                     </ul>
@@ -285,7 +311,7 @@ const CareerPath = ({ careerPathResults }) => {
                   <div className="practice-venues">
                     <h4>Practice Venues:</h4>
                     <ul>
-                      {skill.practice_venues.map((venue, i) => (
+                      {asArray(skill.practice_venues).map((venue, i) => (
                         <li key={i}>{venue}</li>
                       ))}
                     </ul>
@@ -304,7 +330,7 @@ const CareerPath = ({ careerPathResults }) => {
                   <div className="key-concepts">
                     <h4>Key Concepts:</h4>
                     <ul>
-                      {domain.key_concepts.map((concept, i) => (
+                      {asArray(domain.key_concepts).map((concept, i) => (
                         <li key={i}>{concept}</li>
                       ))}
                     </ul>
@@ -312,7 +338,7 @@ const CareerPath = ({ careerPathResults }) => {
                   <div className="industry-applications">
                     <h4>Industry Applications:</h4>
                     <ul>
-                      {domain.industry_applications.map((app, i) => (
+                      {asArray(domain.industry_applications).map((app, i) => (
                         <li key={i}>{app}</li>
                       ))}
                     </ul>
@@ -341,7 +367,7 @@ const CareerPath = ({ careerPathResults }) => {
               <div className="mitigation-strategies">
                 <h4>Mitigation Strategies:</h4>
                 <ul>
-                  {challenge.mitigation_strategies.map((strategy, i) => (
+                  {asArray(challenge.mitigation_strategies).map((strategy, i) => (
                     <li key={i}>{strategy}</li>
                   ))}
                 </ul>
@@ -368,7 +394,7 @@ const CareerPath = ({ careerPathResults }) => {
                 <div className="milestone-prerequisites">
                   <h4>Prerequisites:</h4>
                   <ul>
-                    {milestone.prerequisites.map((prereq, i) => (
+                    {asArray(milestone.prerequisites).map((prereq, i) => (
                       <li key={i}>{prereq}</li>
                     ))}
                   </ul>
@@ -410,19 +436,17 @@ const CareerPath = ({ careerPathResults }) => {
       <div className="timeline-container">
         <div ref={sectionRefs.short} className={`timeline-section ${activeSection === 'short' ? 'active' : ''}`}>
           <h2>Short-term Goals (0-12 months)</h2>
-         { console.log(career_pathway)}
-          
-          {career_pathway.short_term_goals.map((goal, index) => renderTimelineItem(goal, index, 'short'))}
+          {asArray(career_pathway.short_term_goals).map((goal, index) => renderTimelineItem(asRecord(goal), index, 'short'))}
         </div>
         
         <div ref={sectionRefs.mid} className={`timeline-section ${activeSection === 'mid' ? 'active' : ''}`}>
           <h2>Mid-term Goals (1-3 years)</h2>
-          {career_pathway.mid_term_goals.map((goal, index) => renderTimelineItem(goal, index, 'mid'))}
+          {asArray(career_pathway.mid_term_goals).map((goal, index) => renderTimelineItem(asRecord(goal), index, 'mid'))}
         </div>
         
         <div ref={sectionRefs.long} className={`timeline-section ${activeSection === 'long' ? 'active' : ''}`}>
           <h2>Long-term Goals (3+ years)</h2>
-          {career_pathway.long_term_goals.map((goal, index) => renderTimelineItem(goal, index, 'long'))}
+          {asArray(career_pathway.long_term_goals).map((goal, index) => renderTimelineItem(asRecord(goal), index, 'long'))}
         </div>
       </div>
       

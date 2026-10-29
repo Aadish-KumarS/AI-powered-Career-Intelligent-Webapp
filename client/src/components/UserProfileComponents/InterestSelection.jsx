@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import '../../styles/UserProfile Styles/InterestSelection.css';
-import { addInterest, debounce, fetchSuggestions, handleInterestInputChange, removeInterest } from "../../utils/helper";
+import { addInterest, fetchSuggestions, handleInterestInputChange, removeInterest } from "../../utils/helper";
 
 const InterestSelection = ({ 
   profileData, 

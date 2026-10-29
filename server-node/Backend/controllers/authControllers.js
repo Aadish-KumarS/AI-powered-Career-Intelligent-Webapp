@@ -5,6 +5,7 @@ import OTP from '../models/Otp.js';
 import sendEmail from '../utils/sendEmail.js';
 import { OAuth2Client } from 'google-auth-library';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -14,13 +15,16 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    if (!name?.trim() || !email?.trim() || !password || password.length < 8) {
+      return res.status(400).json({ message: "Name, email, and an 8-character password are required" });
+    }
     
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otp = crypto.randomInt(100000, 1000000);
 
     const otpExpiration = new Date();
     otpExpiration.setMinutes(otpExpiration.getMinutes() + 10);
@@ -38,7 +42,8 @@ export const register = async (req, res) => {
     
     res.cookie('email', email, {
       httpOnly: true,
-      secure: false, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
       maxAge: 60 * 60 * 1000,
       path: '/' 
     });
@@ -78,7 +83,6 @@ export const logout = (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
@@ -138,4 +142,3 @@ export const googleLogin = async (req, res) => {
     res.status(500).json({ message: "Google Login Failed", error });
   }
 };
-

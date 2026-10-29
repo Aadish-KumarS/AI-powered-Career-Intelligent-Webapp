@@ -4,22 +4,22 @@ import { useAuthForm } from '../../hooks/useAuthForm';
 import '../../styles/Auth styles/Auth.css';
 import { handleSubmitLogin } from '../../utils/formHanderls';
 import { useState } from 'react';
+import { API_BASE_URL } from '../../config/api';
 
 export default function Login() {
   const navigate = useNavigate();
   const { formData, passwordVisible, error, loading, handleChange, 
     togglePasswordVisibility, setError, setLoading
   } = useAuthForm({ email: '', password: '' });
-  const [isFirstTime, setIsFirstTime] = useState(null);
   const [verificationMessage, setVerificationMessage] = useState("");
 
 
   const handleSubmit = async (e) => {
-    handleSubmitLogin(e, setLoading, setError, formData, navigate, setIsFirstTime, setVerificationMessage)
+    handleSubmitLogin(e, setLoading, setError, formData, navigate, setVerificationMessage)
   };
 
   const handleGoogleLogin = () =>{
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   }
 
   return (

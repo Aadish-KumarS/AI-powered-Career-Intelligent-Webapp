@@ -58,7 +58,7 @@ const featuresData = [
       "🎯 Jumpstart your journey with next-step suggestions."
     ],
     img: ai,
-    link: 'services/career-guid/onboarding'
+    link: 'services/career-guid/career-recommendation'
   },
   {
     id: 5,

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -12,6 +12,7 @@ import re
 from app.models.roadmapModel import Roadmap
 from app.crud.roadmapCRUD import save_roadmap
 from app.crud.roadmapCRUD import get_all_roadmaps,delete_all_roadmaps
+from app.core.auth import get_current_user_id
 
 # Load environment variables from .env
 load_dotenv()
@@ -19,13 +20,23 @@ load_dotenv()
 # Initialize FastAPI app
 app = FastAPI()
 
-# ✅ CORS setup
+# Allow local Vite development ports by default; production origins are
+# configured with CORS_ORIGINS as a comma-separated environment variable.
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://localhost:5174",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Replace with your frontend URL
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # 📦 Request model
@@ -43,9 +54,60 @@ LLM_MODEL = os.getenv("LLM_MODEL", "llama3-8b-8192")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+def parse_roadmap_json(content: object) -> dict:
+    """Extract one complete roadmap object without mutating model output."""
+    if not isinstance(content, str) or not content.strip():
+        raise ValueError("The model returned an empty response")
+    text = content.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        text = "\n".join(lines[1:-1] if lines and lines[-1].strip() == "```" else lines[1:]).strip()
+
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        if start < 0:
+            raise ValueError("No JSON object found in model response")
+        depth, in_string, escaped = 0, False, False
+        parsed = None
+        for index in range(start, len(text)):
+            char = text[index]
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+            elif char == '"':
+                in_string = True
+            elif char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    parsed = json.loads(text[start:index + 1])
+                    break
+        if parsed is None:
+            raise ValueError("The model response contains incomplete JSON")
+
+    if not isinstance(parsed, dict):
+        raise ValueError("The model response must be a JSON object")
+    # Preserve the frontend contract while rejecting unusable output early.
+    Roadmap(**parsed)
+    node_ids = [str(node.get("id")) for node in parsed.get("nodes", [])]
+    if len(node_ids) != len(set(node_ids)) or not node_ids:
+        raise ValueError("Roadmap nodes must have unique IDs")
+    valid_ids = set(node_ids)
+    if any(edge.get("source") not in valid_ids or edge.get("target") not in valid_ids for edge in parsed.get("edges", [])):
+        raise ValueError("Roadmap edges reference unknown nodes")
+    return parsed
+
 # 🚀 Route to generate roadmap only
 @app.post("/generate-roadmap")
-async def generate_roadmap(req: RoadmapRequest):
+async def generate_roadmap(req: RoadmapRequest, _: str = Depends(get_current_user_id)):
     if not GROQ_API_KEY:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Missing GROQ_API_KEY in .env")
 
@@ -134,10 +196,13 @@ async def generate_roadmap(req: RoadmapRequest):
             "messages": [
                 {"role": "system", "content": "You are an expert roadmap generator."},
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            "temperature": 0.3,
+            "max_completion_tokens": 20000,
+            "response_format": {"type": "json_object"}
         }
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(90.0, connect=10.0)) as client:
             response = await client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers=headers,
@@ -152,36 +217,25 @@ async def generate_roadmap(req: RoadmapRequest):
         result = response.json()
         content = result["choices"][0]["message"]["content"]
 
-        json_match = re.search(r'\{.*\}', content, re.DOTALL)
-        if json_match:
-            json_str = json_match.group()
-            try:
-                roadmap_json = json.loads(json_str)
-                return roadmap_json
-            except json.JSONDecodeError:
-                logger.error(f"Failed to parse JSON from LLM response. Extracted content: {json_str}")
-                raise HTTPException(status_code=500, detail="Failed to parse JSON from LLM response.")
-        else:
-            logger.error(f"Could not extract valid JSON from LLM response. Raw content: {content}")
-            raise HTTPException(status_code=500, detail="Could not extract valid JSON from LLM response.")
+        return parse_roadmap_json(content)
 
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error occurred: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"HTTP error: {str(e)}")
+        logger.error("Roadmap provider returned %s", e.response.status_code)
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The roadmap provider could not complete the request")
 
     except httpx.RequestError as e:
-        logger.error(f"Request error occurred: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
+        logger.error("Roadmap provider request failed: %s", e)
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="The roadmap provider is temporarily unavailable")
 
     except Exception as e:
-        logger.error(f"Unexpected error occurred: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+        logger.exception("Roadmap generation failed")
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The generated roadmap was incomplete. Please try again.")
 
 # 💾 Separate route to save roadmap
 @app.post("/save-roadmap")
-async def save_roadmap_to_db(req: RoadmapSaveRequest):
+async def save_roadmap_to_db(req: RoadmapSaveRequest, user_id: str = Depends(get_current_user_id)):
     try:
-        roadmap_model = Roadmap(**req.roadmap)
+        roadmap_model = Roadmap(**req.roadmap, user_id=user_id)
         roadmap_id = await save_roadmap(roadmap_model)
         return {"message": "Roadmap saved successfully", "id": roadmap_id}
     except Exception as e:
@@ -190,19 +244,21 @@ async def save_roadmap_to_db(req: RoadmapSaveRequest):
 
 
 @app.get("/roadmaps")
-async def get_roadmaps():
+async def get_roadmaps(user_id: str = Depends(get_current_user_id)):
     try:
         # Get all roadmaps from the database
-        roadmaps = await get_all_roadmaps()
+        roadmaps = await get_all_roadmaps(user_id)
         if roadmaps:
             return {"roadmaps": roadmaps}
         else:
             raise HTTPException(status_code=404, detail="No roadmaps found")
     except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
         logger.error(f"Error fetching roadmaps: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch roadmaps")
     
 
 @app.delete("/roadmaps/delete-all", tags=["Roadmaps"])
-async def delete_all():
-    return await delete_all_roadmaps()
+async def delete_all(user_id: str = Depends(get_current_user_id)):
+    return await delete_all_roadmaps(user_id)

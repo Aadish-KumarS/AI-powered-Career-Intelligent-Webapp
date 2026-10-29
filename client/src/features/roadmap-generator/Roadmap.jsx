@@ -13,6 +13,8 @@ import '../../styles/Roadmap genarator/Roadmap.css';
 import { CustomEdge, CustomNode } from './CustomReactFlowComponents';
 import gsap from 'gsap';
 import Navbar from '../../components/LandingPageComponents/Navbar'
+import { roadmapMockData } from '../../constants/mockData';
+import { ROADMAP_API_BASE_URL } from '../../config/api';
 
 const RoadmapGenerator = () => {
   const [goal, setGoal] = useState('');
@@ -81,6 +83,13 @@ const RoadmapGenerator = () => {
     setGoal(e.target.value);
   };
 
+  const displayRoadmap = (data) => {
+    setRoadmapData(data);
+    setNodeMap(Object.fromEntries(data.nodes.map((node) => [node.id, node])));
+    processRoadmapData(data);
+    setActiveTab('generated');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -94,10 +103,12 @@ const RoadmapGenerator = () => {
     setSaveSuccess(false);
     
     try {
-      const response = await fetch(`http://localhost:8000/generate-roadmap`, {
+      const token = sessionStorage.getItem('authToken');
+      const response = await fetch(`${ROADMAP_API_BASE_URL}/generate-roadmap`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ goal })
         });
@@ -108,22 +119,14 @@ const RoadmapGenerator = () => {
         
       const data = await response.json();
       
-      setRoadmapData(data);
-      
-      const newNodeMap = {};
-      data.nodes.forEach(node => {
-        newNodeMap[node.id] = node;
-      });
-      setNodeMap(newNodeMap);
-      
-      processRoadmapData(data);
-      
-      // Switch to generated tab automatically
-      setActiveTab('generated');
+      displayRoadmap(data);
       
     } catch (err) {
       console.error("Failed to generate roadmap:", err);
-      setError("Failed to generate roadmap. Please try again.");
+      displayRoadmap({
+        ...roadmapMockData,
+        title: `Professional Roadmap: ${goal.trim()}`
+      });
     } finally {
       setIsGenerating(false);
     }

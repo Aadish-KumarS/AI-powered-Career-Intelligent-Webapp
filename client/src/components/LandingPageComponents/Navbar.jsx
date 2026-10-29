@@ -6,7 +6,7 @@ import { FaAngleDown } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import SettingsDropdown from './SettingsDropdown';
 
-export default function Navbar() {
+export default function Navbar({ variant = 'default' }) {
   const [showServicesDropdown, setShowServicesDropdown] = useState(false);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar fade-in">
+    <nav className={`navbar fade-in navbar--${variant}`}>
       <Link to='/'>
         <h1 className="logo">Right Track</h1>
       </Link>
@@ -30,20 +30,21 @@ export default function Navbar() {
         <li><a href="/#features">Features</a></li>
         <li><a href="/#about">About</a></li>
         <li className="services-dropdown">
-          <div 
+          <button
+            type="button"
             className="services-dropdown-toggle"
             onClick={toggleServicesDropdown}
+            aria-expanded={showServicesDropdown}
+            aria-haspopup="menu"
           >
             Services <FaAngleDown />
-          </div>
+          </button>
           {showServicesDropdown && (
-            <div className="dropdown-content">
+            <div className="dropdown-content" role="menu">
               <div className="dropdown-category">
-                <div className="dropdown-category">
-                  <h3>Macro Services</h3>
-                  <Link to="/services/career-guid/onboarding">AI Career Guidance & Recommondation</Link>
-                  <Link to="/services/career-guid/career-analysis">AI Career Analysis</Link>
-                </div>
+                <h3>Macro Services</h3>
+                <Link to="/services/career-guid/career-recommendation">AI Career Guidance &amp; Recommendation</Link>
+                <Link to="/services/career-guid/career-analysis">AI Career Analysis</Link>
                 <h3>Micro Services</h3>
                 <Link to="/services/generate-roadmap">AI Roadmap Generator </Link>
                 <Link to="/services/exam-certification">Exam Certification AI Recommondation</Link>
@@ -55,7 +56,7 @@ export default function Navbar() {
       </ul>
       <div className='center'>
         <Link to="/signup">
-          <div className='user-profile center'>
+          <div className='user-profile center' aria-label="Create an account">
             <FaRegUser />
           </div>
         </Link>

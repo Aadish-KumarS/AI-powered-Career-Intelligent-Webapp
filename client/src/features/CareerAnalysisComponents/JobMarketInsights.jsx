@@ -16,22 +16,8 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
   // State for active section
   const [activeSection, setActiveSection] = React.useState('skills');
 
-  // Check if data is loaded
-  if (!jobMarketInsights || !jobMarketInsights.result) {
-    return <div className="loading-container">Loading market insights...</div>;
-  }
-
-  const {
-    market_demand_analysis,
-    role_insights,
-    industry_landscape,
-    compensation_insights,
-    future_outlook,
-    hiring_channel_effectiveness,
-    interview_process_insights
-  } = jobMarketInsights.result;
-
   useEffect(() => {
+    if (!jobMarketInsights?.result) return undefined;
     // Main component animation
     gsap.fromTo(
       componentRef.current,
@@ -63,7 +49,21 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
         }
       }
     });
-  }, [activeSection]);
+  }, [activeSection, jobMarketInsights]);
+
+  if (!jobMarketInsights?.result) {
+    return <div className="loading-container">Loading market insights...</div>;
+  }
+
+  const {
+    market_demand_analysis,
+    role_insights,
+    industry_landscape,
+    compensation_insights,
+    future_outlook,
+    hiring_channel_effectiveness,
+    interview_process_insights
+  } = jobMarketInsights.result;
 
   // Handler for section changes
   const handleSectionChange = (section) => {

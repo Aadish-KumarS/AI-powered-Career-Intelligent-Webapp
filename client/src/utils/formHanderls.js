@@ -1,6 +1,9 @@
 import axios from "axios";
 import gsap from "gsap";
 import { getIsFirstTime } from "./helper";
+import { API_BASE_URL } from "../config/api";
+
+axios.defaults.withCredentials = true;
 
 //EMAIL VERIFICATION
 export const handleSubmitEmailVerification = async (e, verificationCode, setError,navigate,location) => {
@@ -12,7 +15,7 @@ export const handleSubmitEmailVerification = async (e, verificationCode, setErro
   }
 
   try {
-    const response = await axios.post('http://localhost:5000/otp/verify-otp', {
+    const response = await axios.post(`${API_BASE_URL}/otp/verify-otp`, {
       otp: verificationCode,
     });
 
@@ -48,12 +51,12 @@ export const handleSubmitForgotPassword = async (e,setError,setSuccess,setLoadin
   }
 
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/forgot-password', {
+    const response = await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, {
       email : email
     });
 
-    const data = await response.data;
-    if (response.status == 200) {
+    const data = response.data;
+    if (response.status === 200) {
       setSuccess('A verification code has been sent to your email.');
       setTimeout(() => {
         navigate('/verify-email', { state: { purpose: 'forgot-password' } });
@@ -62,14 +65,14 @@ export const handleSubmitForgotPassword = async (e,setError,setSuccess,setLoadin
       setError(data.message || 'Something went wrong.');
     }
   } catch (error) {
-    setError('Server error. Please try again later.',error);
+    setError(error.response?.data?.message || 'Server error. Please try again later.');
   } finally {
     setLoading(false);
   }
 };
 
 //LOGIN
-export const handleSubmitLogin = async ( e, setLoading, setError, formData, navigate, setIsFirstTime, setVerificationMessage) => {
+export const handleSubmitLogin = async ( e, setLoading, setError, formData, navigate, setVerificationMessage) => {
   e.preventDefault();
   setLoading(true);
   setError("");
@@ -83,7 +86,7 @@ export const handleSubmitLogin = async ( e, setLoading, setError, formData, navi
 
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/auth/login",
+      `${API_BASE_URL}/api/auth/login`,
       formData,
       { withCredentials: true }
     );
@@ -93,9 +96,7 @@ export const handleSubmitLogin = async ( e, setLoading, setError, formData, navi
     if (token) {
       sessionStorage.setItem("authToken", token);
 
-      const isFirstTime = await getIsFirstTime(token, "http://localhost:5000");
-      
-      setIsFirstTime(isFirstTime);
+      const isFirstTime = await getIsFirstTime(token, API_BASE_URL);
       
       if (isFirstTime) {
         navigate("/profile/create-user-profile");
@@ -105,6 +106,9 @@ export const handleSubmitLogin = async ( e, setLoading, setError, formData, navi
     }
   } catch (err) {
     console.error("Login error:", err);
+    console.error("Login status:", err.response?.status);
+    console.error("Login response:", err.response?.data);
+    console.error("Login error:", err.message);
 
     if (err.response?.data?.message) {
       const errorMessage = err.response.data.message;
@@ -138,20 +142,20 @@ export const handleSubmitResetPassword = async (e,setError,setSuccess,formData,n
   }
 
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/reset-password', {
+    const response = await axios.post(`${API_BASE_URL}/api/auth/reset-password`, {
       password: formData.password
     });
 
-    const data = await response.data;
+    const data = response.data;
 
-    if (response.status == 200) {
+    if (response.status === 200) {
       setSuccess('Password reset successfully. Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } else {
       setError(data.message || 'Something went wrong.');
     }
   } catch (error) {
-    setError('Server error. Please try again later.',error);
+    setError(error.response?.data?.message || 'Server error. Please try again later.');
   }
 };
 
@@ -179,7 +183,7 @@ export const handleSubmitSignup = async (e,setLoading,formData,setError,validate
   }
 
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/register', {
+    const response = await axios.post(`${API_BASE_URL}/api/auth/register`, {
       name: formData.name,
       email: formData.email,
       password: formData.password

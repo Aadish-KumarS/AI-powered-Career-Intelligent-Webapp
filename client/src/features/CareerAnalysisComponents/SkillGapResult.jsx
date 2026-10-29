@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import '../../styles/Career analysis styles/SkillGapResult.css';
 
+const asArray = (value) => Array.isArray(value) ? value : [];
+const asRecord = (value) => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+
 const SkillGapResult = ({ analysisData }) => {
   // Refs for GSAP animations
   const componentRef = useRef(null);
@@ -38,33 +41,16 @@ const SkillGapResult = ({ analysisData }) => {
     // Initialize expanded sections for dynamic roles and learning paths
     const updatedExpandedSections = { ...expandedSections };
     console.log(analysisData);
-    console.log();
-    console.log();
-    console.log();
-    console.log(analysisData.result);
-    console.log();
-    console.log();
-    console.log();
-    console.log();
-    console.log(analysisData.result.skill_assessment);
-    console.log();
-    console.log();
-    console.log();
-    console.log();
-    console.log(analysisData.result.skill_assessment.skill_gaps);
-    console.log();
-    console.log();
-    console.log();
-    console.log();
-
     
     // Add skill gaps sections for each desired role
-    Object.keys(analysisData.result.skill_assessment.skill_gaps).forEach(roleKey => {
+    const result = asRecord(analysisData?.result);
+    const assessment = asRecord(result.skill_assessment);
+    Object.keys(asRecord(assessment.skill_gaps)).forEach(roleKey => {
       updatedExpandedSections.skillGaps[roleKey] = false;
     });
     
     // Add learning path sections
-    Object.keys(analysisData.result.learning_path).forEach(path => {
+    Object.keys(asRecord(result.learning_path)).forEach(path => {
       updatedExpandedSections.learningPath[path] = false;
     });
     
@@ -133,16 +119,30 @@ const SkillGapResult = ({ analysisData }) => {
     return <div className="skill-gap-loading">Unable to display skill assessment. Please try again.</div>;
   }
 
-  const { result } = analysisData;
-  const { 
-    skill_assessment, 
-    missing_skills, 
-    learning_path, 
-    industry_insights, 
-    career_trajectory, 
-    networking_recommendations, 
-    portfolio_recommendations 
-  } = result;
+  const result = asRecord(analysisData.result);
+  const rawAssessment = asRecord(result.skill_assessment);
+  const skill_assessment = {
+    current_strengths: asArray(rawAssessment.current_strengths),
+    current_skill_levels: asRecord(rawAssessment.current_skill_levels),
+    transferable_skills: asArray(rawAssessment.transferable_skills),
+    skill_gaps: asRecord(rawAssessment.skill_gaps),
+  };
+  const learning_path = asRecord(result.learning_path);
+  const rawIndustryInsights = asRecord(result.industry_insights);
+  const industry_insights = {
+    market_trends: asArray(rawIndustryInsights.market_trends),
+    regional_factors: asArray(rawIndustryInsights.regional_factors),
+    salary_expectations: asArray(rawIndustryInsights.salary_expectations),
+  };
+  const rawCareerTrajectory = asRecord(result.career_trajectory);
+  const career_trajectory = {
+    short_term_goals: asArray(rawCareerTrajectory.short_term_goals),
+    medium_term_goals: asArray(rawCareerTrajectory.medium_term_goals),
+    long_term_goals: asArray(rawCareerTrajectory.long_term_goals),
+    estimated_timeline: rawCareerTrajectory.estimated_timeline || 'Not specified',
+  };
+  const networking_recommendations = asArray(result.networking_recommendations);
+  const portfolio_recommendations = asArray(result.portfolio_recommendations);
 
   return (
     <div className="skill-gap-container" ref={componentRef}>
@@ -184,10 +184,13 @@ const SkillGapResult = ({ analysisData }) => {
         {expandedSections.skillLevels && (
           <div className="section-content">
             {Object.entries(skill_assessment.current_skill_levels).map(([skill, description], index) => {
+              const skillDescription = typeof description === 'string'
+                ? description
+                : String(description?.description || '');
               // Extract level from description (assuming format "(Level) Description")
-              const levelMatch = description.match(/^\((.*?)\)/);
+              const levelMatch = skillDescription.match(/^\((.*?)\)/);
               const level = levelMatch ? levelMatch[1] : "Intermediate";
-              const cleanDescription = description.replace(/^\(.*?\)\s*/, '');
+              const cleanDescription = skillDescription.replace(/^\(.*?\)\s*/, '');
               
               return (
                 <div key={index} className="skill-level-item">
@@ -232,7 +235,9 @@ const SkillGapResult = ({ analysisData }) => {
         
         {/* Render each role's skill gaps */}
         {Object.entries(skill_assessment.skill_gaps).map(([roleKey, roleData], index) => {
+          const safeRoleData = asRecord(roleData);
           const role = roleKey.replace(/_/g, ' ');
+          const priorityLevel = String(safeRoleData.priority_level || safeRoleData.priority || 'Medium');
           return (
             <div key={index} className="role-gap-container">
               <div 
@@ -240,8 +245,8 @@ const SkillGapResult = ({ analysisData }) => {
                 onClick={() => toggleSection('skillGaps', roleKey)}
               >
                 <h3>{role}</h3>
-                <span className={`priority-badge ${roleData.priority_level.toLowerCase()}`}>
-                  Priority: {roleData.priority_level}
+                <span className={`priority-badge ${priorityLevel.toLowerCase()}`}>
+                  Priority: {priorityLevel}
                 </span>
                 <span className={`expand-icon ${expandedSections.skillGaps[roleKey] ? 'expanded' : ''}`}>+</span>
               </div>
@@ -251,7 +256,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="skills-column">
                     <h4>Essential Technical Skills</h4>
                     <ul>
-                      {roleData.essential_technical_skills.map((skill, idx) => (
+                      {asArray(safeRoleData.essential_technical_skills).map((skill, idx) => (
                         <li key={idx}>{skill}</li>
                       ))}
                     </ul>
@@ -260,9 +265,10 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="skills-column">
                     <h4>Essential Soft Skills</h4>
                     <ul>
-                      {roleData.essential_soft_skills.map((skill, idx) => (
+                      {asArray(safeRoleData.essential_soft_skills).map((skill, idx) => (
                         <li key={idx}>
-                          {skill.skill} <span className="importance">(Importance: {skill.importance_rating})</span>
+                          {typeof skill === 'string' ? skill : skill?.skill}
+                          {typeof skill !== 'string' && skill?.importance_rating && <span className="importance">(Importance: {skill.importance_rating})</span>}
                         </li>
                       ))}
                     </ul>
@@ -271,7 +277,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="skills-column">
                     <h4>Recommended Tools</h4>
                     <ul className="tools-list">
-                      {roleData.recommended_tools.map((tool, idx) => (
+                      {asArray(safeRoleData.recommended_tools).map((tool, idx) => (
                         <li key={idx} className="tool-item">{tool}</li>
                       ))}
                     </ul>
@@ -280,7 +286,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="skills-column">
                     <h4>Nice to Have</h4>
                     <ul>
-                      {roleData.nice_to_have.map((skill, idx) => (
+                      {asArray(safeRoleData.nice_to_have).map((skill, idx) => (
                         <li key={idx}>{skill}</li>
                       ))}
                     </ul>
@@ -300,6 +306,7 @@ const SkillGapResult = ({ analysisData }) => {
         
         {/* Render each learning path */}
         {Object.entries(learning_path).map(([pathKey, pathData], index) => {
+          const safePathData = asRecord(pathData);
           const pathName = pathKey.replace(/_/g, ' ');
           return (
             <div key={index} className="learning-path-container">
@@ -316,7 +323,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="resource-column">
                     <h4>Beginner Resources</h4>
                     <ul>
-                      {pathData.beginner_resources.map((resource, idx) => (
+                      {asArray(safePathData.beginner_resources).map((resource, idx) => (
                         <li key={idx}>{resource}</li>
                       ))}
                     </ul>
@@ -325,7 +332,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="resource-column">
                     <h4>Intermediate Resources</h4>
                     <ul>
-                      {pathData.intermediate_resources.map((resource, idx) => (
+                      {asArray(safePathData.intermediate_resources).map((resource, idx) => (
                         <li key={idx}>{resource}</li>
                       ))}
                     </ul>
@@ -334,7 +341,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="resource-column">
                     <h4>Advanced Resources</h4>
                     <ul>
-                      {pathData.advanced_resources.map((resource, idx) => (
+                      {asArray(safePathData.advanced_resources).map((resource, idx) => (
                         <li key={idx}>{resource}</li>
                       ))}
                     </ul>
@@ -343,7 +350,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="resource-column">
                     <h4>Practice Projects</h4>
                     <ul>
-                      {pathData.practice_projects.map((project, idx) => (
+                      {asArray(safePathData.practice_projects).map((project, idx) => (
                         <li key={idx}>{project}</li>
                       ))}
                     </ul>
@@ -352,7 +359,7 @@ const SkillGapResult = ({ analysisData }) => {
                   <div className="resource-column">
                     <h4>Certifications</h4>
                     <ul>
-                      {pathData.certifications.map((cert, idx) => (
+                      {asArray(safePathData.certifications).map((cert, idx) => (
                         <li key={idx}>{cert}</li>
                       ))}
                     </ul>

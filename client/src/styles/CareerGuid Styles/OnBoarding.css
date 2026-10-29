@@ -274,6 +274,32 @@
   color: #ff3b3b;
 }
 
+.required-fields-note {
+  margin: -8px 0 18px;
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.field-error,
+.form-error {
+  margin: 6px 0 0;
+  color: #b42318;
+  font-size: 0.88rem;
+}
+
+.form-error {
+  padding: 10px 12px;
+  border: 1px solid #fecdca;
+  border-radius: 6px;
+  background: #fef3f2;
+}
+
+.input-group input[aria-invalid="true"],
+.input-group select[aria-invalid="true"] {
+  border-color: #d92d20;
+}
+
 /* Smart input with suggestions */
 .input-with-suggestions {
   position: relative;

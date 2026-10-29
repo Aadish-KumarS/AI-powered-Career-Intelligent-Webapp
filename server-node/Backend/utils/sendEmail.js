@@ -75,6 +75,7 @@ const sendEmail = async (to, subject, otp) => {
     });
   } catch (error) {
     console.error('❌ Email Sending Failed:', error);
+    throw new Error('Email delivery failed');
   }
 };
 

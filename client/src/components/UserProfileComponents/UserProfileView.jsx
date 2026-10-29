@@ -5,11 +5,12 @@ import Navbar from '../LandingPageComponents/Navbar'
 import { getUserDetail } from "../../utils/helper";
 import gsap from "gsap";
 import bgGif from '../../assets/gif/bg-gif.gif'
+import { API_BASE_URL } from '../../config/api';
 
 export default function Profile() {
   const [currentFeature, setCurrentFeature] = useState(0);
   const [activeTab, setActiveTab] = useState("profile");
-  const BASE_URL = "http://localhost:5000";
+  const BASE_URL = API_BASE_URL;
   const token = sessionStorage.getItem('authToken');
   const navigate = useNavigate();
   

@@ -276,7 +276,7 @@ export const skillGapResultMoackData={
   },
   "processed_at": "2025-04-19T08:34:05.481700",
   "request_id": "req-1745031820.235033"
-}
+};
 
 export const jobMarketResultMoackData =  {
     "result": {
@@ -446,6 +446,113 @@ export const jobMarketResultMoackData =  {
     "processed_at": "2025-04-19T09:54:25.006154",
     "request_id": "req-1745036651.419386"
 }
+
+export const careerRecommendationMockData = {
+  recommendation: `## 1. Data Analyst
+
+### Overview
+Turn data into practical business insights through analysis, dashboards, and clear communication.
+
+### Why This Career Fits
+- Builds on analytical thinking, technical skills, and an interest in solving real problems.
+
+### Skills to Develop
+- **SQL and Data Modeling** — Query and organize reliable datasets.
+- **Python for Analysis** — Use pandas and visualisation libraries to explore data.
+
+### 3–6 Month Learning Roadmap
+- **Month 1–2:** Strengthen SQL and spreadsheet analysis with small practice datasets.
+- **Month 3–4:** Build Python data-cleaning and visualisation projects.
+- **Month 5–6:** Publish a dashboard and an end-to-end portfolio case study.
+
+### Learning Curve
+The path is approachable when each new concept is applied to a small project.
+
+### Entry Strategies
+- **Entry Role 1:** Junior Data Analyst.
+- **Entry Role 2:** Business Intelligence Intern.
+
+### 5-Year Career Growth Path
+- **Year 1–2:** Deliver reliable reports and analyses.
+- **Year 3–4:** Own larger data products and mentor peers.
+- **Year 5:** Progress to Senior Analyst, Analytics Engineer, or Data Scientist.`
+};
+
+export const roadmapMockData = {
+  title: 'Professional Roadmap: Data Analyst',
+  description: 'A practical progression from data fundamentals to job-ready portfolio work.',
+  nodes: [
+    { id: '1', title: 'Data Fundamentals', category: 'foundation', difficulty: 'beginner', description: 'Learn data types, spreadsheets, and basic statistics.' },
+    { id: '2', title: 'SQL Essentials', category: 'technical', difficulty: 'beginner', description: 'Query, join, and aggregate data from relational databases.' },
+    { id: '3', title: 'Python Analysis', category: 'technical', difficulty: 'intermediate', description: 'Clean, analyse, and visualise data with Python.' },
+    { id: '4', title: 'Portfolio Project', category: 'specialization', difficulty: 'intermediate', description: 'Publish an end-to-end analysis with clear recommendations.' }
+  ],
+  edges: [
+    { source: '1', target: '2', type: 'required' },
+    { source: '2', target: '3', type: 'required' },
+    { source: '3', target: '4', type: 'required' }
+  ]
+};
+
+export const examRecommendationMockData = [
+  {
+    exam_name: 'AWS Certified Developer – Associate',
+    why_recommended: 'Builds cloud-development knowledge that complements software and data skills.',
+    ideal_timeline: 'After completing a foundational cloud course and one hands-on project.'
+  },
+  {
+    exam_name: 'Microsoft Azure Fundamentals',
+    why_recommended: 'Provides a practical introduction to cloud concepts used across many entry-level roles.',
+    ideal_timeline: 'Within the next three months.'
+  },
+  {
+    exam_name: 'Google Data Analytics Professional Certificate',
+    why_recommended: 'Strengthens data analysis, visualisation, and portfolio skills.',
+    ideal_timeline: 'Over the next three to six months.'
+  }
+];
+
+export const careerProfileMockData = {
+  education: { highestLevel: "Bachelor's", fieldOfStudy: 'Computer Science', institution: '', graduationYear: '' },
+  skills: { technicalSkills: [{ name: 'Python' }, { name: 'JavaScript' }], softSkills: [{ name: 'Problem Solving' }] },
+  careerInfo: { careerStage: 'Early Career', careerGoals: ['Build job-ready skills'], desiredIndustries: ['Technology'], desiredRoles: ['Data Analyst'] },
+  experience: { currentRole: 'Student', yearsOfExperience: '0', pastRoles: [] },
+  preferences: { personalityType: '', workEnvironment: 'Flexible', workStyle: [] },
+  interests: ['Technology'],
+  insights: { fiveYearGoal: 'Build a rewarding career in technology.' }
+};
+
+export const createLearningPathMockData = (skillName, targetCompletionDate) => ({
+  skill_id: `mock-${skillName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+  skill_name: skillName,
+  current_proficiency: 'Beginner',
+  overall_progress: 0,
+  start_date: new Date().toISOString(),
+  target_completion_date: targetCompletionDate || null,
+  resources_progress: [
+    {
+      resource_id: 'mock-foundation',
+      title: `${skillName} Fundamentals`,
+      platform: 'Self-paced learning',
+      type: 'Course',
+      difficulty: 'Beginner',
+      estimated_time_hours: 12,
+      progress_percentage: 0,
+      status: 'not_started'
+    },
+    {
+      resource_id: 'mock-project',
+      title: `${skillName} Practice Project`,
+      platform: 'Portfolio',
+      type: 'Project',
+      difficulty: 'Intermediate',
+      estimated_time_hours: 16,
+      progress_percentage: 0,
+      status: 'not_started'
+    }
+  ],
+  completed_milestones: []
+});
 
 export const careerPathResultMoackData = {
     "result": {

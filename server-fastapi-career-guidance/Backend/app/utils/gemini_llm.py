@@ -1,6 +1,9 @@
 import os
 import json
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except ImportError:  # Optional integration; the core API still runs without it.
+    genai = None
 from dotenv import load_dotenv
 from typing import Dict, Any, List
 
@@ -9,6 +12,8 @@ load_dotenv()
 class GeminiService:
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY")
+        if genai is None:
+            raise RuntimeError("google-generativeai is not installed")
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
         

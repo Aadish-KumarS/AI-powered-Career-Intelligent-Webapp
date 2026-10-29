@@ -132,17 +132,24 @@ export const handleMultiSelectChange = (section, field, item,setFormData) => {
 
 // Add a skill with proficiency level
 export const handleAddSkill = (skillName, skillType, level,setFormData) => {
-  const newSkill = { name: skillName, level: level };
+  const name = skillName.trim();
+  if (!name) return;
+  const targetList = skillType === 'technical' ? 'technicalSkills' : 'softSkills';
   
-  setFormData(prev => ({
-    ...prev,
-    skills: {
-      ...prev.skills,
-      selectedSkills: [...prev.skills.selectedSkills, newSkill],
-      [skillType === 'technical' ? 'technicalSkills' : 'softSkills']: 
-        [...prev.skills[skillType === 'technical' ? 'technicalSkills' : 'softSkills'], newSkill]
+  setFormData(prev => {
+    if (prev.skills.selectedSkills.some(skill => skill.name.toLowerCase() === name.toLowerCase())) {
+      return prev;
     }
-  }));
+    const newSkill = { name, level };
+    return {
+      ...prev,
+      skills: {
+        ...prev.skills,
+        selectedSkills: [...prev.skills.selectedSkills, newSkill],
+        [targetList]: [...prev.skills[targetList], newSkill]
+      }
+    };
+  });
 };
 
 // Remove a skill from the list

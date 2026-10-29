@@ -1,7 +1,10 @@
 /* General styles */
 .landing-page {
+  overflow: hidden;
+  background: #fffdf9;
+  color: #1d302b;
+  font-family: 'Manrope', sans-serif;
   transition: background-color 0.3s, color 0.3s;
-  font-family: Arial, sans-serif;
 }
 .landing-page.dark {
   background-color: #121212;

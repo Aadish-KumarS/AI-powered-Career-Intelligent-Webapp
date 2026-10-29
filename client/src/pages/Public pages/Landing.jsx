@@ -10,7 +10,7 @@ export default function LandingPage() {
 
     return (
         <div className='landing-page'>
-            <Navbar />
+            <Navbar variant="landing" />
             <HeroSection />
             <Features />
             <About />

@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { careerPathResultMoackData, jobMarketResultMoackData, skillGapResultMoackData } from '../../constants/mockData';
+import {
+  skillGapResultMoackData,
+  careerPathResultMoackData,
+  jobMarketResultMoackData
+} from '../../constants/mockData';
+import { careerProfileMockData } from '../../constants/mockData';
 import SkillGapResult from './SkillGapResult';
 import JobMarketInsights from './JobMarketInsights';
 import CareerPath from './CareerPath';
 import '../../styles/Career analysis styles/CareerAnalysis.css';
 import Navbar from '../../components/LandingPageComponents/Navbar'
+import { API_BASE_URL, CAREER_API_BASE_URL } from '../../config/api';
 
 const CareerAnalysis = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -14,6 +20,7 @@ const CareerAnalysis = () => {
   const [jobMarketResults, setJobMarketResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [tabErrors, setTabErrors] = useState({});
   const [activeTab, setActiveTab] = useState('skillGap');
 
   // Fetch the user's profile (already stored in the backend)
@@ -30,7 +37,7 @@ const CareerAnalysis = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          'http://localhost:5000/api/users/profile',
+          `${API_BASE_URL}/api/users/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -41,7 +48,7 @@ const CareerAnalysis = () => {
         setUserProfile(response.data);
       } catch (err) {
         console.error('Error fetching the data', err);
-        setError('Failed to fetch user profile. Please try again later.');
+        setUserProfile(careerProfileMockData);
       } finally {
         setLoading(false);
       }
@@ -51,161 +58,106 @@ const CareerAnalysis = () => {
   }, []);
 
   // Handle the career analysis process
-  const analyzeCareer = async () => {
-    if (!userProfile) return;
-    
-    setLoading(true);
-    setError(null);
-  
-    // Define the request data based on user profile
-    const requestData = transformUserDataToRequest(userProfile);
-    //const requestData = {
-    //   "current_skills": [
-    //     { "name": "Python", "level": "Intermediate" },
-    //     { "name": "Machine Learning", "level": "Advanced" },
-    //     { "name": "SQL", "level": "Intermediate" },
-    //     { "name": "DevOps", "level": "Beginner" },
-    //     { "name": "UI/UX Design", "level": "Intermediate" },
-    //     { "name": "Communication", "level": "Advanced" }
-    //   ],
-    //   "education": {
-    //     "highest_level": "Bachelor's",
-    //     "field_of_study": "Computer Science",
-    //     "institution": "Stanford University",
-    //     "graduation_year": "2021"
-    //   },
-    //   "desired_roles": [
-    //     "AI Engineer",
-    //     "Data Scientist"
-    //   ],
-    //   "location": {
-    //     "city": "San Francisco",
-    //     "latitude": 37.7749,
-    //     "longitude": -122.4194
-    //   },
-    //   "career_interests": [
-    //     "Artificial Intelligence",
-    //     "Machine Learning",
-    //     "Data Engineering"
-    //   ],
-    //   "experience": {
-    //     "current_role": "Data Analyst",
-    //     "years_of_experience": "3",
-    //     "past_roles": [
-    //       "Junior Data Analyst",
-    //       "Intern - Business Intelligence"
-    //     ]
-    //   },
-    //   "career_info": {
-    //     "career_stage": "Early Career",
-    //     "career_goals": [
-    //       "Lead an AI team",
-    //       "Contribute to open-source ML tools"
-    //     ],
-    //     "desired_industries": [
-    //       "Tech",
-    //       "Healthcare AI"
-    //     ],
-    //     "desired_roles": [
-    //       "Machine Learning Engineer"
-    //     ]
-    //   },
-    //   "preferences": {
-    //     "personality_type": "INTP",
-    //     "work_environment": "Remote",
-    //     "work_style": [
-    //       "Independent",
-    //       "Flexible"
-    //     ]
-    //   }
-    // };
-  
-    try {
-      // Create an array of promises for all API calls
-      const apiCalls = [
-        // API call for Job Market Insights
-        fetch('http://localhost:8001/generator/career/job-market-insights', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Request-ID': `req-${Date.now()}`
-          },
-          body: JSON.stringify(requestData)
-        }).then(response => {
-          if (!response.ok) {
-            throw new Error(`Job market insights failed: ${response.status}`);
-          }
-          return response.json();
-        })
-      ];
-  
-      // apiCalls.push(
-      //   // API call 1: Skill Gap Analysis
-      //   fetch('http://localhost:8001/generator/career/analyze-skill-gap', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //       'X-Request-ID': `req-${Date.now()}`
-      //     },
-      //     body: JSON.stringify(requestData)
-      //   }).then(response => {
-      //     if (!response.ok) {
-      //       throw new Error(`Skill gap analysis failed: ${response.status}`);
-      //     }
-      //     return response.json();
-      //   })
-      // );
-      
-      apiCalls.push(
-        // API call 2: Career Path Suggestions
-        fetch('http://localhost:8001/generator/career/suggest-career-path', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Request-ID': `req-${Date.now()}`
-          },
-          body: JSON.stringify(requestData)
-        }).then(response => {
-          if (!response.ok) {
-            throw new Error(`Career path suggestion failed: ${response.status}`);
-          }
-          return response.json();
-        })
-      );
-  
-      // Wait for all API calls to complete
-      const results = await Promise.all(apiCalls);
-      const jobMarketData = results[0];
-      // const skillGapData = results[0]; 
-      const careerPathData = results[1];
-      //  // Uncomment when using all three APIs
-  
-      // Fix: Check if the result is already an object, or if it's a string that needs parsing
-      
-      setJobMarketResults(typeof jobMarketData.result === 'string' ? JSON.parse(jobMarketData.result) : jobMarketData);
-      // setSkillGapResults(typeof skillGapData.result === 'string' ? JSON.parse(skillGapData.result) : skillGapData);
-      setCareerPathResults(typeof careerPathData.result === 'string' ? JSON.parse(careerPathData.result) : careerPathData);
-      
-      setSkillGapResults(skillGapResultMoackData);
-      // setJobMarketResults(jobMarketResultMoackData);
-      // setCareerPathResults(careerPathResultMoackData);
+ const analyzeCareer = async () => {
+  if (!userProfile) return;
 
-      // setAnalysisComplete(true);
-      
-      
-    } catch (err) {
-      console.error('Error analyzing career data:', err);
-      setError(`Error analyzing career data: ${err.message || 'Unknown error'}`);
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  setError(null);
+  setTabErrors({});
+  setSkillGapResults(null);
+  setCareerPathResults(null);
+  setJobMarketResults(null);
+
+  const requestData = transformUserDataToRequest(userProfile);
+
+  try {
+    const requestOptions = {
+      headers: { 'X-Request-ID': `req-${Date.now()}` }
+    };
+
+    const endpoints = [
+      ['skillGap', '/generator/career/analyze-skill-gap'],
+      ['careerPath', '/generator/career/suggest-career-path'],
+      ['jobMarket', '/generator/career/job-market-insights']
+    ];
+
+    // Run one analysis at a time. The three analyses share the same LLM
+    // provider and parallel requests can exhaust a provider's rate limit.
+    const settled = [];
+    for (const [, path] of endpoints) {
+      try {
+        const value = await axios.post(
+          `${CAREER_API_BASE_URL}${path}`,
+          requestData,
+          requestOptions
+        );
+        settled.push({ status: 'fulfilled', value });
+      } catch (reason) {
+        settled.push({ status: 'rejected', reason });
+      }
     }
-  };
+
+    const nextErrors = {};
+    const fallbacks = {
+      skillGap: skillGapResultMoackData,
+      careerPath: careerPathResultMoackData,
+      jobMarket: jobMarketResultMoackData
+    };
+
+    const normalizeResponse = (response) => ({
+      ...response.data,
+      result: typeof response.data?.result === 'string'
+        ? JSON.parse(response.data.result)
+        : response.data?.result
+    });
+
+    settled.forEach((outcome, index) => {
+      const [key] = endpoints[index];
+
+      if (outcome.status === 'rejected') {
+        nextErrors[key] = 'Live analysis is temporarily unavailable. Showing a sample result.';
+        if (key === 'skillGap') setSkillGapResults(fallbacks[key]);
+        if (key === 'careerPath') setCareerPathResults(fallbacks[key]);
+        if (key === 'jobMarket') setJobMarketResults(fallbacks[key]);
+        return;
+      }
+
+      try {
+        const data = normalizeResponse(outcome.value);
+
+        if (!data.result) {
+          nextErrors[key] = 'The analysis response was empty. Showing a sample result.';
+          if (key === 'skillGap') setSkillGapResults(fallbacks[key]);
+          if (key === 'careerPath') setCareerPathResults(fallbacks[key]);
+          if (key === 'jobMarket') setJobMarketResults(fallbacks[key]);
+          return;
+        }
+
+        if (key === 'skillGap') setSkillGapResults(data);
+        if (key === 'careerPath') setCareerPathResults(data);
+        if (key === 'jobMarket') setJobMarketResults(data);
+      } catch {
+        nextErrors[key] = 'The analysis response could not be read. Showing a sample result.';
+        if (key === 'skillGap') setSkillGapResults(fallbacks[key]);
+        if (key === 'careerPath') setCareerPathResults(fallbacks[key]);
+        if (key === 'jobMarket') setJobMarketResults(fallbacks[key]);
+      }
+    });
+
+    setTabErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length === endpoints.length) {
+      setError('Career analysis could not be generated. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const transformUserDataToRequest = (backendData) => {
     const {
       education,
       careerInfo,
-      location,
       latitude,
       longitude,
       interests,
@@ -213,24 +165,20 @@ const CareerAnalysis = () => {
       skills,
       preferences
     } = backendData;
-    console.log(education,
-      careerInfo,
-      location,
-      latitude,
-      longitude,
-      interests,
-      experience,
-      skills,
-      preferences);
-    
-
     // Helper function to convert skill name + level
     const combineSkills = () => {
-      const { technicalSkills = [], softSkills = [] } = skills || {};
-      return [...technicalSkills, ...softSkills].map((skill) => ({
-        name: skill.name || skill, // fallback in case it's just a string
-        level: skill.level || 'Intermediate'
-      }));
+      const { selectedSkills = [], technicalSkills = [], softSkills = [] } = skills || {};
+      const uniqueSkills = new Map();
+      [...selectedSkills, ...technicalSkills, ...softSkills].forEach((skill) => {
+        const name = typeof skill === 'string' ? skill : skill?.name;
+        if (name?.trim()) {
+          uniqueSkills.set(name.trim().toLowerCase(), {
+            name: name.trim(),
+            level: typeof skill === 'object' && skill.level ? skill.level : 'Intermediate'
+          });
+        }
+      });
+      return [...uniqueSkills.values()];
     };
 
     const requestData = {
@@ -243,9 +191,7 @@ const CareerAnalysis = () => {
         graduation_year: education?.graduationYear || ''
       },
 
-      desired_roles: careerInfo?.desiredRoles?.length
-        ? careerInfo.desiredRoles
-        : ['Software Engineer'], // fallback role
+      desired_roles: careerInfo?.desiredRoles || [],
 
       location: {
         city: backendData.location || '',
@@ -302,13 +248,29 @@ const CareerAnalysis = () => {
       );
     }
 
+    const withServiceNotice = (notice, content) => (
+      <>
+        {notice && <p className="career-service-notice" role="status">{notice}</p>}
+        {content}
+      </>
+    );
+
     switch(activeTab) {
       case 'skillGap':
-        return skillGapResults && <SkillGapResult analysisData={skillGapResults}  userData={userProfile}/>;
+        return withServiceNotice(
+          tabErrors.skillGap,
+          skillGapResults && <SkillGapResult analysisData={skillGapResults} userData={userProfile}/>
+        );
       case 'careerPath':
-        return careerPathResults && <CareerPath careerPathResults={careerPathResults} />;
+        return withServiceNotice(
+          tabErrors.careerPath,
+          careerPathResults && <CareerPath careerPathResults={careerPathResults} />
+        );
       case 'jobMarket':
-        return jobMarketResults && <JobMarketInsights jobMarketInsights={jobMarketResults} />;
+        return withServiceNotice(
+          tabErrors.jobMarket,
+          jobMarketResults && <JobMarketInsights jobMarketInsights={jobMarketResults} />
+        );
       default:
         return null;
     }

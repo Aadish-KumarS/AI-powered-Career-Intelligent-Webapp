@@ -7,7 +7,7 @@ import { resendOTP } from '../../utils/helper';
 export default function EmailVerification() {
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 

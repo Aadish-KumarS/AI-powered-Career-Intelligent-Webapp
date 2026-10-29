@@ -5,7 +5,6 @@ from fastapi import HTTPException
 import logging
 
 collection = db["roadmaps"]
-print(collection)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -41,10 +40,10 @@ async def get_roadmap_by_id(roadmap_id: str):
         logger.error(f"Error retrieving roadmap by ID: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve roadmap")
 
-async def get_all_roadmaps():
+async def get_all_roadmaps(user_id: str):
     try:
         # Retrieve all roadmaps from the collection
-        cursor = collection.find({})
+        cursor = collection.find({"user_id": user_id})
         roadmaps = []
         async for doc in cursor:
             doc["id"] = str(doc["_id"])  # Convert ObjectId to string
@@ -56,9 +55,9 @@ async def get_all_roadmaps():
         raise HTTPException(status_code=500, detail="Failed to retrieve roadmaps")
 
 
-async def delete_all_roadmaps():
+async def delete_all_roadmaps(user_id: str):
     try:
-        result = await collection.delete_many({})
+        result = await collection.delete_many({"user_id": user_id})
         logger.info(f"Deleted {result.deleted_count} roadmaps.")
         return {"message": f"Deleted {result.deleted_count} roadmaps."}
     except Exception as e:

@@ -1,5 +1,5 @@
 from fastapi import HTTPException,APIRouter
-from typing import List
+from typing import List, Optional
 
 from app.models.learning_path_model import (
     RecommendationResponse,
@@ -14,9 +14,20 @@ from app.utils.gemini_llm import GeminiService
 
 router = APIRouter()
 
-# Initialize services
+# Create the optional provider lazily. A missing Gemini key must not prevent
+# career analysis, exams, and authentication routes from starting.
 db = SkillDatabase()
-gemini = GeminiService()
+gemini: Optional[GeminiService] = None
+
+def get_gemini_service() -> Optional[GeminiService]:
+    global gemini
+    if gemini is not None:
+        return gemini
+    try:
+        gemini = GeminiService()
+    except Exception:
+        return None
+    return gemini
 
 @router.get("/")
 async def root():
@@ -29,7 +40,8 @@ async def create_skill(request: CreateSkillRequest):
     
     # Generate documentation for the skill
     try:
-        documentation = gemini.generate_skill_documentation(request.skill_name)
+        service = get_gemini_service()
+        documentation = service.generate_skill_documentation(request.skill_name) if service else None
         if documentation:
             doc_model = SkillDocumentation(**documentation)
             db.save_skill_documentation(skill_id, doc_model)
@@ -39,7 +51,8 @@ async def create_skill(request: CreateSkillRequest):
     
     # Get learning recommendations
     try:
-        recommendations = gemini.get_learning_recommendations(request.skill_name)
+        service = get_gemini_service()
+        recommendations = service.get_learning_recommendations(request.skill_name) if service else []
         if recommendations:
             db.save_recommendations(skill_id, recommendations)
     except Exception as e:
@@ -91,7 +104,8 @@ async def get_documentation(skill_id: str):
             raise HTTPException(status_code=404, detail="Skill not found")
             
         try:
-            documentation = gemini.generate_skill_documentation(skill.skill_name)
+            service = get_gemini_service()
+            documentation = service.generate_skill_documentation(skill.skill_name) if service else None
             if documentation:
                 doc_model = SkillDocumentation(**documentation)
                 db.save_skill_documentation(skill_id, doc_model)
@@ -113,7 +127,8 @@ async def get_recommendations(skill_id: str, refresh: bool = False):
     # If refresh is requested or no recommendations exist, generate new ones
     if refresh or not recommendations:
         try:
-            recommendations = gemini.get_learning_recommendations(skill.skill_name)
+            service = get_gemini_service()
+            recommendations = service.get_learning_recommendations(skill.skill_name) if service else []
             if recommendations:
                 db.save_recommendations(skill_id, recommendations)
         except Exception as e:

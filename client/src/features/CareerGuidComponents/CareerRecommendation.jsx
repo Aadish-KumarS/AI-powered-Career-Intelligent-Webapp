@@ -11,6 +11,9 @@ import { gsap } from 'gsap';
 import html2pdf from 'html2pdf.js';
 import '../../styles/CareerGuid Styles/CareerRecommendation.css';
 import Navbar from '../../components/LandingPageComponents/Navbar'
+import { careerRecommendationMockData } from '../../constants/mockData';
+import { careerProfileMockData } from '../../constants/mockData';
+import { API_BASE_URL, CAREER_API_BASE_URL } from '../../config/api';
 
 const CareerRecommendation = () => {
   const [userData, setUserData] = useState(null);
@@ -31,6 +34,7 @@ const CareerRecommendation = () => {
   const careerPathsRef = useRef([]);
   const timelineRef = useRef(null);
   const chartsRef = useRef(null);
+  const recommendationRequestInFlightRef = useRef(false);
 
  // Parse career paths from recommendation string
   const parseRecommendation = (recData) => {
@@ -57,7 +61,6 @@ const CareerRecommendation = () => {
       const learningCurve = extractSection(section, "Learning Curve", "Entry Strategies");
       const entryStrategies = extractSection(section, "Entry Strategies", "5-Year Career Growth Path");
       const growthPath = extractSection(section, "5-Year Career Growth Path", "---");
-console.log(roadmap);
 
       // Extract structured lists
       const skillsList = extractSkillsData(skills);
@@ -135,7 +138,8 @@ console.log(roadmap);
         line = line.replace('- ', '').trim();
 
         // Extract month range, e.g. "**Month 3–6**:"
-        const monthMatch = line.match(/\*\*Month (\d+)–(\d+)\*\*:/);
+        // Accept both LLM variants: **Month 1–2**: and **Month 1–2:**.
+        const monthMatch = line.match(/\*\*Month (\d+)[–-](\d+):?\*\*:?/);
         if (!monthMatch) return null;
 
         const startMonth = parseInt(monthMatch[1]);
@@ -147,7 +151,7 @@ console.log(roadmap);
         // Extract estimated weekly time commitment (optional)
         // e.g. "- **Estimated weekly time commitment**: 10-15 hours/week"
         let estimatedTime = null;
-        const estimatedMatch = fullText.match(/estimated weekly time commitment[:\-]\s*([\d\-]+ hours\/week)/i);
+        const estimatedMatch = fullText.match(/estimated weekly time commitment[:-]\s*([\d-]+ hours\/week)/i);
         if (estimatedMatch) {
           estimatedTime = estimatedMatch[1].trim();
           fullText = fullText.replace(estimatedMatch[0], '').trim();
@@ -217,13 +221,14 @@ console.log(roadmap);
         line = line.replace('- ', '').trim();
         
         // Extract year range and description
-        const yearMatch = line.match(/\*\*Year (\d+)–(\d+)\*\*:/);
+        // Accept both LLM variants: **Year 1–2**: and **Year 1–2:**.
+        const yearMatch = line.match(/\*\*Year (\d+)[–-](\d+):?\*\*:?/);
         if (!yearMatch) {
-          const finalYearMatch = line.match(/\*\*Year (\d+)\*\*:/);
+          const finalYearMatch = line.match(/\*\*Year (\d+):?\*\*:?/);
           if (!finalYearMatch) return null;
           
           const year = parseInt(finalYearMatch[1]);
-          const description = line.replace(`**Year ${year}**: `, '');
+          const description = line.replace(/^\*\*Year \d+:?\*\*:\s*/, '');
           
           // Extract salary range if available
           const salaryMatch = description.match(/\$(\d+),(\d+)-\$(\d+),(\d+)/);
@@ -241,7 +246,7 @@ console.log(roadmap);
         
         const startYear = parseInt(yearMatch[1]);
         const endYear = parseInt(yearMatch[2]);
-        const description = line.replace(`**Year ${startYear}–${endYear}**: `, '');
+        const description = line.replace(/^\*\*Year \d+[–-]\d+:?\*\*:\s*/, '');
         
         return {
           startYear,
@@ -268,7 +273,7 @@ console.log(roadmap);
     const token = sessionStorage.getItem('authToken');
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/users/profile`, 
+        `${API_BASE_URL}/api/users/profile`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -279,59 +284,173 @@ console.log(roadmap);
       setUserData(response.data);
     } catch (error) {
       console.error('Error fetching the data', error);
+      setUserData(careerProfileMockData);
     }
   };
 
   // Fetch career recommendation
   const getCareerRecommendation = async () => {
-    if (!userData) return;
+    // React Strict Mode intentionally replays effects in development. Without
+    // this guard it sends two expensive LLM requests for one page visit.
+    if (!userData || recommendationRequestInFlightRef.current) return;
+
+    recommendationRequestInFlightRef.current = true;
   
     setLoading(true);
     setError(null);
   
     try {
       const resData = {
-        "personality_type": userData.preferences.personalityType,
-        "interests": userData.interests,
-        "goals": userData.insights.fiveYearGoal,
-        "education_level": userData.education.fieldOfStudy,
-        "experience_years": Number(userData.experience.yearsOfExperience),
-        "current_role": userData.experience.currentRole,
-        "work_type": [userData.preferences.workEnvironment],
-        "desired_industries" : userData.careerInfo.desiredIndustries,
-        "career_goals" : userData.careerInfo.careerGoals,
-        "career_stage" : userData.careerInfo.careerStage,
-        "desired_roles" : userData.careerInfo.desiredRoles,
+        "personality_type": userData.preferences?.personalityType || '',
+        "interests": userData.interests || [],
+        "goals": userData.insights?.fiveYearGoal || '',
+        "education_level": userData.education?.fieldOfStudy || '',
+        "experience_years": Number(userData.experience?.yearsOfExperience) || 0,
+        "current_role": userData.experience?.currentRole || '',
+        "work_type": [userData.preferences?.workEnvironment || ''],
+        "desired_industries" : userData.careerInfo?.desiredIndustries || [],
+        "career_goals" : userData.careerInfo?.careerGoals || [],
+        "career_stage" : userData.careerInfo?.careerStage || '',
+        "desired_roles" : userData.careerInfo?.desiredRoles || [],
       };
-      
-      // Mock response for development
-      // const mockResponse ={
-      //   "recommendation": " ## 1. Career Path Name: Educational Psychology Consultant\n\n### Overview\nThis career path involves working as a consultant in educational psychology, helping educational institutions and organizations create tailored educational programs that support students' emotional, social, and academic growth, based on the insights provided by psychological research.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs are perceptive, intuitive, and empathetic, which makes them naturally suited to understanding and addressing the emotional needs of their clients.\n- Psychological strengths: INFJs are adept at understanding complex concepts, uncovering patterns, and motivating others—skills that are essential for consulting and designing effective educational programs.\n\n### Skills to Develop\n- **Psychological research skills** — Understanding the latest research in educational psychology is crucial for delivering evidence-based recommendations.\n- **Program design and evaluation** — Creating successful educational programs requires the ability to design and evaluate strategies effectively.\n- **Communication and presentation** — Clear communication is essential for translating complex psychological concepts to various stakeholders, such as educators, administrators, and parents.\n- **Consultation and collaboration** — Successful educational psychology consultants must collaborate with educators and administrators to develop practical and implementable solutions.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Learn about the theoretical foundations of educational psychology by taking an online course like [Introduction to Educational Psychology](https://www.coursera.org/courses/educationalpsychology) or [Educational Psychology and Development](https://www.edx.org/professional-certificate/bcgx-psychology-child-development).\n- **Month 3–4**: Dive into program design and evaluation, by enrolling in [Designing and Implementing Effective Educational Programs](https://www.edx.org/professional-certificate/berkeleyx-edx-sd-designing-implementing-effective-pedagogical-programs) or [Evaluating Educational Programs](https://www.coursera.org/courses/evaluation).\n- **Month 5–6**: Gain hands-on experience by participating in a project or internship related to educational psychology consulting. For example, work on a program evaluation for a school or organization, or consult with educators on designing strategy for enhancing students' well-being.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe educational psychology consulting field can be competitive, but it presents opportunities for those who are passionate, dedicated, and committed to continued learning.\n\n### Entry Strategies\n- **Entry Role 1**: Junior Educational Psychology Consultant at educational organizations, research institutions, or consulting firms.\n- **Entry Role 2**: School Psychologist or Educational Psychologist working directly with students and educators to create supportive learning environments.\n- **Optional freelance/startup path**: Offer consultations and program design services independently to schools and educational organizations.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Build a portfolio of successful projects and collaborations, and establish a professional network.\n- **Year 3–4**: Specialize in a particular area, such as social-emotional learning, academic achievement, or career development, to become a recognized expert in your field.\n- **Year 5**: Seek opportunities to speak at conferences, publish research, or coach other educational psychologists to demonstrate your thought leadership in the field.\n\n---\n\n## 2. Career Path Name: Learning & Development Specialist in Corporate HR\n\n### Overview\nLearning & Development (L&D) Specialists focus on developing and implementing training programs and initiatives to help employees improve their skills, increase their productivity, and reach their potential. Within HR, L&D Specialists work closely with employees and management to meet business goals and foster personal growth.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy and intuition, which make them well-suited to understanding the unique learning needs of individuals, as well as the organizational goals that must be met.\n- Psychological strengths: INFJs are natural motivators, adept at identifying the potential within others and tailoring content to meet individual learning preferences.\n\n### Skills to Develop\n- **Training design, delivery, and evaluation** — Proficiency in creating training programs, facilitating sessions, and evaluating the effects on employee performance.\n- **Instructional design principles** — Understanding and applying effective strategies for course structure, interaction, and assessment.\n- **Collaboration** — Ability to work effectively with other HR professionals, management, and departments.\n- **Technical skills (e.g., e-learning tools, Learning Management Systems)** — Proficiency in utilizing and adapting technology to support learning and development.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Brush up on these essential skills with courses like [Learning & Development Fundamentals](https://www.linkedin.com/learning/learning-and-development-fundamentals) or [Introduction to Instructional Design](https://www.edx.org/professional-certificate/purduex-instructional-design-introduction).\n- **Month 3–4**: Learn how to create engaging online training programs by enrolling in [Designing Digital Learning](https://www.edx.org/professional-certificate/edx-designing-digital-learning) or [Creating eLearning: Instructional Design](https://www.pluralsight.com/courses/creating-elearning-instructional-design).\n- **Month 5–6**: Gain hands-on experience by working on a training project or internship within an HR department. For example, collaborate with colleagues to create a training program for onboarding new employees or develop a workshop on communication skills.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe Learning & Development field is evolving rapidly with the increased use of technology, so continuous learning is essential to remain current in this career.\n\n### Entry Strategies\n- **Entry Role 1**: HR Training Specialist or L&D Coordinator in a small to medium-sized organization.\n- **Entry Role 2**: HR Generalist with a focus on learning & development within a department or division.\n- **Optional freelance/startup path**: Offer training and development services to small businesses or organizations as an independent contractor.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in multiple areas of HR to develop a broad understanding of organizational issues and challenges.\n- **Year 3–4**: Specialize in a specific area, such as leadership development, diversity & inclusion, or technical skills training, to become an expert in that area.\n- **Year 5**: Seek opportunities to lead large-scale training initiatives, drive best practices, and influence the strategic direction of a company's learning and development programs.\n\n---\n\n## 3. Career Path Name: Mental Health Counselor in Education\n\n### Overview\nMental Health Counselors in Education work with students and their families, teachers, and administrators to create supportive learning environments that address emotional, behavioral, and academic challenges. They provide counseling services, consultation, and collaboration to promote student success.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy, understanding, and intuitiveness, making them well-suited to genuinely connecting with students and understanding their complex emotional needs.\n- Psychological strengths: INFJs are skilled at uncovering patterns, identifying solutions, and advocating for the well-being of others.\n\n### Skills to Develop\n- **Counseling techniques and therapeutic interventions** — Proficiency in a variety of therapeutic approaches, such as cognitive-behavioral therapy and solution-focused brief therapy.\n- **Assessment and diagnostic skills** — Ability to accurately diagnose mental health conditions and develop appropriate treatment plans.\n- **Collaboration** — Developing effective working relationships with teachers, administrators, and families to support students.\n- **Cultural competence** — Sensitivity to the diversity of students and families and the ability to adapt counseling approaches accordingly.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Gain a foundational understanding of psychology and counseling through online courses like [Introduction to Psychology](https://www.coursera.org/courses/introduction-to-psychology) or [Basic Counseling Skills](https://www.upenn.edu/citizenship/education/counselor-education/basic-counseling-skills/index.html).\n- **Month 3–4**: Learn about mental health conditions and therapeutic techniques by taking courses like [Abnormal Psychology](https://www.coursera.org/courses/abnormal-psychology) or [Introduction to Counseling Theories](https://www.coursera.org/courses/introduction-to-counseling-theories).\n- **Month 5–6**: Obtain hands-on experience through a counseling practicum or internship at a school or counseling center. This will provide opportunities to apply your knowledge in real-world contexts and receive feedback.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe mental health field requires significant education and ongoing training to maintain competence and licensure.\n\n### Entry Strategies\n- **Entry Role 1**: School Counselor, responsible for academic, career, and personal/social counseling for students.\n- **Entry Role 2**: Mental Health Counselor in a school setting, providing counseling services to students specifically focused on emotional and behavioral challenges.\n- **Optional freelance/startup path**: Offer your counseling services to schools and organizations on a contract basis.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in a school setting and become familiar with the unique challenges and opportunities of working with student populations.\n- **Year 3–4**: Specialize in a specific population, such as young children, special education students, or highly gifted learners, to gain expertise and become an expert in that area.\n- **Year 5**: Advance to leadership roles, such as Department Chair or Program Director, or consider furthering your education to pursue an advanced degree in areas like school psychology or educational leadership."
-      // }
-      
-      // Uncomment for actual API call
-      console.log(resData);
-      
-      const response = await axios.post('http://localhost:8001/api/v1/recommend-career', resData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      setRecommendation(response.data);
-      
-      // setRecommendation(mockResponse);
-      // const paths = parseRecommendation(mockResponse);
+      let response;
+      try {
+        response = await axios.post(
+          `${CAREER_API_BASE_URL}/api/v1/recommend-career`,
+          resData,
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      } catch (requestError) {
+        console.warn('Career recommendation service unavailable; using mock data.', requestError);
+        response = { data: careerRecommendationMockData };
+      }
 
-      const paths = parseRecommendation(response.data);
-      console.log(paths);
+      /* Previous temporary hardcoded response retained below for reference.
+      const response ={ "data" :
+        {"recommendation": " ## 1. Career Path Name: Educational Psychology Consultant\n\n### Overview\nThis career path involves working as a consultant in educational psychology, helping educational institutions and organizations create tailored educational programs that support students' emotional, social, and academic growth, based on the insights provided by psychological research.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs are perceptive, intuitive, and empathetic, which makes them naturally suited to understanding and addressing the emotional needs of their clients.\n- Psychological strengths: INFJs are adept at understanding complex concepts, uncovering patterns, and motivating others—skills that are essential for consulting and designing effective educational programs.\n\n### Skills to Develop\n- **Psychological research skills** — Understanding the latest research in educational psychology is crucial for delivering evidence-based recommendations.\n- **Program design and evaluation** — Creating successful educational programs requires the ability to design and evaluate strategies effectively.\n- **Communication and presentation** — Clear communication is essential for translating complex psychological concepts to various stakeholders, such as educators, administrators, and parents.\n- **Consultation and collaboration** — Successful educational psychology consultants must collaborate with educators and administrators to develop practical and implementable solutions.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Learn about the theoretical foundations of educational psychology by taking an online course like [Introduction to Educational Psychology](https://www.coursera.org/courses/educationalpsychology) or [Educational Psychology and Development](https://www.edx.org/professional-certificate/bcgx-psychology-child-development).\n- **Month 3–4**: Dive into program design and evaluation, by enrolling in [Designing and Implementing Effective Educational Programs](https://www.edx.org/professional-certificate/berkeleyx-edx-sd-designing-implementing-effective-pedagogical-programs) or [Evaluating Educational Programs](https://www.coursera.org/courses/evaluation).\n- **Month 5–6**: Gain hands-on experience by participating in a project or internship related to educational psychology consulting. For example, work on a program evaluation for a school or organization, or consult with educators on designing strategy for enhancing students' well-being.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe educational psychology consulting field can be competitive, but it presents opportunities for those who are passionate, dedicated, and committed to continued learning.\n\n### Entry Strategies\n- **Entry Role 1**: Junior Educational Psychology Consultant at educational organizations, research institutions, or consulting firms.\n- **Entry Role 2**: School Psychologist or Educational Psychologist working directly with students and educators to create supportive learning environments.\n- **Optional freelance/startup path**: Offer consultations and program design services independently to schools and educational organizations.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Build a portfolio of successful projects and collaborations, and establish a professional network.\n- **Year 3–4**: Specialize in a particular area, such as social-emotional learning, academic achievement, or career development, to become a recognized expert in your field.\n- **Year 5**: Seek opportunities to speak at conferences, publish research, or coach other educational psychologists to demonstrate your thought leadership in the field.\n\n---\n\n## 2. Career Path Name: Learning & Development Specialist in Corporate HR\n\n### Overview\nLearning & Development (L&D) Specialists focus on developing and implementing training programs and initiatives to help employees improve their skills, increase their productivity, and reach their potential. Within HR, L&D Specialists work closely with employees and management to meet business goals and foster personal growth.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy and intuition, which make them well-suited to understanding the unique learning needs of individuals, as well as the organizational goals that must be met.\n- Psychological strengths: INFJs are natural motivators, adept at identifying the potential within others and tailoring content to meet individual learning preferences.\n\n### Skills to Develop\n- **Training design, delivery, and evaluation** — Proficiency in creating training programs, facilitating sessions, and evaluating the effects on employee performance.\n- **Instructional design principles** — Understanding and applying effective strategies for course structure, interaction, and assessment.\n- **Collaboration** — Ability to work effectively with other HR professionals, management, and departments.\n- **Technical skills (e.g., e-learning tools, Learning Management Systems)** — Proficiency in utilizing and adapting technology to support learning and development.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Brush up on these essential skills with courses like [Learning & Development Fundamentals](https://www.linkedin.com/learning/learning-and-development-fundamentals) or [Introduction to Instructional Design](https://www.edx.org/professional-certificate/purduex-instructional-design-introduction).\n- **Month 3–4**: Learn how to create engaging online training programs by enrolling in [Designing Digital Learning](https://www.edx.org/professional-certificate/edx-designing-digital-learning) or [Creating eLearning: Instructional Design](https://www.pluralsight.com/courses/creating-elearning-instructional-design).\n- **Month 5–6**: Gain hands-on experience by working on a training project or internship within an HR department. For example, collaborate with colleagues to create a training program for onboarding new employees or develop a workshop on communication skills.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe Learning & Development field is evolving rapidly with the increased use of technology, so continuous learning is essential to remain current in this career.\n\n### Entry Strategies\n- **Entry Role 1**: HR Training Specialist or L&D Coordinator in a small to medium-sized organization.\n- **Entry Role 2**: HR Generalist with a focus on learning & development within a department or division.\n- **Optional freelance/startup path**: Offer training and development services to small businesses or organizations as an independent contractor.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in multiple areas of HR to develop a broad understanding of organizational issues and challenges.\n- **Year 3–4**: Specialize in a specific area, such as leadership development, diversity & inclusion, or technical skills training, to become an expert in that area.\n- **Year 5**: Seek opportunities to lead large-scale training initiatives, drive best practices, and influence the strategic direction of a company's learning and development programs.\n\n---\n\n## 3. Career Path Name: Mental Health Counselor in Education\n\n### Overview\nMental Health Counselors in Education work with students and their families, teachers, and administrators to create supportive learning environments that address emotional, behavioral, and academic challenges. They provide counseling services, consultation, and collaboration to promote student success.\n\n### Why This Career Fits\n- Alignment with personality type: INFJs possess strong empathy, understanding, and intuitiveness, making them well-suited to genuinely connecting with students and understanding their complex emotional needs.\n- Psychological strengths: INFJs are skilled at uncovering patterns, identifying solutions, and advocating for the well-being of others.\n\n### Skills to Develop\n- **Counseling techniques and therapeutic interventions** — Proficiency in a variety of therapeutic approaches, such as cognitive-behavioral therapy and solution-focused brief therapy.\n- **Assessment and diagnostic skills** — Ability to accurately diagnose mental health conditions and develop appropriate treatment plans.\n- **Collaboration** — Developing effective working relationships with teachers, administrators, and families to support students.\n- **Cultural competence** — Sensitivity to the diversity of students and families and the ability to adapt counseling approaches accordingly.\n\n### 3–6 Month Learning Roadmap\n- **Month 1–2**: Gain a foundational understanding of psychology and counseling through online courses like [Introduction to Psychology](https://www.coursera.org/courses/introduction-to-psychology) or [Basic Counseling Skills](https://www.upenn.edu/citizenship/education/counselor-education/basic-counseling-skills/index.html).\n- **Month 3–4**: Learn about mental health conditions and therapeutic techniques by taking courses like [Abnormal Psychology](https://www.coursera.org/courses/abnormal-psychology) or [Introduction to Counseling Theories](https://www.coursera.org/courses/introduction-to-counseling-theories).\n- **Month 5–6**: Obtain hands-on experience through a counseling practicum or internship at a school or counseling center. This will provide opportunities to apply your knowledge in real-world contexts and receive feedback.\n- **Estimated weekly time commitment**: 5-10 hours per week\n\n### Learning Curve\nThe mental health field requires significant education and ongoing training to maintain competence and licensure.\n\n### Entry Strategies\n- **Entry Role 1**: School Counselor, responsible for academic, career, and personal/social counseling for students.\n- **Entry Role 2**: Mental Health Counselor in a school setting, providing counseling services to students specifically focused on emotional and behavioral challenges.\n- **Optional freelance/startup path**: Offer your counseling services to schools and organizations on a contract basis.\n\n### 5-Year Career Growth Path\n- **Year 1–2**: Gain experience in a school setting and become familiar with the unique challenges and opportunities of working with student populations.\n- **Year 3–4**: Specialize in a specific population, such as young children, special education students, or highly gifted learners, to gain expertise and become an expert in that area.\n- **Year 5**: Advance to leadership roles, such as Department Chair or Program Director, or consider furthering your education to pursue an advanced degree in areas like school psychology or educational leadership."
+        }}
       
-      setCareerPaths(paths);
+      // Temporary hardcoded version of the newly received LLM response.
+      // It intentionally uses the response's `:**` heading style to verify both parser variants.
+      response.data = {
+        recommendation: `## 1. Data Scientist (Foundational Path)
+
+### Overview
+Build a strong data-science foundation through structured learning, projects, and certifications.
+
+### Why This Career Fits
+- Your Computer Science background supports programming and analytical problem-solving.
+
+### Skills to Develop
+- **Python & R Programming** — Work with pandas, NumPy, scikit-learn, and TensorFlow.
+- **Statistical Analysis & Probability** — Apply regression, testing, and experimental design.
+
+### 3–6 Month Learning Roadmap
+- **Month 1–2:** Python for Data Science and Kaggle micro-projects.
+- **Month 3–4:** Statistics, machine-learning basics, and regression projects.
+- **Month 5–6:** Build and deploy an end-to-end portfolio project.
+
+### Estimated Weekly Time Commitment
+15–20 hours per week.
+
+### Learning Curve
+The initial months are conceptually demanding; regular projects make the material easier to retain.
+
+### Entry Strategies
+- **Entry Role 1:** Junior Data Analyst or Data Assistant.
+- **Entry Role 2:** Data-focused internship.
+
+### 5-Year Career Growth Path
+- **Year 1–2:** Gain junior data-analysis or data-science experience.
+- **Year 3–4:** Specialize in NLP, computer vision, or predictive modeling.
+- **Year 5:** Progress to Senior or Lead Data Scientist.
+
+---
+
+## 2. Machine Learning Engineer
+
+### Overview
+Build, deploy, and scale machine-learning systems in production.
+
+### Why This Career Fits
+- A programming background transfers directly to ML engineering.
+
+### Skills to Develop
+- **Advanced Machine Learning** — Implement deep-learning systems.
+- **ML Engineering & Deployment** — Use Docker, CI/CD, and cloud platforms.
+
+### 3–6 Month Learning Roadmap
+- **Month 1–2:** Study deep learning and implement neural networks.
+- **Month 3–4:** Build a local model-serving pipeline.
+- **Month 5–6:** Deploy and monitor a model API.
+
+### Learning Curve
+Mathematics and deployment complexity are challenging at first but improve with practice.
+
+### Entry Strategies
+- **Entry Role 1:** ML Engineering Intern.
+- **Entry Role 2:** Junior ML Engineer.
+
+### 5-Year Career Growth Path
+- **Year 1–2:** Deliver production-grade ML models.
+- **Year 3–4:** Lead ML architecture decisions.
+- **Year 5:** Become a Principal ML Engineer or ML Architect.
+
+---
+
+## 3. Data Analyst → Data Scientist Transition Path
+
+### Overview
+Start in analytics and progressively move into advanced data-science responsibilities.
+
+### Why This Career Fits
+- Programming skills make automation and data processing a natural strength.
+
+### Skills to Develop
+- **Business Intelligence & Reporting** — Create useful dashboards.
+- **Advanced Statistical Modeling** — Build predictive models and run experiments.
+
+### 3–6 Month Learning Roadmap
+- **Month 1–2:** Learn business-intelligence fundamentals.
+- **Month 3–4:** Study statistical modeling and predictive analytics.
+- **Month 5–6:** Lead an end-to-end business analysis project.
+
+### Learning Curve
+The transition requires moving from descriptive reporting to predictive thinking.
+
+### Entry Strategies
+- **Entry Role 1:** Data Analyst or Business Intelligence Analyst.
+- **Entry Role 2:** Cross-functional data project team member.
+
+### 5-Year Career Growth Path
+- **Year 1–2:** Build SQL, visualization, and statistics expertise.
+- **Year 3–4:** Lead independent analysis and transition to Data Scientist.
+- **Year 5:** Work as a Senior Data Scientist and drive data strategy.`
+      };
+
+      */
+
+      // Uncomment for actual API call
+      
+      // const response = await axios.post('http://localhost:8001/api/v1/recommend-career', resData, {
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   }
+      // });
+      const paths = parseRecommendation(response.data);
+      const usableResponse = paths.length ? response.data : careerRecommendationMockData;
+      if (!paths.length) {
+        console.warn('Career recommendation format was unusable; using mock data.');
+      }
+      setRecommendation(usableResponse);
+      setCareerPaths(parseRecommendation(usableResponse));
       
     } catch (error) {
       setError('Error fetching career recommendation');
       console.error(error);
     } finally {
       setLoading(false);
+      recommendationRequestInFlightRef.current = false;
     }
   };
 
@@ -501,6 +620,7 @@ console.log(roadmap);
   };
 
   // Handle download as PDF
+  // eslint-disable-next-line no-unused-vars
   const downloadRecommendationAsPDF = async () => {
     try {
       // Create temporary div for PDF

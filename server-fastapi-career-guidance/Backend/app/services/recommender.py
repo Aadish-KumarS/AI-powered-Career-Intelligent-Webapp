@@ -1,9 +1,28 @@
+import asyncio
+import logging
+
 import httpx
 from app.core.config import settings
 from fastapi import HTTPException
 
 
+logger = logging.getLogger(__name__)
+MAX_RATE_LIMIT_RETRIES = 2
+
+
+def _retry_delay(response: httpx.Response) -> float:
+    """Honor a provider Retry-After value without allowing an unbounded wait."""
+    try:
+        return min(max(float(response.headers.get("Retry-After", "1")), 0.25), 5.0)
+    except ValueError:
+        return 1.0
+
+
 async def generate_career_advice(payload):
+    if not settings.OPENROUTER_API_KEY or not settings.MODEL_PROVIDER_URL or not settings.MODEL_NAME:
+        logger.error("Career recommendation provider is not fully configured")
+        raise HTTPException(status_code=503, detail="Career recommendation service is not configured")
+
     system_prompt = (
         "You are a strategic career advisor with expertise in global job trends, skill development, and personalized career planning. "
         "You MUST provide EXACTLY 3 different career path recommendations. This is a hard requirement. Each recommendation must be fully developed with all sections below."
@@ -132,21 +151,31 @@ async def generate_career_advice(payload):
     }
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                settings.MODEL_PROVIDER_URL, 
-                json=body,
-                headers=headers
-            )
-            response.raise_for_status()
+        async with httpx.AsyncClient(timeout=httpx.Timeout(45.0, connect=10.0)) as client:
+            for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):
+                response = await client.post(
+                    settings.MODEL_PROVIDER_URL,
+                    json=body,
+                    headers=headers,
+                )
+                if response.status_code != 429:
+                    response.raise_for_status()
+                    result = response.json()
+                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    if content.count("## ") < 3:
+                        raise HTTPException(status_code=502, detail="The career provider returned an incomplete recommendation")
+                    return content
 
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
+                if attempt == MAX_RATE_LIMIT_RETRIES:
+                    logger.warning("Career provider remained rate limited after %s retries", MAX_RATE_LIMIT_RETRIES)
+                    raise HTTPException(status_code=503, detail="Career recommendations are temporarily busy. Please try again shortly.")
+                await asyncio.sleep(_retry_delay(response))
 
     except httpx.HTTPStatusError as http_err:
-        raise HTTPException(
-            status_code=http_err.response.status_code,
-            detail=f"Model request failed: {http_err.response.text}"
-        )
+        logger.error("Career provider returned HTTP %s", http_err.response.status_code)
+        raise HTTPException(status_code=502, detail="Career recommendation provider could not complete the request")
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+        logger.exception("Unexpected career recommendation failure")
+        raise HTTPException(status_code=502, detail="Career recommendation could not be generated")

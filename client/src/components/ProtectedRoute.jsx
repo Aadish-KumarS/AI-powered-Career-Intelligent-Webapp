@@ -2,6 +2,7 @@ import { Navigate,useLocation } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { getIsFirstTime } from "../utils/helper";
+import { API_BASE_URL } from '../config/api';
 
 export const AuthRoute = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
@@ -17,7 +18,7 @@ export const ProtectedRoute = ({ children }) => {
   // const { isAuthenticated } = useAuthContext();
   const location = useLocation();
   const token = sessionStorage.getItem("authToken");
-  const BASE_URL = "http://localhost:5000";
+  const BASE_URL = API_BASE_URL;
   
   const [isFirstTime, setIsFirstTime] = useState(null);
   const [loading, setLoading] = useState(true);

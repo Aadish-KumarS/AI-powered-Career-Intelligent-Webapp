@@ -9,6 +9,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import '../../styles/UserProfile Styles/EditProfile.css'
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config/api';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,7 +37,7 @@ export default function EditProfile() {
   
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [locationAccessStatus, setLocationAccessStatus] = useState('pending');
+  const [, setLocationAccessStatus] = useState('pending');
   const [activeSection, setActiveSection] = useState('personalInfo');
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -90,7 +91,7 @@ export default function EditProfile() {
     }
 
     const token = sessionStorage.getItem('authToken');
-    const BASE_URL = "http://localhost:5000";
+    const BASE_URL = API_BASE_URL;
     getUserData(BASE_URL,token,setUserData,userData)
 
     const sections = [nameRef, locationRef, educationRef, interestsRef, passwordRef, deleteAccountRef];

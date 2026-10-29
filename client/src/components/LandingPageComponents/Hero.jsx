@@ -1,81 +1,66 @@
-import { useEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import '../../styles/Landingpage Styles/HeroSection.css';
-import { FaArrowRight } from 'react-icons/fa';
-import RocketIcon from '../../assets/rocket.svg?react';
-import BrainIcon from '../../assets/brain.svg?react';
-import heroImage from '../../assets/hero-illustration.jpeg';
+import { FiArrowUpRight, FiPlayCircle } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-
-
+import careerJourneyImage from '../../assets/career-journey-editorial.jpg';
+import '../../styles/Landingpage Styles/HeroSection.css';
 
 export default function HeroSection() {
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    gsap.fromTo(".hero-title span", 
-      { opacity: 0, y: -30 },  
-      { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power3.out" }  
-    );
+  const heroRef = useRef(null);
 
-    gsap.fromTo(".hero-subtitle", 
-      { opacity: 0, y: 50 }, 
-      { opacity: 1, y: 0, duration: 1, delay: 0.3, ease: "power3.out" }  
-    );
+  useLayoutEffect(() => {
+    const context = gsap.context(() => {
+      gsap.timeline({ defaults: { ease: 'power3.out' } })
+        .from('.human-hero__eyebrow', { opacity: 0, y: 18, duration: 0.5 })
+        .from('.human-hero__title span', { opacity: 0, y: 38, duration: 0.72, stagger: 0.12 }, '-=0.2')
+        .from('.human-hero__copy, .human-hero__actions, .human-hero__note', { opacity: 0, y: 18, duration: 0.52, stagger: 0.1 }, '-=0.35')
+        .from('.human-hero__portrait', { opacity: 0, scale: 0.96, duration: 0.9 }, '-=0.7')
+        .from('.hero-paper-note', { opacity: 0, x: -20, rotate: -8, duration: 0.55 }, '-=0.4');
+    }, heroRef);
 
-    gsap.fromTo(".btn-primary", 
-      {
-        opacity: 0, 
-        scale: 0.8, 
-        y: 50           
-      },  
-      {
-        opacity: 1, 
-        scale: 1, 
-        y: 0,          
-        duration: 0.8, 
-        delay: 0.6, 
-        ease: "power3.out"
-      }
-    );
-    
-    gsap.fromTo(
-      '.icon', 
-      { opacity: 0, scale: 0.5, rotation: -180 }, 
-      { 
-        opacity: 1, 
-        scale: 1, 
-        rotation: 0, 
-        duration: 1.5, 
-        stagger: 0.3,
-        ease: 'power3.out' 
-      }
-    );
+    return () => context.revert();
   }, []);
 
+  const scrollToMethod = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <section className="hero">
-      <div className="abstract-bg">
-        <div className="shape shape1"></div>
-        <div className="shape shape2"></div>
-        <div className="shape shape3"></div>
-        <div className="shape shape4"></div>
-        <div className="shape shape5"></div>
-      </div>
-      <div className="hero-content">
-        <h1 className="hero-title">
-          <span><RocketIcon className="icon" /> </span>
-          <span>Shape</span> 
-          <span>Your</span> 
-          <span>Future</span> 
-          <span><BrainIcon className="icon" /> </span> 
-          <span>with</span> <span>AI</span>
-        </h1>
-        <p className="hero-subtitle">An intelligent career roadmap built for your success, powered by AI.</p>
-        <button className="btn btn-primary" onClick={() => navigate('/signup')}>Get Started <FaArrowRight /></button>
-      </div>
-      <div className="hero-image">
-        <img src={heroImage} alt="Career Roadmap AI" />
+    <section className="human-hero" ref={heroRef} aria-labelledby="hero-heading">
+      <div className="human-hero__sun" aria-hidden="true" />
+      <div className="human-hero__inner">
+        <div className="human-hero__content">
+          <p className="human-hero__eyebrow">Career guidance for the wonderfully undecided</p>
+          <h1 id="hero-heading" className="human-hero__title">
+            <span>Make your next move</span>
+            <span>feel like <em>your own.</em></span>
+          </h1>
+          <p className="human-hero__copy">
+            Right Track turns your experience, curiosity, and ambitions into a direction you can believe in—and a practical plan to get there.
+          </p>
+          <div className="human-hero__actions">
+            <button className="human-hero__primary" type="button" onClick={() => navigate('/signup')}>
+              Start with your story <FiArrowUpRight />
+            </button>
+            <button className="human-hero__secondary" type="button" onClick={scrollToMethod}>
+              <FiPlayCircle /> See how it works
+            </button>
+          </div>
+          <p className="human-hero__note"><span /> No generic quizzes. Just a clearer next step.</p>
+        </div>
+
+        <div className="human-hero__visual">
+          <div className="human-hero__portrait">
+            <img src={careerJourneyImage} alt="A professional reflecting on her next career move in a sunlit cafe" />
+          </div>
+          <div className="hero-paper-note">
+            <span className="hero-paper-note__label">A small beginning</span>
+            <strong>“I finally know what to explore next.”</strong>
+            <i>— your career can start here</i>
+          </div>
+          <div className="hero-visual-caption" aria-hidden="true">Take the scenic route <span>↗</span></div>
+        </div>
       </div>
     </section>
   );

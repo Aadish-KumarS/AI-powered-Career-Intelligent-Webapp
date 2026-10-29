@@ -96,9 +96,6 @@ async def analyze_skill_gap(
     
     try:
         response = await get_llm_response(prompt)
-        
-        # You could add response validation here to ensure valid JSON
-        
         return {
             "result": response,
             "processed_at": datetime.now(),
@@ -107,8 +104,8 @@ async def analyze_skill_gap(
     except Exception as e:
         logger.error(f"Error in skill gap analysis: {str(e)}, request_id: {request_id}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail=f"Failed to process skill gap analysis: {str(e)}"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Career analysis is temporarily unavailable. Please retry shortly."
         )
 
 
@@ -396,12 +393,10 @@ async def suggest_career_path(
         }
     except Exception as e:
         logger.error(f"Error in career path suggestion: {str(e)}, request_id: {request_id}")
-        # Return a structured error response instead of raising an exception
-        return {
-            "result": {"error": f"LLM API call failed: {str(e)}"},
-            "processed_at": datetime.now(),
-            "request_id": request_id
-        }
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Career path analysis is temporarily unavailable. Please retry shortly."
+        )
 
 
 @career_routes.post("/job-market-insights", 
@@ -527,9 +522,7 @@ async def job_market_insights(
         }
     except Exception as e:
         logger.error(f"Error in job market insights: {str(e)}, request_id: {request_id}")
-        # Return a structured error response instead of raising an exception
-        return {
-            "result": {"error": f"LLM API call failed: {str(e)}"},
-            "processed_at": datetime.now(), 
-            "request_id": request_id
-        }
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Job-market analysis is temporarily unavailable. Please retry shortly."
+        )

@@ -21,6 +21,6 @@ router.put('/change-password', authenticateUser, validatePassword, async (req, r
       res.status(500).json({ message: 'Server error' });
   }
 });
-router.put('/:id/onboarding', updateOnboarding); 
+router.put('/onboarding', authenticateUser, updateOnboarding);
 
 export default router;

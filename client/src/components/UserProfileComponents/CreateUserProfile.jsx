@@ -9,6 +9,7 @@ import img3 from "../../assets/img3.jpg";
 import { getUserData, handleCreateUserFileChange, handleStepChange } from "../../utils/helper";
 import { handleSubmitCreateProfile } from "../../utils/formHanderls";
 import FormStep from "./BasicInfoStep";
+import { API_BASE_URL } from '../../config/api';
 
 export default function CreateProfile() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function CreateProfile() {
     isFirstTime: null,
   });
   const [error, setError] = useState("");
-  const BASE_URL = "http://localhost:5000";
+  const BASE_URL = API_BASE_URL;
   const token = sessionStorage.getItem('authToken');
   const formRef = useRef(null);
 

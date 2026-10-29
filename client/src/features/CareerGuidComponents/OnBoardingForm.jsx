@@ -1,10 +1,17 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import '../../styles/CareerGuid Styles/OnBoarding.css';
-import { getUserIdFromToken, handleAddPastRole, handleAddSkill, handleCheckboxChange, handleInputChange, handleMultiSelectChange, handlePrevious, handleRemoveSkill, handleSelectChange, selectSuggestion, toggleSection } from '../../utils/MVPformHanderls.js';
+import { handleAddPastRole, handleAddSkill, handleInputChange, handleMultiSelectChange, handlePrevious, handleRemoveSkill, handleSelectChange, selectSuggestion, toggleSection } from '../../utils/MVPformHanderls.js';
 import Navbar from '../../components/LandingPageComponents/Navbar.jsx';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config/api';
+
+const FORM_STEPS = [
+  { name: 'Your Profile', sections: ['personalInfo', 'education'] },
+  { name: 'Skills & Expertise', sections: ['skills'] },
+  { name: 'Career Goals', sections: ['careerInfo', 'preferences'] },
+  { name: 'Experience & Insights', sections: ['experience', 'insights'] },
+];
 
 const OnboardingForm = () => {
   const [formData, setFormData] = useState({
@@ -52,10 +59,14 @@ const OnboardingForm = () => {
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [submissionError, setSubmissionError] = useState('');
+  const [customSkillName, setCustomSkillName] = useState('');
+  const [customSkillType, setCustomSkillType] = useState('technical');
+  const [customSkillLevel, setCustomSkillLevel] = useState('Intermediate');
   
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [userId, setUserId] = useState(null);
 
   const navigate = useNavigate();
   
@@ -70,61 +81,113 @@ const OnboardingForm = () => {
   const workEnvironments = ['Remote', 'Hybrid', 'In-office', 'Flexible'];
   const workStyles = ['Independent', 'Collaborative', 'Leadership', 'Creative', 'Analytical', 'Detail-oriented'];
   
-  const [skillOptions, setSkillOptions] = useState({
+  const [skillOptions] = useState({
     technical: ['JavaScript', 'React', 'Python', 'UI/UX Design', 'Data Analysis', 'Project Management', 'DevOps'],
     soft: ['Communication', 'Leadership', 'Problem Solving', 'Time Management', 'Teamwork', 'Adaptability']
   });
   
-  const [industryOptions, setIndustryOptions] = useState([
+  const [industryOptions] = useState([
     'Technology', 'Healthcare', 'Finance', 'Education', 'Manufacturing', 'Retail', 'Media & Entertainment'
   ]);
   
-  const [roleOptions, setRoleOptions] = useState([
+  const [roleOptions] = useState([
     'Software Engineer', 'UX Designer', 'Product Manager', 'Data Scientist', 'Marketing Specialist', 'Business Analyst', 'Project Manager'
   ]);
 
-  // Step configurations for the multi-step form
-  const formSteps = [
-    { name: "Your Profile", sections: ["personalInfo", "education"] },
-    { name: "Skills & Expertise", sections: ["skills"] },
-    { name: "Career Goals", sections: ["careerInfo", "preferences"] },
-    { name: "Experience & Insights", sections: ["experience", "insights"] }
-  ];
+  const totalSteps = FORM_STEPS.length;
 
-  const totalSteps = formSteps.length;
+  const validateCurrentStep = () => {
+    const errors = {};
+    // On the final screen re-check every required field. Users may have gone
+    // back and edited an earlier step after it was initially validated.
+    const validateEverything = currentStep === totalSteps;
+    if (currentStep === 1 || validateEverything) {
+      if (!formData.name.trim()) errors.name = 'Enter your full name.';
+      if (!formData.education.highestLevel) errors['education.highestLevel'] = 'Select your education level.';
+      if (!formData.education.fieldOfStudy.trim()) errors['education.fieldOfStudy'] = 'Enter your field of study.';
+    }
+    if ((currentStep === 2 || validateEverything) && formData.skills.selectedSkills.length === 0) {
+      errors.skills = 'Add at least one technical or soft skill.';
+    }
+    if (currentStep === 3 || validateEverything) {
+      if (!formData.careerInfo.careerStage) errors['careerInfo.careerStage'] = 'Select your career stage.';
+      if (formData.careerInfo.desiredRoles.length === 0) errors['careerInfo.desiredRoles'] = 'Select at least one desired role.';
+    }
+    return errors;
+  };
+
+  const firstInvalidStep = (errors) => {
+    if (errors.name || errors['education.highestLevel'] || errors['education.fieldOfStudy']) return 1;
+    if (errors.skills) return 2;
+    if (errors['careerInfo.careerStage'] || errors['careerInfo.desiredRoles']) return 3;
+    return currentStep;
+  };
+
+  const errorFor = (key) => fieldErrors[key];
+
+  const addCustomSkill = () => {
+    const skillName = customSkillName.trim();
+    if (!skillName) return;
+
+    handleAddSkill(skillName, customSkillType, customSkillLevel, setFormData);
+    setCustomSkillName('');
+    setFieldErrors(prev => ({ ...prev, skills: undefined }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setSubmissionError('');
+    const errors = validateCurrentStep();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      const invalidStep = firstInvalidStep(errors);
+      if (invalidStep !== currentStep) setCurrentStep(invalidStep);
+      if (errors.name) setExpandedSection('personalInfo');
+      else if (errors['education.highestLevel'] || errors['education.fieldOfStudy']) setExpandedSection('education');
+      else if (errors.skills) setExpandedSection('skills');
+      else setExpandedSection('careerInfo');
+      return;
+    }
+
     const isLastStep = currentStep === totalSteps ;
-    console.log(isLastStep);
-    
   
     if (!isLastStep) {
       setCurrentStep(prev => prev + 1);
-      const nextSection = formSteps[currentStep + 1]?.sections?.[0];
+      const nextSection = FORM_STEPS[currentStep + 1]?.sections?.[0];
       if (nextSection) setExpandedSection(nextSection);
   
     } else {
       try {
         setIsSubmitting(true);
   
-        console.log(formData,userId);
-        if (!userId || !formData) {
-          console.warn("Missing userId or formData");
+        const token = sessionStorage.getItem('authToken');
+        if (!token) {
+          setSubmissionError('Your session has expired. Please sign in again.');
           return;
         }
   
         
-        const response = await fetch(`http://localhost:5000/api/users/${userId}/onboarding`, {
+        const response = await fetch(`${API_BASE_URL}/api/users/onboarding`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            onboardingProgress: 100,
+            isFirstTime: false,
+          }),
         });
-        // console.log('Career guidance data updated:', response.data);
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          if (body.errors) {
+            setFieldErrors(body.errors);
+            const invalidStep = firstInvalidStep(body.errors);
+            if (invalidStep !== currentStep) setCurrentStep(invalidStep);
+          }
+          throw new Error(body.message || 'Unable to save onboarding data');
+        }
         navigate('/services/career-guid/career-recommendation')
   
         if (formRef.current) {
@@ -141,6 +204,7 @@ const OnboardingForm = () => {
   
       } catch (error) {
         console.error('Error updating career guidance data:', error);
+        setSubmissionError(error.message || 'Unable to save your onboarding profile. Please try again.');
       } finally {
         setIsSubmitting(false);
       }
@@ -166,16 +230,71 @@ const OnboardingForm = () => {
     });
     
     // Auto-expand the first section of the current step
-    if (formSteps[currentStep - 1] && formSteps[currentStep - 1].sections.length > 0) {
-      setExpandedSection(formSteps[currentStep - 1].sections[0]);
+    if (FORM_STEPS[currentStep - 1] && FORM_STEPS[currentStep - 1].sections.length > 0) {
+      setExpandedSection(FORM_STEPS[currentStep - 1].sections[0]);
     }
-  }, [currentStep]);
+  }, [currentStep, totalSteps]);
+
+  // Returning users can safely resume and amend an unfinished profile. Merge
+  // each persisted section so older accounts with partial profile data remain valid.
+  useEffect(() => {
+    const token = sessionStorage.getItem('authToken');
+    if (!token) return undefined;
+
+    let cancelled = false;
+    const loadExistingProfile = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+        const profile = await response.json();
+        if (cancelled) return;
+
+        setFormData(prev => ({
+          ...prev,
+          name: profile.name ?? prev.name,
+          personalInfo: { ...prev.personalInfo, ...(profile.personalInfo || {}) },
+          education: { ...prev.education, ...(profile.education || {}) },
+          skills: {
+            ...prev.skills,
+            ...(profile.skills || {}),
+            selectedSkills: Array.isArray(profile.skills?.selectedSkills) ? profile.skills.selectedSkills : prev.skills.selectedSkills,
+            technicalSkills: Array.isArray(profile.skills?.technicalSkills) ? profile.skills.technicalSkills : prev.skills.technicalSkills,
+            softSkills: Array.isArray(profile.skills?.softSkills) ? profile.skills.softSkills : prev.skills.softSkills,
+          },
+          careerInfo: {
+            ...prev.careerInfo,
+            ...(profile.careerInfo || {}),
+            careerGoals: Array.isArray(profile.careerInfo?.careerGoals) ? profile.careerInfo.careerGoals : prev.careerInfo.careerGoals,
+            desiredIndustries: Array.isArray(profile.careerInfo?.desiredIndustries) ? profile.careerInfo.desiredIndustries : prev.careerInfo.desiredIndustries,
+            desiredRoles: Array.isArray(profile.careerInfo?.desiredRoles) ? profile.careerInfo.desiredRoles : prev.careerInfo.desiredRoles,
+          },
+          preferences: {
+            ...prev.preferences,
+            ...(profile.preferences || {}),
+            workStyle: Array.isArray(profile.preferences?.workStyle) ? profile.preferences.workStyle : prev.preferences.workStyle,
+          },
+          experience: {
+            ...prev.experience,
+            ...(profile.experience || {}),
+            pastRoles: Array.isArray(profile.experience?.pastRoles) ? profile.experience.pastRoles : prev.experience.pastRoles,
+          },
+          insights: { ...prev.insights, ...(profile.insights || {}) },
+        }));
+      } catch (error) {
+        // A profile load failure should never block the user from completing onboarding.
+        console.warn('Unable to load existing onboarding data:', error);
+      }
+    };
+
+    loadExistingProfile();
+    return () => { cancelled = true; };
+  }, []);
 
   // Button hover animation
   useEffect(() => {
-    const id = getUserIdFromToken();
     const button = nextBtnRef.current;
-    setUserId(id);
     
     if (!button) return;
     
@@ -199,41 +318,24 @@ const OnboardingForm = () => {
     };
   }, []);
 
-  // Calculate the percentage of form completion
+  // Calculate completion from explicit profile fields, not object keys.
   const calculateCompletion = () => {
-    // Simple calculation based on filled fields
-    let filledFields = 0;
-    let totalFields = 0;
-    
-    // Count the number of filled fields
-    Object.keys(formData).forEach(section => {
-      Object.keys(formData[section]).forEach(field => {
-        totalFields++;
-        if (
-          Array.isArray(formData[section][field]) ? 
-            formData[section][field].length > 0 : 
-            formData[section][field]
-        ) {
-          filledFields++;
-        }
-      });
-    });
-    
-    return Math.round((filledFields / totalFields) * 100);
-  };
-
-  // Determine if the Next button should be disabled based on required fields
-  const isNextDisabled = () => {
-    // For simplicity, we're just requiring basic personal info
-    if (currentStep === 1 && !formData.name) {
-      return true;
-    }
-    return false;
+    const fields = [
+      formData.name, formData.personalInfo.currentOccupation,
+      formData.education.highestLevel, formData.education.fieldOfStudy,
+      formData.education.institution, formData.education.graduationYear,
+      formData.skills.selectedSkills.length, formData.careerInfo.careerStage,
+      formData.careerInfo.careerGoals.length, formData.careerInfo.desiredIndustries.length,
+      formData.careerInfo.desiredRoles.length, formData.preferences.workEnvironment,
+      formData.preferences.workStyle.length, formData.experience.currentRole,
+      formData.experience.yearsOfExperience, formData.insights.fiveYearGoal
+    ];
+    return Math.round((fields.filter(Boolean).length / fields.length) * 100);
   };
 
   // Get current step title
   const getCurrentStepTitle = () => {
-    return formSteps[currentStep - 1]?.name || "";
+    return FORM_STEPS[currentStep - 1]?.name || "";
   };
 
   // Render input field with AI suggestions
@@ -275,6 +377,7 @@ const OnboardingForm = () => {
 
   // Render a select dropdown
   const renderSelect = (section, field, label, options, required = false) => {
+    const fieldKey = `${section}.${field}`;
     return (
       <div className="input-group">
         <label htmlFor={field}>
@@ -286,6 +389,7 @@ const OnboardingForm = () => {
           value={formData[section][field]}
           onChange={(e) => handleSelectChange(e, section,setFormData)}
           required={required}
+          aria-invalid={Boolean(errorFor(fieldKey))}
           className="select-input"
         >
           <option value="">Select {label}</option>
@@ -293,6 +397,7 @@ const OnboardingForm = () => {
             <option key={index} value={option}>{option}</option>
           ))}
         </select>
+        {errorFor(fieldKey) && <p className="field-error" role="alert">{errorFor(fieldKey)}</p>}
       </div>
     );
   };
@@ -323,11 +428,13 @@ const OnboardingForm = () => {
                 onChange={(e) => handleInputChange(e, 'name', null,setFormData,setShowSuggestions,fieldOptions,setAiSuggestions,suggestionRef)}
                 placeholder="Your full name"
                 required
+                aria-invalid={Boolean(errorFor('name'))}
                 className="focus-effect"
               />
+              {errorFor('name') && <p className="field-error" role="alert">{errorFor('name')}</p>}
             </div>
             
-            {renderInputWithSuggestions('personalInfo', 'currentOccupation', 'Current Occupation', 'e.g. Software Engineer')}
+            {renderInputWithSuggestions('personalInfo', 'currentOccupation', 'Current Occupation (Optional)', 'e.g. Software Engineer')}
           </div>
         )}
       </div>
@@ -348,10 +455,10 @@ const OnboardingForm = () => {
         
         {expandedSection === 'education' && (
           <div id="section-education" className="section-content">
-            {renderSelect('education', 'highestLevel', 'Highest Level of Education', educationLevels)}
+            {renderSelect('education', 'highestLevel', 'Highest Level of Education', educationLevels, true)}
             
             <div className="input-group">
-              <label htmlFor="fieldOfStudy">Field of Study</label>
+              <label htmlFor="fieldOfStudy">Field of Study <span className="required">*</span></label>
               <input
                 type="text"
                 id="fieldOfStudy"
@@ -359,8 +466,11 @@ const OnboardingForm = () => {
                 value={formData.education.fieldOfStudy}
                 onChange={(e) => handleInputChange(e, 'education', null,setFormData,setShowSuggestions,fieldOptions,setAiSuggestions,suggestionRef)}
                 placeholder="e.g. Computer Science"
+                required
+                aria-invalid={Boolean(errorFor('education.fieldOfStudy'))}
                 className="smart-input"
               />
+              {errorFor('education.fieldOfStudy') && <p className="field-error" role="alert">{errorFor('education.fieldOfStudy')}</p>}
               
               {showSuggestions && (
                 <div ref={suggestionRef} className="ai-suggestions">
@@ -378,7 +488,7 @@ const OnboardingForm = () => {
             </div>
             
             <div className="input-group">
-              <label htmlFor="institution">University/College Name</label>
+              <label htmlFor="institution">University/College Name (Optional)</label>
               <input
                 type="text"
                 id="institution"
@@ -390,7 +500,7 @@ const OnboardingForm = () => {
             </div>
             
             <div className="input-group">
-              <label htmlFor="graduationYear">Year of Graduation</label>
+              <label htmlFor="graduationYear">Year of Graduation (Optional)</label>
               <input
                 type="number"
                 id="graduationYear"
@@ -422,6 +532,7 @@ const OnboardingForm = () => {
         
         {expandedSection === 'skills' && (
           <div id="section-skills" className="section-content">
+            {errorFor('skills') && <p className="field-error" role="alert">{errorFor('skills')}</p>}
             <div className="skills-container">
               <div className="skills-column">
                 <h4>Technical Skills</h4>
@@ -467,6 +578,7 @@ const OnboardingForm = () => {
                           <option value="Advanced">Advanced</option>
                         </select>
                         <button 
+                          type="button"
                           className="remove-skill" 
                           onClick={() => handleRemoveSkill(skill.name, 'technical',setFormData)}
                         >
@@ -522,6 +634,7 @@ const OnboardingForm = () => {
                           <option value="Advanced">Advanced</option>
                         </select>
                         <button 
+                          type="button"
                           className="remove-skill" 
                           onClick={() => handleRemoveSkill(skill.name, 'soft',setFormData)}
                         >
@@ -541,37 +654,28 @@ const OnboardingForm = () => {
                 <input
                   type="text"
                   placeholder="Enter skill name"
-                  id="custom-skill"
                   className="custom-skill-field"
+                  value={customSkillName}
+                  onChange={(e) => setCustomSkillName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addCustomSkill();
+                    }
+                  }}
                 />
-                <select id="skill-type">
+                <select value={customSkillType} onChange={(e) => setCustomSkillType(e.target.value)}>
                   <option value="technical">Technical</option>
                   <option value="soft">Soft</option>
                 </select>
-                <select id="skill-level">
+                <select value={customSkillLevel} onChange={(e) => setCustomSkillLevel(e.target.value)}>
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
                   <option value="Advanced">Advanced</option>
                 </select>
                 <button 
                   type='button'
-                  onClick={(e) => {
-                    e.preventDefault();
-
-                    const skillInput = document.getElementById('custom-skill');
-                    const typeInput = document.getElementById('skill-type');
-                    const levelInput = document.getElementById('skill-level');
-                    
-                    if (skillInput.value) {
-                      handleAddSkill(
-                        skillInput.value, 
-                        typeInput.value, 
-                        levelInput.value,
-                        setFormData
-                      );
-                      skillInput.value = '';
-                    }
-                  }}
+                  onClick={addCustomSkill}
                 >
                   Add
                 </button>
@@ -597,10 +701,10 @@ const OnboardingForm = () => {
         
         {expandedSection === 'careerInfo' && (
           <div id="section-careerInfo" className="section-content">
-            {renderSelect('careerInfo', 'careerStage', 'Career Stage', careerStages)}
+            {renderSelect('careerInfo', 'careerStage', 'Career Stage', careerStages, true)}
             
             <div className="input-group">
-              <label>Career Goals</label>
+              <label>Career Goals (Optional)</label>
               <div className="tags-input-container">
                 <input
                   type="text"
@@ -635,7 +739,7 @@ const OnboardingForm = () => {
             </div>
             
             <div className="selection-group">
-              <label>Desired Industries</label>
+              <label>Desired Industries (Optional)</label>
               <div className="selection-grid">
                 {industryOptions.map((industry, index) => (
                   <div 
@@ -650,7 +754,8 @@ const OnboardingForm = () => {
             </div>
             
             <div className="selection-group">
-              <label>Desired Roles</label>
+              <label>Desired Roles <span className="required">*</span></label>
+              {errorFor('careerInfo.desiredRoles') && <p className="field-error" role="alert">{errorFor('careerInfo.desiredRoles')}</p>}
               <div className="selection-grid">
                 {roleOptions.map((role, index) => (
                   <div 
@@ -737,10 +842,10 @@ const OnboardingForm = () => {
               </div>
             </div>
             
-            {renderSelect('preferences', 'workEnvironment', 'Preferred Work Environment', workEnvironments)}
+            {renderSelect('preferences', 'workEnvironment', 'Preferred Work Environment (Optional)', workEnvironments)}
             
             <div className="selection-group">
-              <label>Work Style</label>
+              <label>Work Style (Optional)</label>
               <div className="selection-grid">
                 {workStyles.map((style, index) => (
                   <div 
@@ -774,7 +879,7 @@ const OnboardingForm = () => {
         {expandedSection === 'experience' && (
           <div id="section-experience" className="section-content">
             <div className="input-group">
-              <label htmlFor="currentRole">Current Role</label>
+              <label htmlFor="currentRole">Current Role (Optional)</label>
               <input
                 type="text"
                 id="currentRole"
@@ -786,7 +891,7 @@ const OnboardingForm = () => {
             </div>
             
             <div className="input-group">
-              <label htmlFor="yearsOfExperience">Years of Experience</label>
+              <label htmlFor="yearsOfExperience">Years of Experience (Optional)</label>
               <input
                 type="number"
                 id="yearsOfExperience"
@@ -800,7 +905,7 @@ const OnboardingForm = () => {
             </div>
             
             <div className="input-group">
-              <label>Past Roles</label>
+              <label>Past Roles (Optional)</label>
               <div className="past-roles-input">
                 <input
                   type="text"
@@ -820,6 +925,7 @@ const OnboardingForm = () => {
                     <div key={index} className="past-role-item">
                       <span>{role}</span>
                       <button 
+                        type="button"
                         className="remove-role" 
                         onClick={() => {
                           setFormData(prev => ({
@@ -859,7 +965,7 @@ const OnboardingForm = () => {
         {expandedSection === 'insights' && (
           <div id="section-insights" className="section-content">
             <div className="input-group">
-              <label htmlFor="careerMotivation">What motivates you in your career?</label>
+              <label htmlFor="careerMotivation">What motivates you in your career? (Optional)</label>
               <textarea
                 id="careerMotivation"
                 name="careerMotivation"
@@ -871,7 +977,7 @@ const OnboardingForm = () => {
             </div>
             
             <div className="input-group">
-              <label htmlFor="careerChallenges">What challenges are you facing in your career?</label>
+              <label htmlFor="careerChallenges">What challenges are you facing in your career? (Optional)</label>
               <textarea
                 id="careerChallenges"
                 name="careerChallenges"
@@ -883,7 +989,7 @@ const OnboardingForm = () => {
             </div>
             
             <div className="input-group">
-              <label htmlFor="fiveYearGoal">Where do you see yourself in 5 years?</label>
+              <label htmlFor="fiveYearGoal">Where do you see yourself in 5 years? (Optional)</label>
               <textarea
                 id="fiveYearGoal"
                 name="fiveYearGoal"
@@ -901,7 +1007,7 @@ const OnboardingForm = () => {
 
   // Render form sections based on current step
   const renderFormSections = () => {
-    const currentSections = formSteps[currentStep - 1]?.sections || [];
+    const currentSections = FORM_STEPS[currentStep - 1]?.sections || [];
     
     return (
       <>
@@ -919,15 +1025,15 @@ const OnboardingForm = () => {
   return (
     <div className="onboarding-container">
       <Navbar />
-      <form ref={formRef} onSubmit={() => handleSubmit(currentStep,setCurrentStep)} className="onboarding-form">
+      <form ref={formRef} onSubmit={handleSubmit} className="onboarding-form" noValidate>
         <div className="form-header">
           <h2>Career Guidance Profile</h2>
           <div className="progress-container">
             <div className="progress-steps">
-              {formSteps.map((step, index) => (
+              {FORM_STEPS.map((step, index) => (
                 <div 
                   key={index} 
-                  className={`step ${currentStep > index ? 'completed' : ''} ${currentStep === index + 1 ? 'active' : ''}`}
+                  className={`step ${currentStep > index + 1 ? 'completed' : ''} ${currentStep === index + 1 ? 'active' : ''}`}
                   onClick={() => {
                     if (currentStep > index + 1) {
                       setCurrentStep(index + 1);
@@ -958,6 +1064,8 @@ const OnboardingForm = () => {
         
         <div className="step-content">
           <h3 className="step-title">{getCurrentStepTitle()}</h3>
+          <p className="required-fields-note"><span className="required">*</span> Required for personalized career guidance. All other fields are optional.</p>
+          {submissionError && <p className="form-error" role="alert">{submissionError}</p>}
           <div className="sections-container">
             {renderFormSections()}
           </div>
@@ -977,10 +1085,9 @@ const OnboardingForm = () => {
           
           <button 
             ref={nextBtnRef}
-            type="button"
-            onClick={handleSubmit}
+            type="submit"
             className="next-button"
-            disabled={isNextDisabled() || isSubmitting}
+            disabled={isSubmitting}
           >
             {currentStep < totalSteps ? 'Continue' : 'Submit'}
             {isSubmitting && <span className="spinner"></span>}

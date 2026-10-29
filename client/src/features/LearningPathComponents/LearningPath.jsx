@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import '../../styles/LearningPath styles/LearningPath.css';
 import Navbar from '../../components/LandingPageComponents/Navbar';
+import { CAREER_API_BASE_URL } from '../../config/api';
+import { createLearningPathMockData } from '../../constants/mockData';
 
 const LearningPath = ({ skillData, onSave }) => {
   const [data, setData] = useState(null);
@@ -24,22 +26,53 @@ const LearningPath = ({ skillData, onSave }) => {
     }
   }, [skillData]);
 
-  // Handle form submission when user starts with empty state
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newSkill = {
-      skill_name: e.target.skill_name.value,
-      current_proficiency: e.target.current_proficiency.value || "Beginner",
-      overall_progress: 0.0,
-      start_date: new Date().toISOString(),
-      target_completion_date: e.target.target_completion_date.value,
-      resources_progress: [],
-      completed_milestones: []
+  useEffect(() => {
+    if (skillData) return;
+
+    const loadLatestLearningPath = async () => {
+      try {
+        const response = await fetch(`${CAREER_API_BASE_URL}/career-guid/skills/`);
+        if (!response.ok) throw new Error('Unable to load learning paths');
+
+        const skills = await response.json();
+        if (Array.isArray(skills) && skills.length) {
+          setData(skills[skills.length - 1]);
+        }
+      } catch {
+        const savedPath = localStorage.getItem('newSkill');
+        if (savedPath) setData(JSON.parse(savedPath));
+      }
     };
-    localStorage.setItem('newSkill', newSkill);
-    
-    setData(newSkill);
-    if (onSave) onSave(newSkill);
+
+    loadLatestLearningPath();
+  }, [skillData]);
+
+  // Handle form submission when user starts with empty state
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const skillName = e.target.skill_name.value.trim();
+    const targetCompletionDate = e.target.target_completion_date.value || null;
+
+    try {
+      const response = await fetch(`${CAREER_API_BASE_URL}/career-guid/skills/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          skill_name: skillName,
+          target_completion_date: targetCompletionDate,
+        }),
+      });
+      if (!response.ok) throw new Error('Unable to create learning path');
+
+      const newSkill = await response.json();
+      setData(newSkill);
+      if (onSave) onSave(newSkill);
+    } catch {
+      const newSkill = createLearningPathMockData(skillName, targetCompletionDate);
+      localStorage.setItem('newSkill', JSON.stringify(newSkill));
+      setData(newSkill);
+      if (onSave) onSave(newSkill);
+    }
   };
 
   const handleUpdateSkill = (e) => {
@@ -160,7 +193,7 @@ const LearningPath = ({ skillData, onSave }) => {
   };
 
   // Database update functions (implement these based on your backend)
-  const updateResourceSteps = (resourceId, steps) => {
+  const updateResourceSteps = () => {
     // Implementation depends on your backend/database
     // Example: API call to update steps
     // fetch(`/api/resources/${resourceId}/steps`, {
@@ -170,11 +203,9 @@ const LearningPath = ({ skillData, onSave }) => {
     //   },
     //   body: JSON.stringify({ steps }),
     // });
-    console.log(1);
-    
   };
 
-  const updateResourceProgress = (resourceId, resourceData) => {
+  const updateResourceProgress = () => {
     // Implementation depends on your backend/database
     // Example: API call to update resource progress
     // fetch(`/api/resources/${resourceId}/progress`, {
@@ -184,8 +215,6 @@ const LearningPath = ({ skillData, onSave }) => {
     //   },
     //   body: JSON.stringify(resourceData),
     // });
-    console.log(3);
-    
   };
 
   // Initialize animations when data is available

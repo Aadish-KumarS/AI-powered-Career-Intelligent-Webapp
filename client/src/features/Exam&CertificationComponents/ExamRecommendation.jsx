@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { gsap } from "gsap";
 import "../../styles/Exam styles/ExamRecommendation.css";
 import Navbar from "../../components/LandingPageComponents/Navbar";
+import { API_BASE_URL, CAREER_API_BASE_URL } from '../../config/api';
+import { examRecommendationMockData } from '../../constants/mockData';
 
 const ExamRecommendation = () => {
   // State management
@@ -32,73 +34,56 @@ const ExamRecommendation = () => {
   useEffect(() => {
     const fetchRecommendations = async () => {
       setIsLoading(true);
+      setError(null);
       try {
-        const res = await fetch("http://localhost:8001/api/v1/recommend-exams", {
+        const token = sessionStorage.getItem('authToken');
+        const profileResponse = await fetch(`${API_BASE_URL}/api/users/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!profileResponse.ok) throw new Error('Unable to load profile');
+
+        const profile = await profileResponse.json();
+        const res = await fetch(`${CAREER_API_BASE_URL}/api/v1/recommend-exams`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             education: {
-              highestLevel: "Bachelor's",
-              fieldOfStudy: "Computer Science",
-              institution: "Example University",
-              graduationYear: "2024",  // Changed to string to match Pydantic model expectations
+              highestLevel: profile.education?.highestLevel || null,
+              fieldOfStudy: profile.education?.fieldOfStudy || null,
+              institution: profile.education?.institution || null,
+              graduationYear: profile.education?.graduationYear || null,
             },
             skills: {
-              technicalSkills: [{ name: "Python" }, { name: "JavaScript" }],
-              softSkills: [{ name: "Problem Solving" }],
+              technicalSkills: profile.skills?.technicalSkills || [],
+              softSkills: profile.skills?.softSkills || [],
             },
             careerInfo: {
-              careerGoals: ["Backend Developer"],
-              desiredIndustries: ["Tech", "Software"],
+              careerGoals: profile.careerInfo?.careerGoals || [],
+              desiredIndustries: profile.careerInfo?.desiredIndustries || [],
             },
             experience: {
-              currentRole: "Student",
-              yearsOfExperience: 0,
+              currentRole: profile.experience?.currentRole || null,
+              yearsOfExperience: Number(profile.experience?.yearsOfExperience) || 0,
             },
-            preferences: {
-              personalityType: "INTJ",
-            },
+            preferences: { personalityType: profile.preferences?.personalityType || null },
           }),
         });
-        
+        if (!res.ok) throw new Error(`Exam recommendation request failed: ${res.status}`);
         const data = await res.json();
-        if (data.recommendations) {
+        if (Array.isArray(data.recommendations) && data.recommendations.length) {
           setRecommendations(data.recommendations);
-        } else if (data.error) {
-          setError(data.error);
+        } else {
+          throw new Error(data.error || 'The service returned no recommendations');
         }
         
         setIsLoading(false);
       } catch (err) {
         console.error("Failed to fetch recommendations", err);
-        setError("Failed to load recommendations. Please try again later.");
+        setRecommendations(examRecommendationMockData);
         setIsLoading(false);
         
-        // Fallback to hardcoded data in case of failure
-        // setRecommendations([
-        //   {
-        //     "exam_name": "AWS Certified Developer - Associate",
-        //     "why_recommended": "Perfect for aspiring backend developers with Python and JavaScript skills",
-        //     "ideal_timeline": "Within 6 months of graduation"
-        //   },
-        //   {
-        //     "exam_name": "Microsoft Certified: Azure Developer Associate",
-        //     "why_recommended": "Complements your CS degree and adds cloud development credentials",
-        //     "ideal_timeline": "First year after graduation"
-        //   },
-        //   {
-        //     "exam_name": "Oracle Certified Professional: Java SE Developer",
-        //     "why_recommended": "Builds on your CS background and expands your backend skills",
-        //     "ideal_timeline": "Within your first year in the industry"
-        //   },
-        //   {
-        //     "exam_name": "MongoDB Developer Certification",
-        //     "why_recommended": "Adds database expertise to your backend development skillset",
-        //     "ideal_timeline": "After 6 months of work experience"
-        //   }
-        // ]);
       }
     };
     

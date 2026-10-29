@@ -1,11 +1,13 @@
 import sendEmail from '../utils/sendEmail.js';
 import OTP from '../models/Otp.js';  // Import OTP model
 import User from '../models/User.js';  // Import User model
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 const OTP_EXPIRATION_TIME = 10 * 60 * 1000; // 10 minutes
 
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000);
+  return crypto.randomInt(100000, 1000000);
 };
 
 const otpController = {
@@ -30,13 +32,8 @@ const otpController = {
         await newOtp.save();
       }
 
-      sendEmail(email, 'Your OTP for Verification', `Your OTP is: ${otp}. It will expire in 10 minutes.`)
-        .then(() => {
-          res.json({ success: true, message: 'OTP sent to your email.' });
-        })
-        .catch((err) => {
-          res.status(500).json({ success: false, message: 'Error sending email. Try again later.' });
-        });
+      await sendEmail(email, 'Your OTP for Verification', `Your OTP is: ${otp}. It will expire in 10 minutes.`);
+      res.json({ success: true, message: 'OTP sent to your email.' });
     } catch (err) {
       console.error('Error sending OTP:', err);
       res.status(500).json({ success: false, message: 'Internal server error. Please try again later.' });
@@ -70,14 +67,22 @@ const otpController = {
           return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        if(user.isVerified != true){
+        if(user.isVerified !== true){
           user.isVerified = true;
           await user.save();
           await OTP.deleteOne({ email });
 
           res.json({ success: true, message: 'OTP verified successfully! Your email is now verified.' });
-        }else{
+        } else {
           await OTP.deleteOne({ email });
+          const resetToken = jwt.sign({ email, purpose: 'password-reset' }, process.env.JWT_SECRET, { expiresIn: '10m' });
+          res.cookie('passwordResetToken', resetToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: OTP_EXPIRATION_TIME,
+            path: '/api/auth/reset-password'
+          });
           res.json({ success: true, message: 'OTP verified successfully! Reset your password.' });
         }
         

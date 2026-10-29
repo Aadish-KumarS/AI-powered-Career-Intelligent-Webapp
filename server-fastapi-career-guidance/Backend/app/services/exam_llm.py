@@ -7,6 +7,7 @@ import json
 # Set up logging
 logger = logging.getLogger(__name__)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+MODEL_NAME = os.getenv("MODEL_NAME", "openai/gpt-3.5-turbo")
 
 # Function to fetch exam recommendations based on user input
 async def fetch_exam_recommendations(prompt: str):
@@ -17,7 +18,7 @@ async def fetch_exam_recommendations(prompt: str):
     }
     
     payload = {
-        "model": "openai/gpt-3.5-turbo",  # Model to be used for AI-powered exam recommendations
+        "model": MODEL_NAME,
         "messages": [
             {"role": "system", "content": "You are an expert career counselor. Always respond with JSON."},
             {"role": "user", "content": prompt}

@@ -18,8 +18,6 @@ export default function ResetPassword() {
     formData, 
     passwordStrength, 
     handleChange, 
-    setError: setFormError, 
-    setPasswordVisible: setFormPasswordVisible 
   } = useAuthForm({ password: '', confirmPassword: '' });
 
   const handleSubmit = async (e) => {

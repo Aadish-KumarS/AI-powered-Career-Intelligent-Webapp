@@ -1,11 +1,14 @@
 import axios from "axios";
 import gsap from "gsap";
+import { API_BASE_URL } from "../config/api";
+
+axios.defaults.withCredentials = true;
 
 
 export const resendOTP = async () => {
 
   try {
-    const response = await axios.post('http://localhost:5000/otp/request-otp');
+    const response = await axios.post(`${API_BASE_URL}/otp/request-otp`);
 
     if (response.data.success) {
       alert('OTP sent to your email.');
@@ -142,7 +145,7 @@ export const handleInterestToggle = (setter, userData) => (interest) => {
 export const fetchIPBasedLocation = async (setUserData, setError, setLocationAccessStatus) => {
   try {
     //CHANGE IT LATER
-    const response = await axios.get('http://localhost:5000/api/location/sds');
+    const response = await axios.get(`${API_BASE_URL}/api/location`);
     const { latitude, longitude, city, region, country_name } = response.data;
     
     setUserData(prevData => ({
@@ -209,7 +212,7 @@ export const updatePassword = async (e, passwordData, setError, setSuccessMessag
     const token = sessionStorage.getItem('authToken');
     
     await axios.put(
-      'http://localhost:5000/api/users/change-password', 
+      `${API_BASE_URL}/api/users/change-password`,
       passwordData,
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -239,13 +242,13 @@ export const deleteAccount = async (setError) => {
   if (confirmDelete) {
     try {
       const token = sessionStorage.getItem('authToken');
-      await axios.delete('http://localhost:5000/api/users/delete-account', {
+      await axios.delete(`${API_BASE_URL}/api/users/delete-account`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       sessionStorage.clear();
       window.location.href = '/login';
-    } catch (err) {
+    } catch {
       setError('Failed to delete account');
     }
   }
@@ -257,7 +260,7 @@ export const updateProfile = async (e, userData, setError, setSuccessMessage,set
     const token = sessionStorage.getItem('authToken');
     setLoading(true)
     await axios.put(
-      'http://localhost:5000/api/users/update-profile', 
+      `${API_BASE_URL}/api/users/update-profile`,
       userData,
       { headers: { Authorization: `Bearer ${token}` } }
     );
