@@ -1,4 +1,3 @@
-import { gsap } from 'gsap';
 import { useEffect, useState } from 'react';
 import '../../styles/Landingpage Styles/Navbar.css';
 import { FaRegUser } from "react-icons/fa6";
@@ -9,14 +8,6 @@ import SettingsDropdown from './SettingsDropdown';
 export default function Navbar({ variant = 'default' }) {
   const [showServicesDropdown, setShowServicesDropdown] = useState(false);
   const isSignedIn = Boolean(sessionStorage.getItem('authToken'));
-
-  useEffect(() => {
-    gsap.fromTo(
-      '.fade-in', 
-      { opacity: 0, y: 20 }, 
-      { opacity: 1, y: 0, duration: 1, stagger: 0.2 }
-    );
-  }, []);
 
   useEffect(() => {
     if (!showServicesDropdown) return undefined;
@@ -32,7 +23,7 @@ export default function Navbar({ variant = 'default' }) {
   };
 
   return (
-    <nav className={`navbar fade-in navbar--${variant}`}>
+    <nav className={`navbar navbar--${variant}`}>
       <Link to='/'>
         <h1 className="logo">Right Track</h1>
       </Link>

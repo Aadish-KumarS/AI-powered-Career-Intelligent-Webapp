@@ -19,7 +19,7 @@
 }
 
 html { background: var(--rt-paper); }
-body { min-width: 320px; background: var(--rt-paper); color: var(--rt-ink); font-family: 'Manrope', 'Inter', sans-serif; }
+body { min-width: 320px; background: var(--rt-paper); color: var(--rt-ink); font-family: 'Manrope', system-ui, sans-serif; }
 button, input, select, textarea { font: inherit; }
 button:disabled { cursor: not-allowed !important; opacity: 0.62; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid rgba(179, 90, 60, 0.35); outline-offset: 3px; }

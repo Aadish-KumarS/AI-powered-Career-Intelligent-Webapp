@@ -1,271 +1,211 @@
-import { useState, useEffect } from "react";
-import "../../styles/UserProfile Styles/UserProfile.css"
-import '../../styles/Global Styles/profile-theme.css';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../LandingPageComponents/Navbar'
-import { getUserDetail } from "../../utils/helper";
-import gsap from "gsap";
-import bgGif from '../../assets/gif/bg-gif.gif'
+import { FiArrowUpRight, FiBarChart2, FiBookOpen, FiCompass, FiEdit2, FiMail, FiMapPin, FiUserCheck } from 'react-icons/fi';
+import '../../styles/Global Styles/profile-theme.css';
+import '../../styles/UserProfile Styles/UserProfile.css';
+import Navbar from '../LandingPageComponents/Navbar';
+import { getUserDetail } from '../../utils/helper';
 import { API_BASE_URL } from '../../config/api';
 
-export default function Profile() {
-  const [currentFeature, setCurrentFeature] = useState(0);
-  const [activeTab, setActiveTab] = useState("profile");
-  const BASE_URL = API_BASE_URL;
-  const token = sessionStorage.getItem('authToken');
-  const navigate = useNavigate();
-  
+const profileTabs = [
+  { id: 'profile', label: 'Profile' },
+  { id: 'focus', label: 'Focus areas' },
+  { id: 'tools', label: 'Career tools' },
+];
 
+export default function UserProfileView() {
+  const [activeTab, setActiveTab] = useState('profile');
   const [userData, setUserData] = useState({
-    name: "",
-    title: "", 
-    location: "",
-    email: "",
-    profileImage: "",
+    name: '',
+    title: '',
+    location: '',
+    email: '',
+    profileImage: '',
     interests: [],
     education: {
-      highestLevel: "",
-      institution: "",
-      graduationYear: "",
-      fieldOfStudy: ""
-    }
+      highestLevel: '',
+      institution: '',
+      graduationYear: '',
+      fieldOfStudy: '',
+    },
   });
-  
+  const navigate = useNavigate();
+  const token = sessionStorage.getItem('authToken');
 
-  const features = [
+  useEffect(() => {
+    getUserDetail(token, navigate, API_BASE_URL, setUserData);
+  }, [navigate, token]);
+
+  const profileReadiness = useMemo(() => {
+    const completedFields = [
+      userData.name,
+      userData.location,
+      userData.education?.fieldOfStudy,
+      userData.interests?.length,
+    ].filter(Boolean).length;
+    return Math.round((completedFields / 4) * 100);
+  }, [userData]);
+
+  const educationSummary = [
+    userData.education?.fieldOfStudy,
+    userData.education?.highestLevel,
+  ].filter(Boolean).join(' · ');
+  const initial = userData.name?.trim().charAt(0).toUpperCase() || 'U';
+  const actions = [
     {
-      text: "AI-powered career roadmap generation",
-      icon: "trending-icon"
+      icon: <FiCompass aria-hidden="true" />,
+      title: 'Career guidance',
+      copy: 'Discover directions that match the profile you have built.',
+      to: '/services/career-guid/career-recommendation',
     },
     {
-      text: "Personalized career suggestions",
-      icon: "user-icon"
+      icon: <FiBarChart2 aria-hidden="true" />,
+      title: 'Career analysis',
+      copy: 'See the skills, path signals, and market context that matter.',
+      to: '/services/career-guid/career-analysis',
     },
     {
-      text: "Industry insights & trends",
-      icon: "insights-icon"
+      icon: <FiBookOpen aria-hidden="true" />,
+      title: 'Build a roadmap',
+      copy: 'Turn a role goal into a paced plan you can follow.',
+      to: '/services/generate-roadmap',
     },
-    {
-      text: "AI exam & certification recommendation",
-      icon: "exam-icon"
-    },
-    {
-      text: "Real-time skill gap analysis",
-      icon: "skill-icon"
-    },
-    {
-      text: "AI-personalized career path planning",
-      icon: "path-icon"
-    },
-    {
-      text: "Job market insights and forecasts",
-      icon: "market-icon"
+  ];
+
+  const renderPanel = () => {
+    if (activeTab === 'focus') {
+      return (
+        <section className="profile-content-card profile-focus-panel" id="focus-panel" role="tabpanel">
+          <div className="profile-section-heading">
+            <p className="profile-eyebrow">What you have told us</p>
+            <h2>Focus areas</h2>
+            <p>Your interests help the career services adapt their suggestions to you.</p>
+          </div>
+          {userData.interests?.length ? (
+            <div className="profile-interest-cloud" aria-label="Your interests">
+              {userData.interests.map((interest) => <span key={interest}>{interest}</span>)}
+            </div>
+          ) : (
+            <div className="profile-empty-note">
+              <FiUserCheck aria-hidden="true" />
+              <p>Add a few interests to make your recommendations more specific.</p>
+              <button type="button" onClick={() => navigate('/profile/edit-profile')}>Add interests <FiArrowUpRight aria-hidden="true" /></button>
+            </div>
+          )}
+          <div className="focus-guidance">
+            <strong>Useful next move</strong>
+            <p>Keep your interests and education current before generating a new recommendation or analysis.</p>
+            <button type="button" className="text-action" onClick={() => navigate('/profile/edit-profile')}>Edit profile <FiEdit2 aria-hidden="true" /></button>
+          </div>
+        </section>
+      );
     }
-  ];
 
+    if (activeTab === 'tools') {
+      return (
+        <section className="profile-content-card profile-tools-panel" id="tools-panel" role="tabpanel">
+          <div className="profile-section-heading">
+            <p className="profile-eyebrow">Ready when you are</p>
+            <h2>Put your profile to work.</h2>
+            <p>Each tool uses your saved information to make its output more relevant.</p>
+          </div>
+          <div className="profile-action-grid">
+            {actions.map(({ icon, title, copy, to }) => (
+              <button type="button" className="profile-action-card" key={title} onClick={() => navigate(to)}>
+                <span className="profile-action-icon">{icon}</span>
+                <span className="profile-action-copy">
+                  <strong>{title}</strong>
+                  <small>{copy}</small>
+                </span>
+                <FiArrowUpRight className="profile-action-arrow" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        </section>
+      );
+    }
 
-  // Progress tracking data
-  const progressData = [
-    { course: "Advanced AI Techniques", progress: 75 },
-    { course: "Machine Learning Fundamentals", progress: 90 },
-    { course: "Data Structures & Algorithms", progress: 60 },
-  ];
-
-  // Upcoming events
-  const upcomingEvents = [
-    { title: "Technical Interview", date: "March 25, 2025", type: "interview" },
-    { title: "AWS Certification Exam", date: "April 2, 2025", type: "exam" },
-    { title: "AI Conference", date: "April 15, 2025", type: "conference" },
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFeature((prev) => (prev + 1) % features.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-
-  useEffect(() => {
-    //get data
-    getUserDetail(token,navigate,BASE_URL,setUserData);
-
-    //Animation
-    gsap.fromTo(
-      ".profile-header",
-      { opacity: 0, y: -50 },
-      { opacity: 1, y: 0, duration: 1, ease: "power2.out" }
+    return (
+      <section className="profile-content-card profile-details-panel" id="profile-panel" role="tabpanel">
+        <div className="profile-section-heading">
+          <p className="profile-eyebrow">Your foundation</p>
+          <h2>Profile details</h2>
+          <p>A clear record of the information guiding your career experience.</p>
+        </div>
+        <div className="profile-details-grid">
+          <article className="profile-detail-card">
+            <FiMapPin aria-hidden="true" />
+            <span>Location</span>
+            <strong>{userData.location || 'Not added yet'}</strong>
+          </article>
+          <article className="profile-detail-card">
+            <FiBookOpen aria-hidden="true" />
+            <span>Education</span>
+            <strong>{educationSummary || 'Not added yet'}</strong>
+            {userData.education?.institution && <small>{userData.education.institution}</small>}
+          </article>
+          <article className="profile-detail-card">
+            <FiMail aria-hidden="true" />
+            <span>Email</span>
+            <strong>{userData.email || 'Not available'}</strong>
+          </article>
+        </div>
+        <div className="profile-detail-footer">
+          <span>{userData.interests?.length || 0} saved interest{userData.interests?.length === 1 ? '' : 's'}</span>
+          <button type="button" className="text-action" onClick={() => navigate('/profile/edit-profile')}>Update details <FiEdit2 aria-hidden="true" /></button>
+        </div>
+      </section>
     );
-
-    gsap.fromTo(
-      ".tab-button",
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power2.out" }
-    );
-
-    gsap.fromTo(
-      ".content-card",
-      { opacity: 0, scale: 0.95 },
-      { opacity: 1, scale: 1, duration: 1, stagger: 0.3, ease: "power2.out" }
-    );
-  }, []);
-
-
-  const handleEditClick = () => {
-    navigate("/profile/edit-profile"); 
   };
 
   return (
     <div className="view-profile-container">
       <Navbar variant="app" />
-      <div className="profile-header">
-        <div className="profile-setting">
-          <div className="profile-image-container">
-            {
-              userData.profileImage != '' ?
-                <img 
-                  src={userData.profileImage} 
-                  alt="Profile" 
-                  className="profile-image" 
-                />
-              : <div className="profile-image center"> <p className="user-initial">{userData.name.charAt(0)}</p>  </div>
-            }
+      <main className="profile-workspace">
+        <section className="profile-hero">
+          <div className="profile-identity">
+            <div className="profile-avatar" aria-label={`${userData.name || 'User'} profile image`}>
+              {userData.profileImage ? <img src={userData.profileImage} alt="Profile" /> : <span>{initial}</span>}
             </div>
-        </div>
-
-        <div className="profile-header-content">
-          <div className="profile-info">
-            <h1 className="profile-name">Welcome! <br /> {userData.name}</h1>
-            <p className="profile-title">{userData.title}</p>
-            <div className="skill-tags">
-              {userData.interests.map((skill, index) => (
-                <span key={index} className="skill-tag">{skill}</span>
-              ))}
-            </div>
-            <div className="profile-actions">
-              <button className="primary-button edit-btn" onClick={handleEditClick}>Edit Profile</button>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gif">
-          <img src={bgGif} alt="" />
-        </div>
-      </div>
-
-      <div className="main-content">
-        <div className="navigation-tabs center">
-          <div className="tabs-container">
-            <button 
-              onClick={() => setActiveTab("profile")}
-              className={`tab-button ${activeTab === "profile" ? "active-tab" : ""}`}
-            >
-              <span className="tab-icon user-icon"></span> Profile
-            </button>
-            <button 
-              onClick={() => setActiveTab("progress")}
-              className={`tab-button ${activeTab === "progress" ? "active-tab" : ""}`}
-            >
-              <span className="tab-icon progress-icon"></span> Progress
-            </button>
-            <button 
-              onClick={() => setActiveTab("calendar")}
-              className={`tab-button ${activeTab === "calendar" ? "active-tab" : ""}`}
-            >
-              <span className="tab-icon calendar-icon"></span> Calendar
-            </button>
-          </div>
-        </div>
-        
-        <div className="main-column">
-          {activeTab === "profile" && (
-            <div className="content-card">
-              <h2 className="section-title">Personal Info</h2>
-              <div className="profile-details">
-                <div className="detail-item">
-                  <h3 className="detail-label">Location</h3>
-                  <p className="detail-value">{userData.location}</p>
-                </div>
-                <div className="detail-item">
-                  <h3 className="detail-label">Education</h3>
-                  <p className="detail-value">{userData.education.fieldOfStudy}</p>
-                </div>
-                <div className="detail-item">
-                  <h3 className="detail-label">Email</h3>
-                  <p className="detail-value">{userData.email}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "progress" && (
-            <div className="content-card">
-              <h2 className="section-title">Learning Progress</h2>
-              <div className="progress-list">
-                <p style={{color: "orange"}}>(Upcoming Feature ⭐)</p>
-                <p style={{color: "red",fontSize: '10px',marginTop: '-.75rem'}}>Under Development</p>
-                {progressData.map((item, index) => (
-                  <div key={index} className="progress-item">
-                    <div className="progress-header">
-                      <span className="progress-title">{item.course}</span>
-                      <span className="progress-percentage">{item.progress}%</span>
-                    </div>
-                    <div className="progress-bar-container">
-                      <div 
-                        className="progress-bar" 
-                        style={{ width: `${item.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "calendar" && (
-            <div className="content-card">
-              <h2 className="section-title">Upcoming Events</h2>
-              <div className="events-list">
-                <p style={{color: "orange"}}>(Upcoming Feature ⭐)</p>
-                <p style={{color: "red",fontSize: '10px',marginTop: '-.75rem'}}>Under Development</p>
-                {upcomingEvents.map((event, index) => (
-                  <div key={index} className={`event-item event-${event.type}`}>
-                    <div className="event-content">
-                      <div>
-                        <h3 className="event-title">{event.title}</h3>
-                        <p className="event-date">{event.date}</p>
-                      </div>
-                      <span className={`event-type-badge ${event.type}-badge`}>
-                        {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="sidebar-column">
-          <div className="content-card">
-            <h2 className="section-title">Features</h2>
-            <div className="feature-card fade-in-out">
-              <div className="feature-content">
-                <span className={`feature-icon ${features[currentFeature].icon}`}></span>
-                <p className="feature-text">{features[currentFeature].text}</p>
-              </div>
-              <div className="feature-indicators">
-                {features.map((_, index) => (
-                  <div 
-                    key={index} 
-                    className={`feature-indicator ${index === currentFeature ? 'active-indicator' : ''}`}
-                  ></div>
-                ))}
+            <div>
+              <p className="profile-eyebrow">Career profile</p>
+              <h1>{userData.name || 'Your profile'}</h1>
+              <p className="profile-subtitle">{userData.title || 'The details that shape your career guidance.'}</p>
+              <div className="profile-meta">
+                {userData.location && <span><FiMapPin aria-hidden="true" /> {userData.location}</span>}
+                {userData.education?.fieldOfStudy && <span><FiBookOpen aria-hidden="true" /> {userData.education.fieldOfStudy}</span>}
               </div>
             </div>
           </div>
-        </div>
-      </div>
+          <aside className="profile-readiness" aria-label="Profile readiness">
+            <div className="readiness-heading"><span>Profile readiness</span><strong>{profileReadiness}%</strong></div>
+            <div className="readiness-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={profileReadiness}>
+              <span style={{ width: `${profileReadiness}%` }} />
+            </div>
+            <p>{profileReadiness === 100 ? 'Your essentials are ready for a more specific result.' : 'Complete the remaining essentials for sharper recommendations.'}</p>
+            <button type="button" onClick={() => navigate('/profile/edit-profile')}>Edit profile <FiEdit2 aria-hidden="true" /></button>
+          </aside>
+        </section>
+
+        <section className="profile-dashboard">
+          <nav className="profile-tabs" role="tablist" aria-label="Profile workspace">
+            {profileTabs.map((tab) => (
+              <button
+                type="button"
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`${tab.id}-panel`}
+                className={activeTab === tab.id ? 'active' : ''}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+          {renderPanel()}
+        </section>
+      </main>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import ReactFlow, { 
   Controls, 
   Background, 
@@ -13,11 +13,20 @@ import '../../styles/Roadmap genarator/Roadmap.css';
 import '../../styles/Global Styles/service-theme.css';
 import '../../styles/Global Styles/roadmap-workspace.css';
 import { CustomEdge, CustomNode } from './CustomReactFlowComponents';
-import gsap from 'gsap';
 import Navbar from '../../components/LandingPageComponents/Navbar'
 import { FiArrowUpRight, FiBookmark, FiClock, FiCompass, FiMap, FiMaximize2, FiTrash2 } from 'react-icons/fi';
 import { roadmapMockData } from '../../constants/mockData';
 import { ROADMAP_API_BASE_URL } from '../../config/api';
+
+const categoryColors = {
+  core: '#3c574d',
+  optional: '#b35a3c',
+  advanced: '#6d7668',
+  beginner: '#78937f',
+  intermediate: '#c28b45',
+  expert: '#87483b',
+  default: '#3c574d'
+};
 
 const RoadmapGenerator = () => {
   const [goal, setGoal] = useState('');
@@ -33,51 +42,11 @@ const RoadmapGenerator = () => {
   const [viewMode, setViewMode] = useState('default');
   const [activeTab, setActiveTab] = useState('saved'); // Default tab is 'saved'
   
-  // References for GSAP animations
-  const headerRef = useRef(null);
-  const contentRef = useRef(null);
-  const tabsRef = useRef(null);
-  
   const reactFlowInstance = useRef(null);
 
   const nodeTypes = useMemo(() => ({ custom: CustomNode }), []);
   const edgeTypes = useMemo(() => ({ custom: CustomEdge }), []);
   
-  // Initialize GSAP animations
-  useEffect(() => {
-    if (headerRef.current && contentRef.current && tabsRef.current) {
-      gsap.fromTo(
-        headerRef.current,
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
-      );
-      
-      gsap.fromTo(
-        tabsRef.current,
-        { opacity: 0, y: -10 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power3.out" }
-      );
-      
-      gsap.fromTo(
-        contentRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.4, ease: "power3.out" }
-      );
-    }
-  }, []);
-
-  // Animate tab changes
-  useEffect(() => {
-    if (contentRef.current) {
-      // Fade out and in when tab changes
-      gsap.fromTo(
-        contentRef.current,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-      );
-    }
-  }, [activeTab]);
-
   const handleInputChange = (e) => {
     setGoal(e.target.value);
   };
@@ -163,22 +132,6 @@ const RoadmapGenerator = () => {
 
       setSaveSuccess(true);
       
-      // Animate save success notification
-      const saveNotification = document.querySelector('.save-roadmap-btn');
-      if (saveNotification) {
-        gsap.fromTo(
-          saveNotification,
-          { backgroundColor: '#4CAF50', color: '#ffffff' },
-          { 
-            backgroundColor: '#2E7D32', 
-            color: '#ffffff',
-            duration: 0.5,
-            yoyo: true,
-            repeat: 1
-          }
-        );
-      }
-      
       setTimeout(() => {
         setSaveSuccess(false);
       }, 3000);
@@ -187,17 +140,6 @@ const RoadmapGenerator = () => {
       setError("Failed to save roadmap. Please try again.");
     }
   };
-
-  const categoryColors = {
-    core: '#3c574d',
-    optional: '#b35a3c',
-    advanced: '#6d7668',
-    beginner: '#78937f',
-    intermediate: '#c28b45',
-    expert: '#87483b',
-    default: '#3c574d'
-  };
-  
 
   const processRoadmapData = useCallback((data) => {
     if (!data?.nodes || !data?.edges) return;
@@ -412,7 +354,7 @@ const RoadmapGenerator = () => {
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: edgeType === 'required' ? '#ff7e5f' : '#feb47b',
+          color: edgeType === 'required' ? '#b35a3c' : '#78937f',
           width: 15,
           height: 15,
         }
@@ -429,7 +371,7 @@ const RoadmapGenerator = () => {
       }
     }, 300);
     
-  }, []);
+  }, [setEdges, setNodes]);
 
   const onNodeClick = useCallback((event, node) => {
     event.stopPropagation();
@@ -469,26 +411,7 @@ const RoadmapGenerator = () => {
     }
   };
 
-  const handleTabChange = (tab) => {
-    // Animate the tab change
-    if (contentRef.current) {
-      gsap.to(contentRef.current, {
-        opacity: 0,
-        y: 10,
-        duration: 0.3,
-        onComplete: () => {
-          setActiveTab(tab);
-          gsap.to(contentRef.current, {
-            opacity: 1,
-            y: 0,
-            duration: 0.3
-          });
-        }
-      });
-    } else {
-      setActiveTab(tab);
-    }
-  };
+  const handleTabChange = (tab) => setActiveTab(tab);
 
   // Function to load a roadmap when selected
   const loadRoadmap = (roadmap) => {
@@ -504,14 +427,6 @@ const RoadmapGenerator = () => {
     // Switch to generated tab
     handleTabChange('generated');
 
-    // Animate the roadmap appearance
-    if (contentRef.current) {
-      gsap.fromTo(
-        contentRef.current,
-        { opacity: 0, scale: 0.95 },
-        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
-      );
-    }
   };
 
   // Function to delete a saved roadmap
@@ -535,7 +450,7 @@ const RoadmapGenerator = () => {
     <div className="roadmap-generator-container">
       <Navbar variant="app" />
       <main className="roadmap-workspace">
-      <section className="roadmap-header-section" ref={headerRef}>
+      <section className="roadmap-header-section">
         <div className="roadmap-composer-copy">
           <p className="workspace-eyebrow">AI roadmap generator</p>
           <h1 className="input-title">Make the next chapter tangible.</h1>
@@ -580,7 +495,7 @@ const RoadmapGenerator = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="roadmap-tabs" ref={tabsRef}>
+        <div className="roadmap-tabs">
           <button 
             className={`tab-btn ${activeTab === 'saved' ? 'active' : ''}`}
             onClick={() => handleTabChange('saved')}
@@ -604,7 +519,7 @@ const RoadmapGenerator = () => {
       </section>
 
       {/* Second part - Dynamic Content based on active tab */}
-      <div className="roadmap-dynamic-content" ref={contentRef}>
+      <div className="roadmap-dynamic-content">
         {isGenerating && (
           <div className="roadmap-loading">
             <div className="loading-spinner"></div>
@@ -706,7 +621,7 @@ const RoadmapGenerator = () => {
                   <FiMaximize2 aria-hidden="true" /> Fit canvas
                 </button>
                 <button 
-                  className="save-roadmap-btn" 
+                  className={`save-roadmap-btn ${saveSuccess ? 'is-saved' : ''}`}
                   onClick={saveRoadmap}
                   disabled={saveSuccess}
                 >
@@ -816,13 +731,6 @@ const RoadmapGenerator = () => {
                             const node = nodes.find(n => n.id === prereqId);
                             if (node) {
                               setSelectedNode(nodeMap[prereqId] || null);
-                              
-                              // Animate the selection change
-                              gsap.fromTo(
-                                ".node-details",
-                                { opacity: 0.7, x: 10 },
-                                { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }
-                              );
                             }
                           }} className="prerequisite-item">
                             {nodeMap[prereqId]?.title || prereqId}
@@ -884,13 +792,6 @@ const RoadmapGenerator = () => {
                               className={`next-step-btn ${edge.data?.type === 'required' ? 'required' : 'recommended'}`}
                               onClick={() => {
                                 setSelectedNode(targetNode);
-                                
-                                // Animate the selection change
-                                gsap.fromTo(
-                                  ".node-details",
-                                  { opacity: 0.7, x: 10 },
-                                  { opacity: 1, x: 0, duration: 0.3, ease: "power2.out" }
-                                );
                               }}
                             >
                               {targetNode.title}

@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import L from "leaflet";
+import 'leaflet/dist/leaflet.css';
 import { IoMdAddCircle } from "react-icons/io";
+
+const DEFAULT_LOCATION = {
+  latitude: 40.7128,
+  longitude: -74.0060,
+  location: "New York, USA"
+};
 
 const LocationInput = ({ onLocationSelected, selectedLocation,userData }) => {
   const [inputValue, setInputValue] = useState("");
@@ -95,6 +102,7 @@ const LocationInput = ({ onLocationSelected, selectedLocation,userData }) => {
               >
                 <span className="location-name">{location.display_name}</span>
                 <button 
+                  type="button"
                   className="add-location-btn"
                   onClick={() => addLocation(location)}
                   aria-label="Add location"
@@ -114,6 +122,7 @@ const LocationInput = ({ onLocationSelected, selectedLocation,userData }) => {
               {selectedLocation ?selectedLocation.name  :userData.location }
             </span>
             <button 
+              type="button"
               className="remove-location-btn"
               onClick={removeLocation}
               aria-label="Remove location"
@@ -131,12 +140,6 @@ const LocationInput = ({ onLocationSelected, selectedLocation,userData }) => {
 const MapComponent = ({ userData, setUserData }) => {
 
     
-  const defaultLocation = { 
-    latitude: 40.7128, 
-    longitude: -74.0060, 
-    location: "New York, USA" 
-  };
-  
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isMapLoading, setIsMapLoading] = useState(false);
   const mapRef = useRef(null);
@@ -149,12 +152,12 @@ const MapComponent = ({ userData, setUserData }) => {
       
       setSelectedLocation(location);
       if (setUserData) {
-        setUserData({
-          ...userData,
+        setUserData((previousUserData) => ({
+          ...previousUserData,
           latitude: location.latitude,
           longitude: location.longitude,
           location: location.name
-        });
+        }));
       }
     } else {
       
@@ -162,7 +165,7 @@ const MapComponent = ({ userData, setUserData }) => {
       if (setUserData) {
         setUserData({
           ...userData,
-          ...defaultLocation
+          ...DEFAULT_LOCATION
         });
       }
     }
@@ -194,9 +197,9 @@ const MapComponent = ({ userData, setUserData }) => {
   useEffect(() => {
     if (!mapRef.current || !userData || Object.keys(userData).length === 0) return; // Ensure userData is loaded
   
-    const latitude = userData.latitude || defaultLocation.latitude;
-    const longitude = userData.longitude || defaultLocation.longitude;
-    const locationName = userData.location || defaultLocation.location;
+    const latitude = userData.latitude || DEFAULT_LOCATION.latitude;
+    const longitude = userData.longitude || DEFAULT_LOCATION.longitude;
+    const locationName = userData.location || DEFAULT_LOCATION.location;
   
     if (!leafletMap.current) {
       leafletMap.current = L.map(mapRef.current).setView([latitude, longitude], 13);
@@ -234,7 +237,7 @@ const MapComponent = ({ userData, setUserData }) => {
       .addTo(leafletMap.current)
       .bindPopup(locationName)
       .openPopup();
-  }, [userData]); // Runs only when userData updates
+  }, [setUserData, userData]); // Runs when profile location data updates
   
   
   // Cleanup map on component unmount
@@ -252,34 +255,15 @@ const MapComponent = ({ userData, setUserData }) => {
       <div
         ref={mapRef}
         className="map-container"
-        style={{
-          height: '300px',
-          width: '100%',
-          marginTop: '15px',
-          background: '#e5e3df',
-          position: 'relative',
-          cursor: 'pointer'
-        }}
       >
         {isMapLoading && (
-          <div 
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: 'rgba(255, 255, 255, 0.8)',
-              padding: '5px 10px',
-              borderRadius: '4px',
-              zIndex: 1000
-            }}
-          >
+          <div className="map-loading-overlay">
             Loading location...
           </div>
         )}
       </div>
 
-      <p className="map-instructions" style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+      <p className="map-instructions">
         Click anywhere on the map to select that location
       </p>
 

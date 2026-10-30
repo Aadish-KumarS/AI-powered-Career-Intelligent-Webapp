@@ -3,17 +3,12 @@ import { getUserData, handleInputChange, fetchIPBasedLocation, getGeoLocation, a
 import MapComponent from './MapComponent';
 import { FaSave, FaKey, FaTrash, FaInfoCircle } from "react-icons/fa";
 import PasswordChangeFields from '../PasswordComponents/PasswordChange'; 
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import '../../styles/UserProfile Styles/EditProfile.css'
 import '../../styles/Global Styles/profile-theme.css';
+import '../../styles/UserProfile Styles/EditProfile.css';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
 import AppDialog from '../AppDialog';
-
-gsap.registerPlugin(ScrollTrigger);
+import Navbar from '../LandingPageComponents/Navbar';
 
 export default function EditProfile() {
   const [userData, setUserData] = useState({
@@ -41,8 +36,6 @@ export default function EditProfile() {
   const [successMessage, setSuccessMessage] = useState('');
   const [, setLocationAccessStatus] = useState('pending');
   const [activeSection, setActiveSection] = useState('personalInfo');
-  const mapRef = useRef(null);
-  const [map, setMap] = useState(null);
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
@@ -59,7 +52,6 @@ export default function EditProfile() {
   const pictureRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const sideMenuRef = useRef(null);
   
 
   const getUserLocation = () => {
@@ -72,7 +64,7 @@ export default function EditProfile() {
 
   // Scroll to section function
   const scrollToSection = (ref) => {
-    ref.current.scrollIntoView({ behavior: 'smooth' });
+    window.setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
   };
 
   const handleFetchSuggestions = useCallback(
@@ -94,65 +86,9 @@ export default function EditProfile() {
     }
 
     const token = sessionStorage.getItem('authToken');
-    const BASE_URL = API_BASE_URL;
-    getUserData(BASE_URL,token,setUserData,userData)
+    getUserData(API_BASE_URL, token, setUserData);
 
-    const sections = [nameRef, locationRef, educationRef, interestsRef, passwordRef, deleteAccountRef];
-    
-    sections.forEach(section => {
-      if (section.current) {
-        gsap.fromTo(section.current, 
-          { opacity: 0, y: 30 },
-          { 
-            opacity: 1, 
-            y: 0, 
-            duration: 0.8,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: section.current,
-              start: 'top 80%'
-            }
-          }
-        );
-      }
-    });
-
-    gsap.fromTo(
-      sideMenuRef.current,
-      { x: -200, opacity: 0 }, 
-      { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" } 
-    );
   }, []);
-
-  useEffect(() => {
-    if (map) {
-      map.remove();
-    }
-
-    if (userData.latitude && userData.longitude && mapRef.current) {
-      const newMap = L.map(mapRef.current).setView(
-        [userData.latitude, userData.longitude], 
-        13
-      );
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(newMap);
-
-      L.marker([userData.latitude, userData.longitude])
-        .addTo(newMap)
-        .bindPopup(userData.location || 'Current Location')
-        .openPopup();
-
-      setMap(newMap);
-    }
-
-    return () => {
-      if (map) {
-        map.remove();
-      }
-    };
-  }, [userData.latitude, userData.longitude]);
 
 
   const handlePasswordUpdate = (e) => {
@@ -188,41 +124,36 @@ export default function EditProfile() {
 
   return (
     <div className="profile-editor-container">
+      <Navbar variant="app" />
+      <div className="profile-editor-workspace">
+        <header className="profile-editor-header">
+          <div>
+            <p className="editor-eyebrow">Career profile</p>
+            <h1>Keep your profile useful.</h1>
+            <p>These details make every recommendation, analysis, and roadmap more relevant to you.</p>
+          </div>
+          <button type="button" className='back-btn' onClick={() => navigate('/profile/user-profile')}>Back to profile</button>
+        </header>
 
-      <div className="content-wrapper">
-        <aside className="side-menu" ref={sideMenuRef}>
-          <button className='back-btn' onClick={() => window.history.back()}>Back</button>
+        <div className="content-wrapper">
+        <aside className="side-menu">
 
           <div className="menu-section">
             <h3><FaInfoCircle /> Personal Info</h3>
             <ul>
-              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(nameRef); }}>
-                Full Name
-              </li>
-              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(locationRef); }}>
-                Location
-              </li>
-              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(educationRef); }}>
-                Education
-              </li>
-              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(pictureRef); }}>
-                Profile Picture
-              </li>
-              <li onClick={() => { setActiveSection('personalInfo'); scrollToSection(interestsRef); }}>
-                Interests
-              </li>
+              <li><button type="button" className="menu-link" onClick={() => { setActiveSection('personalInfo'); scrollToSection(nameRef); }}>Full Name</button></li>
+              <li><button type="button" className="menu-link" onClick={() => { setActiveSection('personalInfo'); scrollToSection(locationRef); }}>Location</button></li>
+              <li><button type="button" className="menu-link" onClick={() => { setActiveSection('personalInfo'); scrollToSection(educationRef); }}>Education</button></li>
+              <li><button type="button" className="menu-link" onClick={() => { setActiveSection('personalInfo'); scrollToSection(pictureRef); }}>Profile Picture</button></li>
+              <li><button type="button" className="menu-link" onClick={() => { setActiveSection('personalInfo'); scrollToSection(interestsRef); }}>Interests</button></li>
             </ul>
           </div>
           
           <div className="menu-section">
             <h3><FaKey /> Security</h3>
             <ul>
-              <li onClick={() => { setActiveSection('security'); scrollToSection(passwordRef); }}>
-                Change Password
-              </li>
-              <li onClick={() => { setActiveSection('security'); scrollToSection(deleteAccountRef); }}>
-                Delete Account
-              </li>
+              <li><button type="button" className="menu-link" onClick={() => { setActiveSection('security'); scrollToSection(passwordRef); }}>Change Password</button></li>
+              <li><button type="button" className="menu-link" onClick={() => { setActiveSection('security'); scrollToSection(deleteAccountRef); }}>Delete Account</button></li>
             </ul>
           </div>
         </aside>
@@ -319,6 +250,7 @@ export default function EditProfile() {
                 </div>
 
                 <button 
+                  type="button"
                   className="save-changes-btn center" 
                   onClick={(e) => updateProfile(e, userData, setError, setSuccessMessage,setLoading,navigate)}
                 >
@@ -362,6 +294,7 @@ export default function EditProfile() {
                   <p>Warning: This action cannot be undone. All your data will be permanently deleted.</p>
                 </div>
                 <button 
+                  type="button"
                   onClick={() => setShowDeleteDialog(true)}
                   className="delete-account-btn center"
                   disabled={loading}
@@ -375,6 +308,7 @@ export default function EditProfile() {
           {error && <div className="error-message">{error}</div>}
           {successMessage && <div className="success-message">{successMessage}</div>}
         </main>
+      </div>
       </div>
       <AppDialog
         open={showDeleteDialog}

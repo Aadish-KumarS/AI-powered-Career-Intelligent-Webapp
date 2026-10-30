@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/UserProfile Styles/CreateProfile.css";
 import '../../styles/Global Styles/profile-theme.css';
-import gsap from "gsap";
+import "../../styles/UserProfile Styles/CreateProfile.css";
 
 import img1 from "../../assets/img1.jpg";
 import img2 from "../../assets/img2.jpg";
@@ -11,6 +10,8 @@ import { getUserData, handleCreateUserFileChange, handleStepChange } from "../..
 import { handleSubmitCreateProfile } from "../../utils/formHanderls";
 import FormStep from "./BasicInfoStep";
 import { API_BASE_URL } from '../../config/api';
+
+const BASE_URL = API_BASE_URL;
 
 export default function CreateProfile() {
   const navigate = useNavigate();
@@ -31,85 +32,13 @@ export default function CreateProfile() {
     isFirstTime: null,
   });
   const [error, setError] = useState("");
-  const BASE_URL = API_BASE_URL;
   const token = sessionStorage.getItem('authToken');
   const formRef = useRef(null);
 
   
   useEffect(() => {
-    getUserData(BASE_URL,token,setProfileData,profileData);
-
-    gsap.fromTo(".left-form", 
-      {
-        opacity: 0, 
-        x: -100 
-      }, 
-      {
-        opacity: 1, 
-        x: 0, 
-        ease: "power2.out", 
-        duration: 1.5, 
-        delay: 0.3
-      });
-  
-    gsap.fromTo(".right-content", 
-      {
-        opacity: 0, 
-        x: 100
-      }, 
-      {
-        opacity: 1, 
-        x: 0, 
-        ease: "power2.out", 
-        duration: 1.5, 
-        delay: 0.5
-      });
-  
-    gsap.fromTo(".card", 
-      {
-        opacity: 0, 
-        y: 100
-      }, 
-      {
-        opacity: 1, 
-        y: 0, 
-        stagger: 0.2, 
-        ease: "bounce.out", 
-        duration: 1, 
-        delay: 1
-      });
-  
-    gsap.fromTo(".create-btn, .next-btn", 
-      {
-        scale: 0.8, 
-        opacity: 0
-      }, 
-      {
-        scale: 1, 
-        opacity: 1, 
-        ease: "power2.out", 
-        duration: 1, 
-        delay: 1.2
-      });
+    getUserData(BASE_URL, sessionStorage.getItem('authToken'), setProfileData);
   }, []);
-
-  // Animation for step transitions
-  useEffect(() => {
-    if (formRef.current) {
-      gsap.fromTo(formRef.current,
-        {
-          opacity: 0,
-          y: 30
-        },
-        {
-          opacity: 1,
-          y: 0,
-          ease: "power3.out",
-          duration: 0.8
-        }
-      );
-    }
-  }, [step]);
 
 
   // Handle final form submission

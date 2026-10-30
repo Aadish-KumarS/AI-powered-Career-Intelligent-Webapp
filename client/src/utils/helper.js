@@ -25,7 +25,7 @@ export const resendOTP = async () => {
 
 //USER PROFILE 
 // create profile component helper functions 
-export async function getUserData(BASE_URL,token,setProfileData,profileData) {
+export async function getUserData(BASE_URL, token, setProfileData) {
     try {
       const response = await axios.get(
         `${BASE_URL}/api/users/profile`, 
@@ -50,8 +50,10 @@ export async function getUserData(BASE_URL,token,setProfileData,profileData) {
         interests: response.data.interests || [],
         isFirstTime: response.data.isFirstTime ?? null
       };
-      setProfileData({...profileData, 
-        ...fetchedUserData});
+      setProfileData((previousProfile) => ({
+        ...previousProfile,
+        ...fetchedUserData
+      }));
       sessionStorage.setItem('userData', JSON.stringify(fetchedUserData));
     } catch (error) {
       console.error('Error fetching the data',error);
