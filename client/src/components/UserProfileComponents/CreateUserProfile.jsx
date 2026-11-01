@@ -44,7 +44,6 @@ export default function CreateProfile() {
   // Handle final form submission
   const handleSubmit = async (e) => {
     const updatedProfileData = { ...profileData, isFirstTime: false };
-    console.log(updatedProfileData);
     
     handleSubmitCreateProfile(e, updatedProfileData, setError, BASE_URL, token, formRef, navigate);
 };

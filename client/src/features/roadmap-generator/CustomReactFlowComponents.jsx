@@ -2,7 +2,8 @@ import { Handle, } from 'reactflow';
 
 const CustomNode = ({ data, selected }) => {
   const nodeStyle = {
-    '--node-accent': data.backgroundColor || '#b35a3c'
+    '--node-accent': data.backgroundColor || '#527462',
+    '--node-gradient': data.backgroundGradient || 'linear-gradient(135deg, #edf4ef 0%, #c8d9ce 100%)'
   };
   
   return (
@@ -41,19 +42,9 @@ const CustomEdge = ({
   markerEnd,
   style = {},
 }) => {
-  const sourceHandleOffset = 0;
-  const targetHandleOffset = 0;
-  const startX = sourceX;
-  const startY = sourceY + sourceHandleOffset;
-  const endX = targetX;
-  const endY = targetY - targetHandleOffset;
-  const midY = startY + (endY - startY) / 2;
-  const edgePath = `
-    M ${startX},${startY}
-    L ${startX},${midY}
-    L ${endX},${midY}
-    L ${endX},${endY}
-  `;
+  const verticalDistance = Math.abs(targetY - sourceY);
+  const bend = Math.max(48, Math.min(110, verticalDistance * .42));
+  const edgePath = `M ${sourceX},${sourceY} C ${sourceX},${sourceY + bend} ${targetX},${targetY - bend} ${targetX},${targetY}`;
 
   return (
     <g className="react-flow__connection">
@@ -61,15 +52,15 @@ const CustomEdge = ({
         id={`${id}-bg`}
         className="react-flow__edge-path-bg"
         d={edgePath}
-        strokeWidth={7}
-        stroke="#e7ece5"
+        strokeWidth={9}
+        stroke="#eef1ec"
         fill="none"
       />
       <path
         id={id}
         className="react-flow__edge-path"
         d={edgePath}
-        strokeWidth={1.5}
+        strokeWidth={3}
         stroke={style.stroke || "#b35a3c"}
         fill="none"
         markerEnd={markerEnd}

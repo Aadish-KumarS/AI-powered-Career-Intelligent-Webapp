@@ -33,7 +33,7 @@
   background: var(--rt-paper);
   color: var(--rt-ink);
   cursor: pointer;
-  font: 800 .68rem/1 'Manrope', sans-serif;
+  font: 800 .76rem/1 'Manrope', sans-serif;
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
@@ -110,7 +110,7 @@
 .roadmap-generator-container .industry-insights p {
   margin: .85rem 0 0;
   color: var(--rt-ink-soft);
-  font-size: .76rem;
+  font-size: .9rem;
   line-height: 1.7;
 }
 
@@ -165,7 +165,7 @@
   padding: .65rem .7rem;
   border: 1px solid var(--rt-line);
   border-radius: .65rem;
-  font-size: .72rem;
+  font-size: .84rem;
   line-height: 1.5;
 }
 
@@ -186,7 +186,7 @@
 
 .roadmap-generator-container .resource-type {
   color: var(--rt-clay);
-  font: 800 .58rem/1 'DM Mono', monospace;
+  font: 800 .66rem/1 'DM Mono', monospace;
   letter-spacing: .06em;
   text-transform: uppercase;
 }
@@ -228,7 +228,7 @@
 .roadmap-generator-container .edge-type-label {
   flex: 0 0 auto;
   color: var(--rt-muted);
-  font: 600 .56rem/1 'DM Mono', monospace;
+  font: 600 .64rem/1 'DM Mono', monospace;
 }
 
 .roadmap-generator-container .roadmap-node.selected {

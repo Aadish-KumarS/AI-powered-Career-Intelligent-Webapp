@@ -1,4 +1,4 @@
-export const skillGapResultMoackData={
+export const skillGapResultMockData={
   "result": {
       "skill_assessment": {
           "current_strengths": [
@@ -187,8 +187,8 @@ export const skillGapResultMoackData={
                   "Kaggle datasets"
               ],
               "certifications": [
-                  "Python Institute Certification",
-                  "PCEP - Oracle Certified Professional, Java Programmer: Developing and Maintaining Applications with Python"
+                  "NPTEL Python for Data Science certificate",
+                  "Python Institute PCEP certification"
               ]
           },
           "Deep Learning": {
@@ -238,47 +238,47 @@ export const skillGapResultMoackData={
       },
       "industry_insights": {
           "market_trends": [
-              "Increasing demand for AI and machine learning skills",
-              "Cloud platforms are becoming more popular for data storage and computation",
-              "There is a growing need for data engineers to manage and process large datasets"
+              "Indian GCCs, SaaS teams, and digital-public-infrastructure projects are increasing demand for applied AI and data skills",
+              "Cloud data platforms and MLOps are becoming core skills for product and services teams",
+              "Data engineering remains a practical entry route for candidates who can build reliable pipelines and communicate trade-offs"
           ],
           "regional_factors": [
-              "San Francisco has a high concentration of tech companies, providing ample job opportunities"
+              "Bengaluru, Hyderabad, Pune, Chennai, Gurugram, and Mumbai have strong technology, GCC, fintech, and analytics hiring ecosystems"
           ],
           "salary_expectations": [
-              "AI Engineer: $120,000 - $180,000",
-              "Data Scientist: $90,000 - $150,000"
+              "AI/ML Engineer: approximately ₹8–18 LPA for early to mid-level roles, depending on portfolio and city",
+              "Data Analyst or Data Scientist: approximately ₹5–15 LPA for early to mid-level roles, depending on domain expertise"
           ]
       },
       "career_trajectory": {
           "short_term_goals": [
-              "Complete a deep learning course",
-              "Build a project using a cloud platform"
+              "Complete a hands-on deep learning or data engineering course through NPTEL, SWAYAM, or an equivalent provider",
+              "Build a portfolio project using a public Indian dataset or a cloud free tier"
           ],
           "medium_term_goals": [
-              "Attend a relevant conference or workshop",
-              "Contribute to an open-source ML project"
+              "Attend a local PyData, GDG, AWS User Group, or campus/community workshop",
+              "Contribute a documented project or small open-source improvement on GitHub"
           ],
           "long_term_goals": [
               "Secure a role as an AI Engineer or Data Scientist",
-              "Publish a research paper in a top-tier AI conference"
+              "Build a strong portfolio and interview narrative for product companies, startups, or global capability centres"
           ],
           "estimated_timeline": "1-2 years to transition to target roles"
       },
       "networking_recommendations": [
-          "Join the AI community at San Francisco AI meetups",
-          "Join the Data Science group on LinkedIn"
+          "Join local PyData, GDG, AWS User Group, or NASSCOM community sessions in your city",
+          "Connect with data professionals on LinkedIn and share one well-documented project each month"
       ],
       "portfolio_recommendations": [
-          "Build a machine learning model for a popular dataset (e.g., MNIST, Iris, Titanic)",
-          "Create a project demonstrating the use of cloud platforms for data processing"
+          "Build an ML or analytics project using an Indian public dataset such as RBI, data.gov.in, Open Government Data, or public transport data",
+          "Create a cloud-data project with a clear cost note, README, and short walkthrough for recruiters"
       ]
   },
   "processed_at": "2025-04-19T08:34:05.481700",
   "request_id": "req-1745031820.235033"
 };
 
-export const jobMarketResultMoackData =  {
+export const jobMarketResultMockData =  {
     "result": {
         "market_demand_analysis": {
             "high_demand_skills": [
@@ -315,23 +315,23 @@ export const jobMarketResultMoackData =  {
                     "growth_percentage": 35
                 }
             ],
-            "technical_vs_soft_skills_balance": "In San Francisco, both technical and soft skills are valued in the AI Engineer and Data Scientist roles, with a slight emphasis on technical skills."
+            "technical_vs_soft_skills_balance": "Across Indian product teams, startups, and global capability centres, technical depth opens the door while communication, ownership, and stakeholder clarity differentiate candidates."
         },
         "role_insights": [
             {
                 "role_title": "AI Engineer",
                 "common_requirements": [
                     "Mastery of Python and Machine Learning",
-                    "Experience with AWS or Google Cloud",
+                    "Experience with AWS, Azure, Google Cloud, or a comparable managed platform",
                     "Strong data analysis and problem-solving skills"
                 ],
-                "average_years_experience": "3-5 years",
+                "average_years_experience": "1-3 years for associate roles; 3-5 years for independent ownership",
                 "common_titles": [
                     "Machine Learning Engineer",
                     "AI Developer",
                     "Artificial Intelligence Specialist"
                 ],
-                "remote_opportunities": "70%",
+                "remote_opportunities": "Hybrid roles are common; fully remote availability varies by employer",
                 "entry_vs_senior_distribution": "30% junior, 60% senior, 10% leadership"
             },
             {
@@ -341,56 +341,56 @@ export const jobMarketResultMoackData =  {
                     "Experience with SQL, Python, and Big Data technologies",
                     "Problem-solving and analytical skills"
                 ],
-                "average_years_experience": "3-5 years",
+                "average_years_experience": "1-3 years for analyst roles; 3-5 years for specialist roles",
                 "common_titles": [
                     "Data Scientist",
                     "Data Analyst - Machine Learning",
                     "Data Science Consultant"
                 ],
-                "remote_opportunities": "60%",
+                "remote_opportunities": "Hybrid roles are common across product, services, and GCC teams",
                 "entry_vs_senior_distribution": "20% junior, 60% mid-level, 20% senior"
             }
         ],
         "industry_landscape": {
             "growing_sectors": [
-                "Healthcare",
-                "Finance",
-                "Retail"
+                "Fintech and digital payments",
+                "Global capability centres (GCCs)",
+                "SaaS, e-commerce, healthtech, and enterprise analytics"
             ],
             "declining_sectors": [
-                "Manufacturing",
-                "Oil and Gas"
+                "Routine reporting roles with limited analytical ownership",
+                "Legacy manual-process work without cloud or data modernisation"
             ],
             "geographical_hotspots": [
                 {
-                    "city": "New York",
-                    "latitude": 40.7128,
-                    "longitude": -74.006
+                    "city": "Bengaluru",
+                    "latitude": 12.9716,
+                    "longitude": 77.5946
                 },
                 {
-                    "city": "Seattle",
-                    "latitude": 47.6062,
-                    "longitude": -122.3321
+                    "city": "Hyderabad",
+                    "latitude": 17.385,
+                    "longitude": 78.4867
                 }
             ],
-            "startup_vs_enterprise": "Startups offer more opportunities for AI Engineers and Data Scientists, but large enterprises tend to offer more stable employment and better benefits."
+            "startup_vs_enterprise": "Indian startups can offer broad ownership and fast portfolio growth, while enterprises and GCCs often provide structured teams, scale, and longer-term domain depth."
         },
         "compensation_insights": {
             "salary_ranges": {
-                "entry_level": "$80,000 - $100,000",
-                "mid_level": "$100,000 - $150,000",
-                "senior_level": "> $150,000"
+                "entry_level": "₹4–8 LPA",
+                "mid_level": "₹8–18 LPA",
+                "senior_level": "₹18–35+ LPA"
             },
-            "compensation_trends": "3% year-over-year salary growth",
+            "compensation_trends": "Compensation varies widely by city, domain, company stage, and demonstrated production experience.",
             "benefits_trends": [
-                "401k matching",
-                "Health Insurance",
-                "Stock options"
+                "Health insurance and wellness support",
+                "Provident fund and paid leave",
+                "Learning budgets, flexible work, or ESOPs at eligible companies"
             ],
             "negotiation_leverage_points": [
-                "Industry Experience",
-                "Previous Projects and Achievements",
-                "Certifications and Awards"
+                "Relevant internships, freelance work, or domain experience",
+                "Portfolio projects with a measurable business narrative",
+                "Demonstrated cloud, data, or ML deployment skills"
             ]
         },
         "future_outlook": {
@@ -410,20 +410,20 @@ export const jobMarketResultMoackData =  {
         "hiring_channel_effectiveness": {
             "job_boards": [
                 "LinkedIn",
-                "Indeed",
-                "Glassdoor"
+                "Naukri",
+                "Instahyre and company career pages"
             ],
             "networking_platforms": [
-                "Meetup",
-                "Slack",
-                "GitHub"
+                "PyData and GDG communities",
+                "LinkedIn and alumni groups",
+                "GitHub and local developer communities"
             ],
             "recruitment_agencies": [
-                "TechEpiphany",
-                "The Adecco Group",
-                "Robert Half"
+                "Specialist technology recruiters",
+                "GCC and enterprise hiring partners",
+                "University and alumni placement networks"
             ],
-            "direct_application_success_rate": "30%"
+            "direct_application_success_rate": "Higher when applications are tailored with a relevant project, skills evidence, and a concise role-specific note"
         },
         "interview_process_insights": {
             "common_assessments": [
@@ -432,9 +432,9 @@ export const jobMarketResultMoackData =  {
                 "Machine Learning problem-solving tests"
             ],
             "interview_stages": [
-                "Phone screening",
-                "Technical interview",
-                "Cultural fit interview"
+                "Recruiter or HR screening",
+                "Technical or case-study round",
+                "Hiring-manager and stakeholder discussion"
             ],
             "key_evaluation_criteria": [
                 "Technical expertise",
@@ -455,10 +455,15 @@ Turn data into practical business insights through analysis, dashboards, and cle
 
 ### Why This Career Fits
 - Builds on analytical thinking, technical skills, and an interest in solving real problems.
+- Rewards a structured, curious working style: investigate a question, test the evidence, and communicate a practical recommendation.
+- Creates several credible next moves, including analytics engineering, product analytics, business intelligence, and data science.
 
 ### Skills to Develop
 - **SQL and Data Modeling** — Query and organize reliable datasets.
 - **Python for Analysis** — Use pandas and visualisation libraries to explore data.
+- **Data Visualisation** — Make concise, decision-ready charts in Tableau, Power BI, or a Python notebook.
+- **Business Framing** — Translate broad stakeholder questions into measurable metrics and a clear analytical brief.
+- **Version Control** — Document and share reproducible work with Git and a portfolio-ready README.
 
 ### 3–6 Month Learning Roadmap
 - **Month 1–2:** Strengthen SQL and spreadsheet analysis with small practice datasets.
@@ -475,24 +480,154 @@ The path is approachable when each new concept is applied to a small project.
 ### 5-Year Career Growth Path
 - **Year 1–2:** Deliver reliable reports and analyses.
 - **Year 3–4:** Own larger data products and mentor peers.
-- **Year 5:** Progress to Senior Analyst, Analytics Engineer, or Data Scientist.`
+- **Year 5:** Progress to Senior Analyst, Analytics Engineer, or Data Scientist.
+
+---
+
+## 2. Business Intelligence Analyst
+
+### Overview
+Translate operational questions into trusted dashboards, definitions, and decision-ready reporting.
+
+### Why This Career Fits
+- Combines analytical problem-solving with the communication needed to make insights useful across a team.
+- Fits people who enjoy turning ambiguous requests into a shared definition of success, useful metrics, and an easy-to-read story.
+- Offers visible business impact while building strong foundations in SQL, stakeholder management, and data product thinking.
+
+### Skills to Develop
+- **Dashboard Design** — Build readable reports in Power BI, Tableau, or Looker Studio.
+- **Stakeholder Discovery** — Turn an ambiguous question into measurable KPIs and a clear brief.
+- **SQL and Semantic Models** — Produce reusable definitions that make reporting consistent and trustworthy.
+- **Data Storytelling** — Explain what changed, why it matters, and what a team should do next.
+- **Data Quality Checks** — Spot broken logic, incomplete data, and misleading trends before a dashboard reaches users.
+
+### 3–6 Month Learning Roadmap
+- **Month 1–2:** Practice SQL joins, aggregations, and KPI definitions with a public dataset.
+- **Month 3–4:** Build two dashboards that answer real business questions and document their logic.
+- **Month 5–6:** Deliver a portfolio case study with recommendations for a non-technical audience.
+
+### Learning Curve
+The technical foundations are accessible; the differentiator is learning to frame analysis around decisions.
+
+### Entry Strategies
+- **Entry Role 1:** Business Intelligence Analyst Intern.
+- **Entry Role 2:** Reporting Analyst or Operations Analyst.
+
+### 5-Year Career Growth Path
+- **Year 1–2:** Own recurring reports and sharpen stakeholder communication.
+- **Year 3–4:** Design semantic models, analytics standards, and self-service reporting.
+- **Year 5:** Advance to Senior BI Analyst, Analytics Engineer, or Analytics Lead.
+
+---
+
+## 3. Junior Data Engineer
+
+### Overview
+Build the reliable pipelines and data models that make analytics and machine-learning work possible.
+
+### Why This Career Fits
+- Suits people who enjoy programming, systems thinking, and improving how teams access data.
+- Turns patient problem-solving into durable systems: reliable inputs, clean transformations, and data other people can confidently use.
+- Builds a technical base that transfers naturally to analytics engineering, platform work, cloud data, and machine learning operations.
+
+### Skills to Develop
+- **Data Pipelines** — Move, validate, and schedule data using Python and SQL.
+- **Warehouse Modeling** — Organize analytics-ready data with dimensional modeling and documentation.
+- **Orchestration and Testing** — Schedule dependable jobs and add validation that catches errors before they spread.
+- **Cloud Fundamentals** — Work confidently with object storage, compute, permissions, and a managed warehouse.
+- **Observability** — Monitor freshness, failures, and quality so data users understand what they can trust.
+
+### 3–6 Month Learning Roadmap
+- **Month 1–2:** Strengthen Python, SQL, Git, and command-line workflow.
+- **Month 3–4:** Build a small extract-transform-load pipeline that lands data in a warehouse.
+- **Month 5–6:** Add tests, monitoring notes, and a clear project README for your portfolio.
+
+### Learning Curve
+The role rewards patient debugging and steady systems practice more than memorizing a single tool.
+
+### Entry Strategies
+- **Entry Role 1:** Junior Data Engineer.
+- **Entry Role 2:** Data Operations Analyst or ETL Developer Intern.
+
+### 5-Year Career Growth Path
+- **Year 1–2:** Maintain dependable pipelines and learn the team’s data platform.
+- **Year 3–4:** Own data models, orchestration, and platform reliability improvements.
+- **Year 5:** Progress to Senior Data Engineer, Analytics Engineer, or Data Platform Specialist.`
 };
 
 export const roadmapMockData = {
   title: 'Professional Roadmap: Data Analyst',
-  description: 'A practical progression from data fundamentals to job-ready portfolio work.',
+  description: 'A practical eight-stage progression from foundations to a job-ready portfolio.',
   nodes: [
-    { id: '1', title: 'Data Fundamentals', category: 'foundation', difficulty: 'beginner', description: 'Learn data types, spreadsheets, and basic statistics.' },
-    { id: '2', title: 'SQL Essentials', category: 'technical', difficulty: 'beginner', description: 'Query, join, and aggregate data from relational databases.' },
-    { id: '3', title: 'Python Analysis', category: 'technical', difficulty: 'intermediate', description: 'Clean, analyse, and visualise data with Python.' },
-    { id: '4', title: 'Portfolio Project', category: 'specialization', difficulty: 'intermediate', description: 'Publish an end-to-end analysis with clear recommendations.' }
+    {
+      id: 'foundation', title: 'Data Foundations', category: 'foundation', difficulty: 'beginner', estimated_time: '1–2 weeks',
+      description: 'Learn data types, spreadsheet thinking, descriptive statistics, and responsible data handling.',
+      key_skills: ['Data literacy', 'Spreadsheets', 'Descriptive statistics'], specific_technologies: ['Google Sheets', 'Excel'],
+      practical_tasks: ['Summarise a public dataset', 'Create a simple KPI tracker'], resources: [{ type: 'Practice', title: 'Explore a public dataset' }]
+    },
+    {
+      id: 'sql', title: 'SQL Essentials', category: 'technical', difficulty: 'beginner', estimated_time: '3–4 weeks',
+      description: 'Query, join, aggregate, and validate data from relational databases.',
+      key_skills: ['SELECT queries', 'Joins', 'Aggregations'], specific_technologies: ['PostgreSQL', 'SQLBolt'], prerequisites: ['foundation'],
+      practical_tasks: ['Answer ten business questions with SQL', 'Write a documented sales query set'], resources: [{ type: 'Course', title: 'SQL practice exercises' }]
+    },
+    {
+      id: 'python', title: 'Python for Analysis', category: 'technical', difficulty: 'beginner', estimated_time: '3–4 weeks',
+      description: 'Use Python notebooks to clean, explore, and communicate data findings.',
+      key_skills: ['Python basics', 'pandas', 'Data cleaning'], specific_technologies: ['Python', 'Jupyter', 'pandas'], prerequisites: ['foundation'],
+      practical_tasks: ['Clean a messy CSV', 'Publish an exploratory notebook'], resources: [{ type: 'Course', title: 'Python data analysis fundamentals' }]
+    },
+    {
+      id: 'statistics', title: 'Applied Statistics', category: 'analysis', difficulty: 'intermediate', estimated_time: '2–3 weeks',
+      description: 'Use sampling, distributions, confidence intervals, and basic experiments to interpret results.',
+      key_skills: ['Probability', 'Hypothesis testing', 'Experiment design'], specific_technologies: ['Python', 'SciPy'], prerequisites: ['foundation'],
+      practical_tasks: ['Interpret an A/B test result', 'Explain uncertainty in a short memo'], resources: [{ type: 'Reading', title: 'Applied statistics reference' }]
+    },
+    {
+      id: 'visualisation', title: 'Visualisation & Storytelling', category: 'analysis', difficulty: 'intermediate', estimated_time: '2–3 weeks',
+      description: 'Design clear charts and explain the decision behind the numbers.',
+      key_skills: ['Chart selection', 'Narrative', 'Dashboard design'], specific_technologies: ['Tableau', 'Power BI', 'matplotlib'], prerequisites: ['sql', 'python'],
+      practical_tasks: ['Redesign a misleading chart', 'Create an executive-ready dashboard'], resources: [{ type: 'Project', title: 'Dashboard redesign challenge' }]
+    },
+    {
+      id: 'data-modeling', title: 'Analytics Data Modeling', category: 'technical', difficulty: 'intermediate', estimated_time: '2–3 weeks',
+      description: 'Model reliable, reusable datasets for analysis and reporting.',
+      key_skills: ['Data quality', 'Dimensional modeling', 'Documentation'], specific_technologies: ['dbt', 'PostgreSQL'], prerequisites: ['sql'],
+      practical_tasks: ['Create a star schema', 'Document a data dictionary'], resources: [{ type: 'Practice', title: 'Warehouse modeling exercise' }]
+    },
+    {
+      id: 'capstone', title: 'End-to-End Capstone', category: 'specialization', difficulty: 'advanced', estimated_time: '4–5 weeks',
+      description: 'Combine raw data, analysis, visualisation, and a written recommendation into one credible project.',
+      key_skills: ['Project scoping', 'Analysis', 'Communication'], specific_technologies: ['GitHub', 'Python', 'SQL'], prerequisites: ['statistics', 'visualisation', 'data-modeling'],
+      practical_tasks: ['Ship a complete portfolio case study', 'Record a three-minute project walkthrough'], resources: [{ type: 'Portfolio', title: 'Capstone project brief' }]
+    },
+    {
+      id: 'career-ready', title: 'Career-Ready Portfolio', category: 'career', difficulty: 'expert', estimated_time: '2 weeks',
+      description: 'Package your strongest work, tailor your story, and practise the interviews that bring it to life.',
+      key_skills: ['Portfolio presentation', 'Interview communication', 'Job search strategy'], specific_technologies: ['GitHub', 'LinkedIn'], prerequisites: ['capstone'],
+      practical_tasks: ['Refresh your portfolio', 'Practise two case-study walkthroughs'], resources: [{ type: 'Checklist', title: 'Data career launch checklist' }]
+    }
   ],
   edges: [
-    { source: '1', target: '2', type: 'required' },
-    { source: '2', target: '3', type: 'required' },
-    { source: '3', target: '4', type: 'required' }
+    { source: 'foundation', target: 'sql', type: 'required' },
+    { source: 'foundation', target: 'python', type: 'required' },
+    { source: 'foundation', target: 'statistics', type: 'recommended' },
+    { source: 'sql', target: 'visualisation', type: 'required' },
+    { source: 'python', target: 'visualisation', type: 'required' },
+    { source: 'sql', target: 'data-modeling', type: 'recommended' },
+    { source: 'statistics', target: 'capstone', type: 'required' },
+    { source: 'visualisation', target: 'capstone', type: 'required' },
+    { source: 'data-modeling', target: 'capstone', type: 'recommended' },
+    { source: 'capstone', target: 'career-ready', type: 'required' }
   ]
 };
+
+export const createRoadmapMockData = (goal) => ({
+  ...roadmapMockData,
+  title: `Professional Roadmap: ${goal?.trim() || 'Data Analyst'}`,
+  nodes: roadmapMockData.nodes.map((node) => ({ ...node })),
+  edges: roadmapMockData.edges.map((edge) => ({ ...edge }))
+});
 
 export const examRecommendationMockData = [
   {
@@ -554,7 +689,7 @@ export const createLearningPathMockData = (skillName, targetCompletionDate) => (
   completed_milestones: []
 });
 
-export const careerPathResultMoackData = {
+export const careerPathResultMockData = {
     "result": {
         "career_pathway": {
             "short_term_goals": [
@@ -565,16 +700,16 @@ export const careerPathResultMoackData = {
                         "Familiarizing with specific AI tools and libraries"
                     ],
                     "actionable_steps": [
-                        "Complete online courses on AWS, Terraform, or Kubernetes",
+                        "Complete a hands-on AWS, Azure, Terraform, or Kubernetes course through NPTEL, SWAYAM, or an equivalent provider",
                         "Contribute to open-source AI projects on GitHub",
-                        "Attend DevOps webinars or workshops"
+                        "Attend a GDG, AWS User Group, PyData, or local developer workshop"
                     ],
                     "learning_objectives": [
                         "Understanding cloud services and DevOps best practices",
                         "Gaining hands-on experience with AI tools"
                     ],
                     "networking_targets": [
-                        "Join DevOps and AI-related communities on LinkedIn or Slack"
+                        "Join Indian DevOps and AI communities on LinkedIn, Discord, or local meetups"
                     ],
                     "project_recommendations": [
                         "Work on a personal project that combines Machine Learning and DevOps, such as building a data pipeline for a ML model"
@@ -594,7 +729,7 @@ export const careerPathResultMoackData = {
                         "Gaining practical experience in designing user-friendly interfaces"
                     ],
                     "networking_targets": [
-                        "Join UX design communities, attend local meetups or workshops"
+                        "Join UX communities, design chapters, and local workshops to get portfolio feedback"
                     ],
                     "project_recommendations": [
                         "Contribute to open-source UX design projects, or redesign a personal project to improve its user experience"
@@ -607,14 +742,14 @@ export const careerPathResultMoackData = {
                     ],
                     "actionable_steps": [
                         "Document and showcase projects in a professional portfolio",
-                        "Attend hackathons or competitions to gain more projects"
+                        "Join campus, company, or community hackathons to build practical project evidence"
                     ],
                     "learning_objectives": [
                         "Demonstrating a diverse skill set",
                         "Highlighting problem-solving abilities"
                     ],
                     "networking_targets": [
-                        "Participate in online forums, attend industry events or conferences"
+                        "Participate in local tech events, alumni groups, and online professional communities"
                     ],
                     "project_recommendations": [
                         "Collaborate with other developers on projects that align with your career goals"
@@ -694,8 +829,8 @@ export const careerPathResultMoackData = {
                     "target_level": "Expert",
                     "development_timeline": "Ongoing",
                     "learning_resources": [
-                        "Online courses on Python 3",
-                        "Reading advanced Python books"
+                        "NPTEL or SWAYAM Python for Data Science modules",
+                        "Practice problems and a public data project"
                     ],
                     "application_opportunities": [
                         "Contributing to open-source projects",
@@ -709,8 +844,8 @@ export const careerPathResultMoackData = {
                     "target_level": "Expert",
                     "development_timeline": "Ongoing",
                     "learning_resources": [
-                        "Online courses on deep learning",
-                        "Books on advanced Machine Learning topics"
+                        "Applied ML courses with deployment assignments",
+                        "Indian-language, fintech, or public-service use-case case studies"
                     ],
                     "application_opportunities": [
                         "Developing and deploying AI models",
@@ -738,17 +873,17 @@ export const careerPathResultMoackData = {
                 {
                     "skill": "Communication",
                     "importance": "High",
-                    "development_approach": "Practicing public speaking, writing technical articles",
+                    "development_approach": "Practise explaining one technical decision each week to a non-technical peer and write concise project notes",
                     "practice_venues": [
-                        "Toastmasters, technical writing communities"
+                        "College or workplace presentations, Toastmasters chapters, and technical writing communities"
                     ]
                 },
                 {
                     "skill": "Leadership",
                     "importance": "Medium",
-                    "development_approach": "Taking on leadership roles in projects, mentoring junior colleagues",
+                    "development_approach": "Own a small project milestone, coordinate feedback, and mentor a peer through a focused task",
                     "practice_venues": [
-                        "Leading open-source projects, organizing workshops"
+                        "Hackathon teams, college clubs, workplace initiatives, and community workshops"
                     ]
                 }
             ],
@@ -829,9 +964,9 @@ export const careerPathResultMoackData = {
             "mentor_profiles": [
                 "Experienced AI professionals, industry leaders, professors in the field"
             ],
-            "networking_strategy": "Attending industry events, reaching out to professionals on LinkedIn",
+            "networking_strategy": "Attend local data and AI communities, connect with alumni, and ask for focused feedback on a portfolio project",
             "community_engagement": [
-                "AI-related forums, LinkedIn groups, meetups"
+                "PyData, GDG, NASSCOM FutureSkills, LinkedIn groups, and local meetups"
             ],
             "thought_leadership": [
                 "Writing technical articles, speaking at conferences"
@@ -852,3 +987,11 @@ export const careerPathResultMoackData = {
     "processed_at": "2025-04-19T15:04:46.916851",
     "request_id": "req-1745055244.291706"
 }
+
+const cloneMockData = (value) => JSON.parse(JSON.stringify(value));
+
+export const getCareerAnalysisMockResults = () => ({
+  skillGap: cloneMockData(skillGapResultMockData),
+  careerPath: cloneMockData(careerPathResultMockData),
+  jobMarket: cloneMockData(jobMarketResultMockData)
+});

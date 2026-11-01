@@ -4,22 +4,20 @@ from app.services.recommender import generate_career_advice
 import logging
 
 router = APIRouter()
-
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @router.post("/recommend-career")
 async def recommend(prompt: CareerPrompt):
-    logging.info(CareerPrompt)
     try:
         recommendation = await generate_career_advice(prompt)
-        logging.info(f"Career advice generated: {recommendation}")
+        logger.info("Career recommendation generated")
 
         return {"recommendation": recommendation}
 
     except HTTPException as http_error:
-        logging.error(f"HTTP error: {http_error.detail}")
+        logger.warning("Career recommendation request failed: %s", http_error.detail)
         raise HTTPException(status_code=http_error.status_code, detail=http_error.detail)
 
-    except Exception as e:
-        logging.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    except Exception:
+        logger.exception("Unexpected career recommendation error")
+        raise HTTPException(status_code=503, detail="Career recommendations are temporarily unavailable. Please retry shortly.")

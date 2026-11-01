@@ -4,7 +4,11 @@ import re
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import time
+import logging
 from functools import wraps
+
+logger = logging.getLogger(__name__)
+REQUEST_TIMEOUT_SECONDS = 15
 
 def rate_limit(seconds: int = 1):
     """Simple rate limiting decorator"""
@@ -36,7 +40,7 @@ class ExamScraper:
         exams = []
         
         try:
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers, timeout=REQUEST_TIMEOUT_SECONDS)
             response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -78,8 +82,11 @@ class ExamScraper:
             
             return exams
         
-        except Exception as e:
-            print(f"Error scraping NTA exams: {str(e)}")
+        except requests.RequestException as exc:
+            logger.warning("Unable to scrape NTA exams: %s", exc)
+            return []
+        except Exception:
+            logger.exception("Unexpected NTA scraper error")
             return []
     
     @rate_limit(seconds=2)
@@ -89,11 +96,10 @@ class ExamScraper:
         exams = []
         
         try:
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers, timeout=REQUEST_TIMEOUT_SECONDS)
             response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
-            print(soup.prettify()[:3000])  
             # Find the exam tables
             exam_tables = soup.find_all('table')
             
@@ -123,8 +129,11 @@ class ExamScraper:
             
             return exams
         
-        except Exception as e:
-            print(f"Error scraping UPSC exams: {str(e)}")
+        except requests.RequestException as exc:
+            logger.warning("Unable to scrape UPSC exams: %s", exc)
+            return []
+        except Exception:
+            logger.exception("Unexpected UPSC scraper error")
             return []
     
     @rate_limit(seconds=2)
@@ -134,7 +143,7 @@ class ExamScraper:
         certifications = []
         
         try:
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers, timeout=REQUEST_TIMEOUT_SECONDS)
             response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -167,8 +176,11 @@ class ExamScraper:
             
             return certifications
         
-        except Exception as e:
-            print(f"Error scraping AWS certifications: {str(e)}")
+        except requests.RequestException as exc:
+            logger.warning("Unable to scrape AWS certifications: %s", exc)
+            return []
+        except Exception:
+            logger.exception("Unexpected AWS certification scraper error")
             return []
     
     def _extract_date(self, text: str) -> Optional[str]:

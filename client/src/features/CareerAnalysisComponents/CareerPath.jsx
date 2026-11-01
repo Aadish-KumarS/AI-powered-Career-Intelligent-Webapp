@@ -229,14 +229,26 @@ const CareerPath = ({ careerPathResults }) => {
           
           {activeSkillTab === 'soft' && (
             <div className="soft-skills">
+              <div className="soft-skills-intro">
+                <span>Weekly practice plan</span>
+                <p>Choose one behaviour to practise each week, then use the venues below to turn it into evidence you can discuss in an interview.</p>
+              </div>
               {skill_development_roadmap.soft_skills.map((skill, index) => (
-                <div key={index} className="skill-card">
-                  <h3>{skill.skill}</h3>
-                  <div className="skill-importance">Importance: {skill.importance}</div>
-                  <p>{skill.development_approach}</p>
+                <div key={index} className={`skill-card soft-skill-card priority-${String(skill.importance || 'recommended').toLowerCase().replace(/[^a-z]/g, '')}`}>
+                  <div className="soft-skill-card-header">
+                    <div className="soft-skill-title-group">
+                      <span className="soft-skill-number">{String(index + 1).padStart(2, '0')}</span>
+                      <h3>{skill.skill}</h3>
+                    </div>
+                    <span className="skill-importance">{skill.importance || 'Recommended'} priority</span>
+                  </div>
+                  <p className="soft-skill-approach">{skill.development_approach}</p>
                   <div className="practice-venues">
-                    <h4>Practice Venues:</h4>
-                    <ul>
+                    <div className="practice-venues-header">
+                      <span>Practical evidence</span>
+                      <h4>Practise it through</h4>
+                    </div>
+                    <ul className="practice-venues-list">
                       {asArray(skill.practice_venues).map((venue, i) => (
                         <li key={i}>{venue}</li>
                       ))}

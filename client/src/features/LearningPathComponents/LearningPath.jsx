@@ -5,6 +5,8 @@ import '../../styles/LearningPath styles/LearningPath.css';
 import Navbar from '../../components/LandingPageComponents/Navbar';
 import { CAREER_API_BASE_URL } from '../../config/api';
 import { createLearningPathMockData } from '../../constants/mockData';
+import { fetchWithAiTimeout, USE_LIVE_AI } from '../../config/aiRuntime';
+import { getSessionAiResult, setSessionAiResult } from '../../utils/profileSession';
 
 const LearningPath = ({ skillData, onSave }) => {
   const [data, setData] = useState(null);
@@ -31,17 +33,35 @@ const LearningPath = ({ skillData, onSave }) => {
     if (skillData) return;
 
     const loadLatestLearningPath = async () => {
+      const cachedPath = getSessionAiResult('learningPath');
+      if (cachedPath) {
+        setData(cachedPath);
+        return;
+      }
+
+      if (!USE_LIVE_AI) {
+        const savedPath = localStorage.getItem('newSkill');
+        const learningPath = savedPath ? JSON.parse(savedPath) : createLearningPathMockData('Data Analysis', null);
+        setSessionAiResult('learningPath', learningPath);
+        setData(learningPath);
+        return;
+      }
+
       try {
-        const response = await fetch(`${CAREER_API_BASE_URL}/career-guid/skills/`);
+        const response = await fetchWithAiTimeout(`${CAREER_API_BASE_URL}/career-guid/skills/`);
         if (!response.ok) throw new Error('Unable to load learning paths');
 
         const skills = await response.json();
         if (Array.isArray(skills) && skills.length) {
-          setData(skills[skills.length - 1]);
+          const learningPath = skills[skills.length - 1];
+          setSessionAiResult('learningPath', learningPath);
+          setData(learningPath);
         }
       } catch {
         const savedPath = localStorage.getItem('newSkill');
-        if (savedPath) setData(JSON.parse(savedPath));
+        const learningPath = savedPath ? JSON.parse(savedPath) : createLearningPathMockData('Data Analysis', null);
+        setSessionAiResult('learningPath', learningPath);
+        setData(learningPath);
       }
     };
 
@@ -55,7 +75,9 @@ const LearningPath = ({ skillData, onSave }) => {
     const targetCompletionDate = e.target.target_completion_date.value || null;
 
     try {
-      const response = await fetch(`${CAREER_API_BASE_URL}/career-guid/skills/`, {
+      if (!USE_LIVE_AI) throw new Error('Mock AI mode enabled');
+
+      const response = await fetchWithAiTimeout(`${CAREER_API_BASE_URL}/career-guid/skills/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -66,11 +88,13 @@ const LearningPath = ({ skillData, onSave }) => {
       if (!response.ok) throw new Error('Unable to create learning path');
 
       const newSkill = await response.json();
+      setSessionAiResult('learningPath', newSkill);
       setData(newSkill);
       if (onSave) onSave(newSkill);
     } catch {
       const newSkill = createLearningPathMockData(skillName, targetCompletionDate);
       localStorage.setItem('newSkill', JSON.stringify(newSkill));
+      setSessionAiResult('learningPath', newSkill);
       setData(newSkill);
       if (onSave) onSave(newSkill);
     }
@@ -309,7 +333,7 @@ const LearningPath = ({ skillData, onSave }) => {
       difficulty: form.difficulty.value,
       estimated_time_hours: parseFloat(form.estimated_time.value) || 0,
       cost: form.cost.value || "Free",
-      url: form.url.value,
+      link: form.url.value,
       status: "not_started",
       progress_percentage: 0
     };
@@ -319,7 +343,7 @@ const LearningPath = ({ skillData, onSave }) => {
         ...prevData,
         resources_progress: [...(prevData.resources_progress || []), newResource]
       };
-      localStorage.setItem('learningResources', updatedData)
+      localStorage.setItem('learningResources', JSON.stringify(updatedData));
       if (onSave) onSave(updatedData);
       return updatedData;
     });
@@ -459,6 +483,9 @@ const LearningPath = ({ skillData, onSave }) => {
         });
       }
     }
+    // This derives a single field from progress. Including `data` would loop
+    // because the effect itself updates the current skill snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.overall_progress]);
 
   // Get resource being edited
@@ -1122,10 +1149,10 @@ const LearningPath = ({ skillData, onSave }) => {
                             <span className="detail-value">{resource.cost}</span>
                           </div>
                         )}
-                        {resource.url && (
+                        {(resource.link || resource.url) && (
                           <div className="resource-url">
                             <a 
-                              href={resource.url}
+                              href={resource.link || resource.url}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}

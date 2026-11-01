@@ -2,6 +2,7 @@ import axios from "axios";
 import gsap from "gsap";
 import { API_BASE_URL } from "../config/api";
 import { toast } from 'react-toastify';
+import { getSessionProfile, setSessionProfile } from './profileSession';
 
 axios.defaults.withCredentials = true;
 
@@ -26,6 +27,12 @@ export const resendOTP = async () => {
 //USER PROFILE 
 // create profile component helper functions 
 export async function getUserData(BASE_URL, token, setProfileData) {
+    const cachedProfile = getSessionProfile();
+    if (cachedProfile) {
+      setProfileData((previousProfile) => ({ ...previousProfile, ...cachedProfile }));
+      return cachedProfile;
+    }
+
     try {
       const response = await axios.get(
         `${BASE_URL}/api/users/profile`, 
@@ -48,13 +55,20 @@ export async function getUserData(BASE_URL, token, setProfileData) {
           fieldOfStudy: response.data.education?.fieldOfStudy || ""
         },
         interests: response.data.interests || [],
+        personalInfo: response.data.personalInfo || { currentOccupation: '' },
+        skills: response.data.skills || { selectedSkills: [], technicalSkills: [], softSkills: [] },
+        careerInfo: response.data.careerInfo || { careerStage: '', careerGoals: [], desiredIndustries: [], desiredRoles: [] },
+        preferences: response.data.preferences || { personalityType: '', workEnvironment: '', workStyle: [] },
+        experience: response.data.experience || { currentRole: '', yearsOfExperience: '', pastRoles: [] },
+        insights: response.data.insights || { careerMotivation: '', careerChallenges: '', fiveYearGoal: '' },
         isFirstTime: response.data.isFirstTime ?? null
       };
       setProfileData((previousProfile) => ({
         ...previousProfile,
         ...fetchedUserData
       }));
-      sessionStorage.setItem('userData', JSON.stringify(fetchedUserData));
+      setSessionProfile(fetchedUserData);
+      return fetchedUserData;
     } catch (error) {
       console.error('Error fetching the data',error);
     }
@@ -67,6 +81,16 @@ export async function getUserDetail(token,navigate,BASE_URL,setUserData) {
       return;
     }
 
+    const cachedProfile = getSessionProfile();
+    if (cachedProfile) {
+      const profileData = {
+        ...cachedProfile,
+        profileImage: cachedProfile.profileImage || cachedProfile.profilePicture || '',
+      };
+      setUserData(profileData);
+      return profileData;
+    }
+
     const response = await axios.get(
       `${BASE_URL}/api/users/profile`, 
       {
@@ -76,7 +100,7 @@ export async function getUserDetail(token,navigate,BASE_URL,setUserData) {
       }
     );
     
-    setUserData({
+    const profileData = {
       name: response.data.name || "",
       title: response.data.title || "",
       location: response.data.location || "",
@@ -89,8 +113,20 @@ export async function getUserDetail(token,navigate,BASE_URL,setUserData) {
       email: response.data.email || "",
       profileImage: response.data.profilePicture || "",
       interests: response.data.interests || [],
-      isFirstTime: response.data.isFirstTime || true,
+      personalInfo: response.data.personalInfo || {},
+      skills: response.data.skills || { selectedSkills: [], technicalSkills: [], softSkills: [] },
+      careerInfo: response.data.careerInfo || { careerStage: '', careerGoals: [], desiredIndustries: [], desiredRoles: [] },
+      preferences: response.data.preferences || { personalityType: '', workEnvironment: '', workStyle: [] },
+      experience: response.data.experience || { currentRole: '', yearsOfExperience: '', pastRoles: [] },
+      insights: response.data.insights || { careerMotivation: '', careerChallenges: '', fiveYearGoal: '' },
+      isFirstTime: response.data.isFirstTime ?? null,
+    };
+    setUserData(profileData);
+    setSessionProfile({
+      ...profileData,
+      profilePicture: profileData.profileImage
     });
+    return profileData;
   } catch (error) {
     console.error('Error fetching the data:', error);
   }
@@ -100,13 +136,17 @@ export const getIsFirstTime = async (token, BASE_URL) => {
   try {
     if (!token) return null;
 
+    const cachedProfile = getSessionProfile();
+    if (typeof cachedProfile?.isFirstTime === 'boolean') return cachedProfile.isFirstTime;
+
     const response = await axios.get(`${BASE_URL}/api/users/profile`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    return response.data.isFirstTime;
+    setSessionProfile(response.data);
+    return response.data.isFirstTime ?? null;
   } catch (error) {
     console.error("Error fetching the user profile:", error);
     return null;
@@ -264,13 +304,13 @@ export const updateProfile = async (e, userData, setError, setSuccessMessage,set
   try {
     const token = sessionStorage.getItem('authToken');
     setLoading(true)
-    await axios.put(
+    const response = await axios.put(
       `${API_BASE_URL}/api/users/update-profile`,
       userData,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     
-    sessionStorage.setItem('userData', JSON.stringify(userData));
+    setSessionProfile(response.data?.user || userData);
     
     setSuccessMessage('Profile updated successfully');
     setError('');

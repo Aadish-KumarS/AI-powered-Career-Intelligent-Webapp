@@ -18,7 +18,7 @@
   --rt-radius-lg: 1.6rem;
 }
 
-html { background: var(--rt-paper); }
+html { font-size: 17px; background: var(--rt-paper); }
 body { min-width: 320px; background: var(--rt-paper); color: var(--rt-ink); font-family: 'Manrope', system-ui, sans-serif; }
 button, input, select, textarea { font: inherit; }
 button:disabled { cursor: not-allowed !important; opacity: 0.62; }
@@ -42,6 +42,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .rt-dialog-backdrop { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 1rem; background: rgba(23, 38, 32, 0.48); backdrop-filter: blur(4px); }.rt-dialog { width: min(100%, 430px); padding: 1.4rem; border: 1px solid rgba(255,255,255,0.34); border-radius: var(--rt-radius-md); background: var(--rt-paper); box-shadow: var(--rt-shadow-lg); }.rt-dialog h2 { margin: 0; font: 400 1.75rem 'DM Serif Display', Georgia, serif; }.rt-dialog p { margin: 0.6rem 0 1.2rem; color: var(--rt-muted); font-size: 0.86rem; line-height: 1.6; }.rt-dialog__actions { display: flex; justify-content: flex-end; gap: 0.65rem; }
 .rt-button--danger { background: var(--rt-danger); }.rt-button--danger:hover:not(:disabled) { background: #873126; }.rt-dialog--danger { border-color: #efc0b7; }
 
-@media (max-width: 600px) { .rt-page { padding-top: 5.25rem; }.rt-heading { font-size: clamp(2.4rem, 12vw, 3.45rem); }.rt-dialog__actions { display: grid; grid-template-columns: 1fr; }.rt-dialog__actions .rt-button { width: 100%; } }
+@media (max-width: 600px) { html { font-size: 16px; }.rt-page { padding-top: 5.25rem; }.rt-heading { font-size: clamp(2.4rem, 12vw, 3.45rem); }.rt-dialog__actions { display: grid; grid-template-columns: 1fr; }.rt-dialog__actions .rt-button { width: 100%; } }
 .Toastify__toast-container { width: min(calc(100vw - 2rem), 23rem); }.Toastify__toast { min-height: auto; padding: .8rem .95rem; border: 1px solid var(--rt-line); border-radius: .85rem; background: var(--rt-paper); color: var(--rt-ink); box-shadow: var(--rt-shadow-lg); font-family: 'Manrope', sans-serif; font-size: .78rem; font-weight: 700; }.Toastify__toast--success { border-color: #bcddcf; }.Toastify__toast--error { border-color: #efc0b7; }.Toastify__progress-bar--success { background: var(--rt-success); }.Toastify__progress-bar--error { background: var(--rt-danger); }.Toastify__close-button { color: var(--rt-ink); opacity: .65; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }

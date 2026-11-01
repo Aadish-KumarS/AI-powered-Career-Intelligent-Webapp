@@ -39,12 +39,14 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
   const renderSkillDemand = (skill) => (
     <div className="skill-item" key={skill.name}>
       <span className="skill-name">{skill.name}</span>
-      <div className="demand-bar-container">
-        <div 
-          className="demand-bar" 
-          style={{ width: `${skill.demand_rating * 10}%` }}
-        ></div>
-        <span className="demand-rating">{skill.demand_rating}</span>
+      <div className="metric-meter">
+        <div className="demand-bar-container" aria-label={`Demand rating: ${skill.demand_rating} out of 10`}>
+          <div
+            className="demand-bar"
+            style={{ width: `${skill.demand_rating * 10}%` }}
+          ></div>
+        </div>
+        <span className="demand-rating">{skill.demand_rating}/10</span>
       </div>
     </div>
   );
@@ -53,11 +55,13 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
   const renderEmergingSkill = (skill) => (
     <div className="emerging-skill-item" key={skill.name}>
       <span className="skill-name">{skill.name}</span>
-      <div className="growth-bar-container">
-        <div 
-          className="growth-bar" 
-          style={{ width: `${skill.growth_percentage}%` }}
-        ></div>
+      <div className="metric-meter">
+        <div className="growth-bar-container" aria-label={`${skill.growth_percentage}% growth`}>
+          <div
+            className="growth-bar"
+            style={{ width: `${skill.growth_percentage}%` }}
+          ></div>
+        </div>
         <span className="growth-percentage">{skill.growth_percentage}%</span>
       </div>
     </div>
@@ -103,6 +107,7 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
                 className={`distribution-segment ${levelType}`} 
                 key={i}
                 style={{ width: percentage }}
+                title={level}
               >
                 <span className="segment-label">{level}</span>
               </div>
@@ -211,22 +216,9 @@ const JobMarketInsights = ({ jobMarketInsights }) => {
             </div>
             <div className="grid-item full-width">
               <h2>Geographical Hotspots</h2>
-              <div className="hotspots-map">
-                {/* Simplified map visualization */}
-                <div className="map-container">
-                  {asArray(industryLandscape.geographical_hotspots).map((hotspot, i) => (
-                    <div 
-                      key={i}
-                      className="hotspot-marker"
-                      style={{ 
-                        left: `${(hotspot.longitude + 180) * (100/360)}%`, 
-                        top: `${(90 - hotspot.latitude) * (100/180)}%` 
-                      }}
-                    >
-                      <span className="hotspot-label">{hotspot.city}</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="hotspots-coming-soon" role="status">
+                <span>Under construction</span>
+                <p>City-level hiring signals are being prepared. This view will surface region-specific opportunities when the dataset is ready.</p>
               </div>
             </div>
             <div className="grid-item">

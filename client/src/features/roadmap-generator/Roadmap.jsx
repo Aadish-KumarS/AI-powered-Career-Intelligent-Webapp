@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import ReactFlow, { 
   Controls, 
   Background, 
@@ -15,17 +15,30 @@ import '../../styles/Global Styles/roadmap-workspace.css';
 import { CustomEdge, CustomNode } from './CustomReactFlowComponents';
 import Navbar from '../../components/LandingPageComponents/Navbar'
 import { FiArrowUpRight, FiBookmark, FiClock, FiCompass, FiMap, FiMaximize2, FiTrash2 } from 'react-icons/fi';
-import { roadmapMockData } from '../../constants/mockData';
+import { createRoadmapMockData } from '../../constants/mockData';
 import { ROADMAP_API_BASE_URL } from '../../config/api';
+import { fetchWithAiTimeout, USE_LIVE_AI } from '../../config/aiRuntime';
+import { getSessionAiResult, setSessionAiResult } from '../../utils/profileSession';
 
-const categoryColors = {
-  core: '#3c574d',
-  optional: '#b35a3c',
-  advanced: '#6d7668',
-  beginner: '#78937f',
-  intermediate: '#c28b45',
-  expert: '#87483b',
-  default: '#3c574d'
+const nodeLevelStyles = {
+  beginner: { accent: '#21bd79', gradient: 'linear-gradient(135deg, #078859 0%, #25c981 100%)' },
+  intermediate: { accent: '#f2a01f', gradient: 'linear-gradient(135deg, #ad5b04 0%, #ec9818 100%)' },
+  advanced: { accent: '#ee694b', gradient: 'linear-gradient(135deg, #bd3d46 0%, #ef6d4c 100%)' },
+  expert: { accent: '#8c6cf0', gradient: 'linear-gradient(135deg, #563bb7 0%, #8c69ec 100%)' },
+  default: { accent: '#24b7c9', gradient: 'linear-gradient(135deg, #087d99 0%, #22b7c8 100%)' }
+};
+
+const getNodeLevelStyle = (difficulty) => (
+  nodeLevelStyles[String(difficulty || '').toLowerCase()] || nodeLevelStyles.default
+);
+
+const readStoredRoadmaps = (key) => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(key) || '[]');
+    return Array.isArray(stored) ? stored : [];
+  } catch {
+    return [];
+  }
 };
 
 const RoadmapGenerator = () => {
@@ -41,6 +54,8 @@ const RoadmapGenerator = () => {
   const [nodeMap, setNodeMap] = useState({});
   const [viewMode, setViewMode] = useState('default');
   const [activeTab, setActiveTab] = useState('saved'); // Default tab is 'saved'
+  const [savedRoadmaps, setSavedRoadmaps] = useState(() => readStoredRoadmaps('savedRoadmaps'));
+  const [recentRoadmaps, setRecentRoadmaps] = useState(() => readStoredRoadmaps('recents'));
   
   const reactFlowInstance = useRef(null);
 
@@ -51,12 +66,91 @@ const RoadmapGenerator = () => {
     setGoal(e.target.value);
   };
 
-  const displayRoadmap = (data) => {
+  const displayRoadmap = (data, shouldRecordAsRecent = false) => {
     setRoadmapData(data);
     setNodeMap(Object.fromEntries(data.nodes.map((node) => [node.id, node])));
-    processRoadmapData(data);
+    setSelectedNode(null);
+    if (shouldRecordAsRecent) {
+      const nextRecents = [data, ...recentRoadmaps.filter((item) => item?.title !== data.title)].slice(0, 6);
+      setRecentRoadmaps(nextRecents);
+      localStorage.setItem('recents', JSON.stringify(nextRecents));
+    }
     setActiveTab('generated');
   };
+
+  const persistRoadmap = async (data) => {
+    setSessionAiResult('roadmap', data);
+    const token = sessionStorage.getItem('authToken');
+    if (!token) return;
+
+    const response = await fetchWithAiTimeout(`${ROADMAP_API_BASE_URL}/save-roadmap`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ roadmap: data }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Unable to save roadmap: ${response.status}`);
+    }
+  };
+
+  // Opening the service restores the newest roadmap for this signed-in user.
+  // It deliberately does not call the generator; the form is the only way to
+  // request a new roadmap.
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadLatestRoadmap = async () => {
+      const token = sessionStorage.getItem('authToken');
+      if (!token) return;
+
+      const cachedRoadmap = getSessionAiResult('roadmap');
+      if (cachedRoadmap && Array.isArray(cachedRoadmap.nodes) && cachedRoadmap.nodes.length && Array.isArray(cachedRoadmap.edges)) {
+        if (!cancelled) {
+          setRoadmapData(cachedRoadmap);
+          setNodeMap(Object.fromEntries(cachedRoadmap.nodes.map((node) => [node.id, node])));
+          setGoal(String(cachedRoadmap.title || '').replace(/^Professional Roadmap:\s*/i, ''));
+          setSelectedNode(null);
+          setActiveTab('generated');
+        }
+        return;
+      }
+
+      try {
+        const response = await fetchWithAiTimeout(`${ROADMAP_API_BASE_URL}/roadmaps`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const latest = Array.isArray(payload?.roadmaps) ? payload.roadmaps[0] : null;
+        if (
+          cancelled ||
+          !latest ||
+          !Array.isArray(latest.nodes) ||
+          !latest.nodes.length ||
+          !Array.isArray(latest.edges)
+        ) return;
+
+        setRoadmapData(latest);
+        setNodeMap(Object.fromEntries(latest.nodes.map((node) => [node.id, node])));
+        setGoal(String(latest.title || '').replace(/^Professional Roadmap:\s*/i, ''));
+        setSelectedNode(null);
+        setActiveTab('generated');
+        setSessionAiResult('roadmap', latest);
+      } catch (loadError) {
+        // A saved roadmap is an enhancement. The composer remains usable when
+        // the persistence service is unreachable.
+        console.warn('Unable to load the saved roadmap.', loadError);
+      }
+    };
+
+    loadLatestRoadmap();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,8 +165,19 @@ const RoadmapGenerator = () => {
     setSaveSuccess(false);
     
     try {
+      if (!USE_LIVE_AI) {
+        const mockRoadmap = createRoadmapMockData(goal);
+        displayRoadmap(mockRoadmap, true);
+        try {
+          await persistRoadmap(mockRoadmap);
+        } catch (saveError) {
+          console.warn('Unable to save mock roadmap.', saveError);
+        }
+        return;
+      }
+
       const token = sessionStorage.getItem('authToken');
-      const response = await fetch(`${ROADMAP_API_BASE_URL}/generate-roadmap`, {
+      const response = await fetchWithAiTimeout(`${ROADMAP_API_BASE_URL}/generate-roadmap`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -86,15 +191,27 @@ const RoadmapGenerator = () => {
         }
         
       const data = await response.json();
+      if (!Array.isArray(data?.nodes) || !data.nodes.length || !Array.isArray(data?.edges)) {
+        throw new Error('Roadmap response did not include a usable graph');
+      }
       
-      displayRoadmap(data);
+      displayRoadmap(data, true);
+      try {
+        await persistRoadmap(data);
+      } catch (saveError) {
+        console.warn('Unable to save generated roadmap.', saveError);
+      }
       
     } catch (err) {
       console.error("Failed to generate roadmap:", err);
-      displayRoadmap({
-        ...roadmapMockData,
-        title: `Professional Roadmap: ${goal.trim()}`
-      });
+      setError('Live generation is temporarily unavailable. Showing a detailed sample roadmap.');
+      const mockRoadmap = createRoadmapMockData(goal);
+      displayRoadmap(mockRoadmap, true);
+      try {
+        await persistRoadmap(mockRoadmap);
+      } catch (saveError) {
+        console.warn('Unable to save fallback roadmap.', saveError);
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -104,16 +221,9 @@ const RoadmapGenerator = () => {
     if (!roadmapData) return;
     
     try {
-      const recentRoadmaps = JSON.parse(localStorage.getItem('recents')) || [];
-      recentRoadmaps.unshift(roadmapData);
-
-      const limitedRecents = recentRoadmaps.slice(0, 6);
-      localStorage.setItem('recents', JSON.stringify(limitedRecents));
-
       const maxRoadmaps = 6;
-      const existingRoadmaps = JSON.parse(localStorage.getItem('savedRoadmaps')) || [];
 
-      if (existingRoadmaps.length >= maxRoadmaps) {
+      if (savedRoadmaps.length >= maxRoadmaps) {
         setError("You can only save up to 6 roadmaps. Please delete one to save a new one.");
         return;
       }
@@ -127,8 +237,9 @@ const RoadmapGenerator = () => {
         timestamp: new Date().toISOString()
       };
 
-      existingRoadmaps.unshift(newRoadmap);
-      localStorage.setItem('savedRoadmaps', JSON.stringify(existingRoadmaps));
+      const nextSavedRoadmaps = [newRoadmap, ...savedRoadmaps];
+      localStorage.setItem('savedRoadmaps', JSON.stringify(nextSavedRoadmaps));
+      setSavedRoadmaps(nextSavedRoadmaps);
 
       setSaveSuccess(true);
       
@@ -203,8 +314,8 @@ const RoadmapGenerator = () => {
       visited.add(rootId);
       depths[rootId] = 0;
       
-      while (queue.length > 0) {
-        const { id, depth } = queue.shift();
+      for (let queueIndex = 0; queueIndex < queue.length; queueIndex += 1) {
+        const { id, depth } = queue[queueIndex];
         
         // Process children
         for (const childId of graph.children[id]) {
@@ -259,8 +370,13 @@ const RoadmapGenerator = () => {
     
     // Calculate horizontal positions for each node at each level
     const positions = {};
-    const horizontalSpacing = 400; // Increased spacing between horizontal nodes
-    const verticalSpacing = 250;   // Increased spacing between vertical levels
+    const layoutDensity = {
+      compact: { horizontal: 260, vertical: 185, padding: 0.42 },
+      default: { horizontal: 340, vertical: 235, padding: 0.5 },
+      expanded: { horizontal: 420, vertical: 300, padding: 0.34 }
+    }[viewMode];
+    const horizontalSpacing = layoutDensity.horizontal;
+    const verticalSpacing = layoutDensity.vertical;
     
     // For each level, position nodes horizontally with even spacing
     Object.entries(nodesByLevel).forEach(([level, nodeIds]) => {
@@ -315,9 +431,7 @@ const RoadmapGenerator = () => {
     const flowNodes = data.nodes.map((node) => {
       
       const category = (node.category || 'default').toLowerCase();
-      const difficulty = (node.difficulty || '').toLowerCase();
-      const colorKey = categoryColors[difficulty] ? difficulty : category;
-      const backgroundColor = categoryColors[colorKey] || categoryColors.default;
+      const levelStyle = getNodeLevelStyle(node.difficulty);
       
       return {
         id: node.id,
@@ -325,22 +439,23 @@ const RoadmapGenerator = () => {
         data: {
           ...node,
           nodeType: category,
-          backgroundColor, 
-          borderColor: backgroundColor,
-          textColor: '#ffffff',
+          backgroundColor: levelStyle.accent,
+          backgroundGradient: levelStyle.gradient,
           category: category,
         },
         position: positions[node.id] || { x: 0, y: 0 },
-        className: `roadmap-node node-${category}`,
+        className: `roadmap-flow-node node-${category}`,
         style: {
-          background: backgroundColor,
-          color: '#ffffff'
+          '--node-accent': levelStyle.accent,
+          '--node-gradient': levelStyle.gradient,
+          background: 'transparent'
         }
       };
     });
     
     const flowEdges = workingEdges.map((edge) => {
       const edgeType = edge.type || 'recommended';
+      const edgeColor = edgeType === 'required' ? '#d55c40' : '#348568';
       
       return {
         id: `${edge.source}-${edge.target}`,
@@ -352,11 +467,12 @@ const RoadmapGenerator = () => {
         data: {
           type: edgeType
         },
+        style: { stroke: edgeColor },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: edgeType === 'required' ? '#b35a3c' : '#78937f',
-          width: 15,
-          height: 15,
+          color: edgeColor,
+          width: 18,
+          height: 18,
         }
       };
     });
@@ -365,25 +481,22 @@ const RoadmapGenerator = () => {
     setEdges(flowEdges);
     
     // Ensure the view fits all nodes initially
-    setTimeout(() => {
+    window.requestAnimationFrame(() => {
       if (reactFlowInstance.current) {
-        reactFlowInstance.current.fitView({ padding: 0.5 });
+        reactFlowInstance.current.fitView({ padding: layoutDensity.padding });
       }
-    }, 300);
+    });
     
-  }, [setEdges, setNodes]);
+  }, [setEdges, setNodes, viewMode]);
+
+  useEffect(() => {
+    if (roadmapData) processRoadmapData(roadmapData);
+  }, [roadmapData, processRoadmapData]);
 
   const onNodeClick = useCallback((event, node) => {
     event.stopPropagation();
     setSelectedNode(nodeMap[node.id] || null);
   }, [nodeMap]);
-
-  const toggleViewMode = () => {
-    const modes = ['default', 'compact', 'expanded'];
-    const currentIndex = modes.indexOf(viewMode);
-    const nextIndex = (currentIndex + 1) % modes.length;
-    setViewMode(modes[nextIndex]);
-  };
 
   const fitView = useCallback(() => {
     if (reactFlowInstance.current) {
@@ -391,32 +504,20 @@ const RoadmapGenerator = () => {
     }
   }, []);
 
-  // Function to load saved roadmaps from localStorage
-  const getSavedRoadmaps = () => {
-    try {
-      return JSON.parse(localStorage.getItem('savedRoadmaps')) || [];
-    } catch (err) {
-      console.error("Failed to load saved roadmaps:", err);
-      return [];
-    }
-  };
+  const setCanvasViewMode = useCallback((mode) => {
+    setViewMode(mode);
+  }, []);
 
-  // Function to load recent roadmaps from localStorage
-  const getRecentRoadmaps = () => {
-    try {
-      return JSON.parse(localStorage.getItem('recents')) || [];
-    } catch (err) {
-      console.error("Failed to load recent roadmaps:", err);
-      return [];
-    }
-  };
+  const selectedNodeStyle = selectedNode
+    ? getNodeLevelStyle(selectedNode.difficulty)
+    : nodeLevelStyles.default;
 
   const handleTabChange = (tab) => setActiveTab(tab);
 
   // Function to load a roadmap when selected
   const loadRoadmap = (roadmap) => {
     setRoadmapData(roadmap);
-    processRoadmapData(roadmap);
+    setSelectedNode(null);
     
     const newNodeMap = {};
     roadmap.nodes.forEach(node => {
@@ -432,14 +533,9 @@ const RoadmapGenerator = () => {
   // Function to delete a saved roadmap
   const deleteSavedRoadmap = (index) => {
     try {
-      const savedRoadmaps = getSavedRoadmaps();
-      savedRoadmaps.splice(index, 1);
-      localStorage.setItem('savedRoadmaps', JSON.stringify(savedRoadmaps));
-      
-      // Force a re-render by changing tab and then changing back
-      const currentTab = activeTab;
-      handleTabChange('temp');
-      setTimeout(() => handleTabChange(currentTab), 10);
+      const nextSavedRoadmaps = savedRoadmaps.filter((_, roadmapIndex) => roadmapIndex !== index);
+      localStorage.setItem('savedRoadmaps', JSON.stringify(nextSavedRoadmaps));
+      setSavedRoadmaps(nextSavedRoadmaps);
     } catch (err) {
       console.error("Failed to delete roadmap:", err);
       setError("Failed to delete roadmap. Please try again.");
@@ -474,7 +570,7 @@ const RoadmapGenerator = () => {
                 className="generate-btn"
                 disabled={isGenerating}
               >
-                {isGenerating ? 'Shaping your roadmap…' : <>Generate roadmap <FiArrowUpRight aria-hidden="true" /></>}
+                {isGenerating ? 'Shaping your roadmap…' : <>{roadmapData ? 'Regenerate roadmap' : 'Generate roadmap'} <FiArrowUpRight aria-hidden="true" /></>}
               </button>
             </div>
             
@@ -534,8 +630,8 @@ const RoadmapGenerator = () => {
               <h2 className="section-title">Saved roadmaps</h2>
             </div>
             <div className="roadmaps-grid">
-              {getSavedRoadmaps().length > 0 ? (
-                getSavedRoadmaps().map((roadmap, index) => (
+              {savedRoadmaps.length > 0 ? (
+                savedRoadmaps.map((roadmap, index) => (
                   <div key={index} className="roadmap-card">
                     <div className="roadmap-card-header">
                       <h5>{roadmap.title}</h5>
@@ -579,8 +675,8 @@ const RoadmapGenerator = () => {
               <h2 className="section-title">Recent roadmaps</h2>
             </div>
             <div className="roadmaps-grid">
-              {getRecentRoadmaps().length > 0 ? (
-                getRecentRoadmaps().map((roadmap, index) => (
+              {recentRoadmaps.length > 0 ? (
+                recentRoadmaps.map((roadmap, index) => (
                   <div key={index} className="roadmap-card">
                     <div className="roadmap-card-header">
                       <h5>{roadmap.title}</h5>
@@ -631,7 +727,7 @@ const RoadmapGenerator = () => {
             </div>
 
             <div className="roadmap-layout">
-              <div className="roadmap-flow" style={{ width: '100%', height: '700px' }}>
+              <div className="roadmap-flow">
                 <ReactFlow
                   nodes={nodes}
                   edges={edges}
@@ -646,9 +742,9 @@ const RoadmapGenerator = () => {
                   nodesConnectable={false}
                   elementsSelectable={false}
                   nodesFocusable={false}
-                  connectionLineType="step" // Use step-like connection lines
+                  connectionLineType="smoothstep"
                   preventScrolling={false} // Fix for dragging glitch - allow scrolling
-                  onlyRenderVisibleElements={false} // Render all elements to prevent flickering
+                  onlyRenderVisibleElements // Avoid rendering off-screen graph content
                   zoomOnScroll={true} // Enable zoom on scroll
                   zoomOnPinch={true} // Enable zoom on pinch
                   panOnDrag={true} // Enable pan on drag
@@ -664,26 +760,30 @@ const RoadmapGenerator = () => {
                     zoomable
                     pannable
                     nodeColor={(node) => {
-                      const difficulty = node.data?.difficulty?.toLowerCase();
-                      const category = node.data?.nodeType?.toLowerCase() || 'default';
-                      return categoryColors[difficulty] || categoryColors[category] || categoryColors.default;
+                      return getNodeLevelStyle(node.data?.difficulty).accent;
                     }}
                   />
                   <Background 
-                    variant="dots" 
-                    gap={20} 
+                    variant="lines" 
+                    gap={24} 
                     size={1} 
-                  color="#cbd9ca"
+                    color="#d9e5d8"
                     className="roadmap-background"
                   />
                   <Panel position="top-right" className="roadmap-panel">
-                    <button 
-                      className="view-toggle-btn" 
-                      onClick={toggleViewMode}
-                    >
-                      {viewMode === 'default' ? 'Default View' : 
-                        viewMode === 'compact' ? 'Compact View' : 'Expanded View'}
-                    </button>
+                    <div className="view-mode-controls" aria-label="Roadmap layout density">
+                      {['default', 'compact', 'expanded'].map((mode) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
+                          onClick={() => setCanvasViewMode(mode)}
+                          aria-pressed={viewMode === mode}
+                        >
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
                   </Panel>
                 </ReactFlow>
               </div>
@@ -691,10 +791,12 @@ const RoadmapGenerator = () => {
               <div className="roadmap-details">
                 {selectedNode ? (
                   <div className="node-details">
-                    <h4 className="details-title">{selectedNode.title}</h4>
+                    <div className="details-title-container" style={{ '--selected-node-gradient': selectedNodeStyle.gradient }}>
+                      <h4 className="details-title">{selectedNode.title}</h4>
+                    </div>
                     <div className="node-metadata">
-                    <span className="difficulty-badge" style={{ '--difficulty-color': categoryColors[String(selectedNode.difficulty || '').toLowerCase()] || categoryColors.default }}>{selectedNode.difficulty || 'N/A'}</span>
-                    <span className="category-badge" style={{ '--category-color': categoryColors[selectedNode.category?.toLowerCase()] || categoryColors.default }}>{selectedNode.category || 'N/A'}</span>
+                    <span className="difficulty-badge">{selectedNode.difficulty || 'N/A'}</span>
+                    <span className="category-badge">{selectedNode.category || 'N/A'}</span>
                     <span className="time-badge">{selectedNode.estimated_time || 'N/A'}</span>
                   </div>
                   
@@ -746,13 +848,13 @@ const RoadmapGenerator = () => {
                       <ul className="resource-list">
                         {selectedNode.resources.map((resource, index) => (
                           <li key={index} className="resource-item">
-                            {resource.link ? (
-                              <a href={resource.link} target="_blank" rel="noopener noreferrer" className="resource-link">
+                            {resource.link || resource.url ? (
+                              <a href={resource.link || resource.url} target="_blank" rel="noopener noreferrer" className="resource-link">
                                 <span className="resource-type">{resource.type || 'Resource'}</span>
-                                <span className="resource-title">{resource.title || 'Resource'}</span>
+                                <span className="resource-title">{resource.title || resource.name || 'Resource'}</span>
                               </a>
                             ) : (
-                              <span>{typeof resource === 'string' ? resource : resource.title || 'Resource'}</span>
+                              <span>{typeof resource === 'string' ? resource : resource.title || resource.name || 'Resource'}</span>
                             )}
                           </li>
                         ))}

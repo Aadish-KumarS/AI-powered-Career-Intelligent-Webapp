@@ -1,21 +1,57 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../../styles/Landingpage Styles/Navbar.css';
 import { FaRegUser } from "react-icons/fa6";
 import { FaAngleDown } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import SettingsDropdown from './SettingsDropdown';
 
+const getStoredProfilePicture = () => {
+  try {
+    const userData = JSON.parse(sessionStorage.getItem('userData') || '{}');
+    return userData.profilePicture || userData.profileImage || '';
+  } catch {
+    return '';
+  }
+};
+
 export default function Navbar({ variant = 'default' }) {
   const [showServicesDropdown, setShowServicesDropdown] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(getStoredProfilePicture);
+  const servicesDropdownRef = useRef(null);
   const isSignedIn = Boolean(sessionStorage.getItem('authToken'));
+
+  useEffect(() => {
+    const syncProfilePicture = () => setProfilePicture(getStoredProfilePicture());
+    window.addEventListener('storage', syncProfilePicture);
+    window.addEventListener('profile-updated', syncProfilePicture);
+    return () => {
+      window.removeEventListener('storage', syncProfilePicture);
+      window.removeEventListener('profile-updated', syncProfilePicture);
+    };
+  }, []);
 
   useEffect(() => {
     if (!showServicesDropdown) return undefined;
 
     const closeOnScroll = () => setShowServicesDropdown(false);
-    window.addEventListener('scroll', closeOnScroll, { passive: true });
+    const closeOnOutsidePointerDown = (event) => {
+      if (!servicesDropdownRef.current?.contains(event.target)) {
+        setShowServicesDropdown(false);
+      }
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setShowServicesDropdown(false);
+    };
 
-    return () => window.removeEventListener('scroll', closeOnScroll);
+    window.addEventListener('scroll', closeOnScroll, { passive: true });
+    document.addEventListener('pointerdown', closeOnOutsidePointerDown);
+    document.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      window.removeEventListener('scroll', closeOnScroll);
+      document.removeEventListener('pointerdown', closeOnOutsidePointerDown);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
   }, [showServicesDropdown]);
 
   const toggleServicesDropdown = () => {
@@ -30,7 +66,7 @@ export default function Navbar({ variant = 'default' }) {
       <ul className="nav-links">
         <li><a href="/#features">Features</a></li>
         <li><a href="/#about">About</a></li>
-        <li className="services-dropdown">
+        <li className="services-dropdown" ref={servicesDropdownRef}>
           <button
             type="button"
             className="services-dropdown-toggle"
@@ -44,7 +80,7 @@ export default function Navbar({ variant = 'default' }) {
             <div className="dropdown-content" role="menu">
               <div className="dropdown-category">
                 <h3>Macro Services</h3>
-                <Link to="/services/career-guid/onboarding" onClick={() => setShowServicesDropdown(false)}>AI Career Guidance &amp; Recommendation</Link>
+                <Link to="/services/career-guid/career-recommendation" onClick={() => setShowServicesDropdown(false)}>AI Career Guidance &amp; Recommendation</Link>
                 <Link to="/services/career-guid/career-analysis" onClick={() => setShowServicesDropdown(false)}>AI Career Analysis</Link>
                 <h3>Micro Services</h3>
                 <Link to="/services/generate-roadmap" onClick={() => setShowServicesDropdown(false)}>AI Roadmap Generator </Link>
@@ -58,7 +94,7 @@ export default function Navbar({ variant = 'default' }) {
       <div className='center'>
         <Link to={isSignedIn ? "/profile/user-profile" : "/signup"}>
           <div className='user-profile center' aria-label={isSignedIn ? "Open your profile" : "Create an account"}>
-            <FaRegUser />
+            {isSignedIn && profilePicture ? <img src={profilePicture} alt="" /> : <FaRegUser />}
           </div>
         </Link>
         <SettingsDropdown />

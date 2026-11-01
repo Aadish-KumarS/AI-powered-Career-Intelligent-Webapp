@@ -10,6 +10,7 @@ const Login = lazy(() => import('./pages/Auth pages/Login'));
 const EmailVerification = lazy(() => import('./pages/Auth pages/EmailVerification'));
 const ForgotPassword = lazy(() => import('./pages/Auth pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/Auth pages/ResetPassword'));
+const GoogleAuthCallback = lazy(() => import('./pages/Auth pages/GoogleAuthCallback'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Profile = lazy(() => import('./pages/User profile pages/Profile'));
 const CareerGuidMVP = lazy(() => import('./pages/CareerGuid pages/CareerGuidMVP'));
@@ -26,6 +27,7 @@ function App() {
       <Route path="/verify-email" element={<AuthRoute><EmailVerification /></AuthRoute>} />
       <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
       <Route path="/reset-password" element={<AuthRoute><ResetPassword /></AuthRoute>} />
+      <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
 
       <Route path="/dashboard" element={<LoggedInAccessRoute><Dashboard /></LoggedInAccessRoute>} />
       <Route path="/profile/*" element={<LoggedInAccessRoute><Profile /></LoggedInAccessRoute>} />

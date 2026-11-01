@@ -1,4 +1,4 @@
-import {Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa'; 
 import { useAuthForm } from '../../hooks/useAuthForm'; 
 import '../../styles/Auth styles/Auth.css';
@@ -8,6 +8,7 @@ import { API_BASE_URL } from '../../config/api';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { formData, passwordVisible, error, loading, handleChange, 
     togglePasswordVisibility, setError, setLoading
   } = useAuthForm({ email: '', password: '' });
@@ -29,6 +30,7 @@ export default function Login() {
         <h2 className="auth-title">Log in to Your Account</h2>
         
         {error && <p className="error-text">{error}</p>}
+        {searchParams.get('oauth') === 'failed' && <p className="error-text">Google sign-in could not be completed. Please try again.</p>}
         {verificationMessage && (
         <p className="error-text">
           {verificationMessage}{" "}

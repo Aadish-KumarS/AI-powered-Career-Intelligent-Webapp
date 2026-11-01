@@ -2,17 +2,17 @@ import jwt from 'jsonwebtoken';
 
 export const authenticateUser = (req, res, next) => {
   try {
-    const token = req.header("Authorization");
+    const authorization = req.header("Authorization");
 
-    if (!token) {
+    if (!authorization) {
       return res.status(401).json({ message: "Unauthorized - No token provided" });
     }
 
-    const tokenWithoutBearer = token.split(" ")[1];
-    if (!tokenWithoutBearer) {
+    const [scheme, token] = authorization.split(' ');
+    if (scheme !== 'Bearer' || !token) {
       return res.status(401).json({ message: "Unauthorized - Invalid token format" });
     }
-    const verified = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
     req.user = verified;
 
     next();

@@ -31,6 +31,9 @@
 .guidance-result-count { display: flex; align-items: center; gap: .65rem; padding: .9rem 1rem; border: 1px solid var(--rt-sage-deep); border-radius: 1rem; background: var(--rt-sage); }
 .guidance-result-count span { color: var(--rt-clay); font: 400 2.65rem/.8 'DM Serif Display', Georgia, serif; }
 .guidance-result-count small { color: #456052; font: 700 .62rem/1.35 'Manrope', sans-serif; letter-spacing: .03em; text-transform: uppercase; }
+.guidance-regenerate-button { display: inline-flex; align-items: center; gap: .38rem; min-height: 2.25rem; margin-left: .25rem; padding: .5rem .68rem; border: 1px solid var(--rt-ink); border-radius: .68rem; background: var(--rt-ink); color: var(--rt-paper); cursor: pointer; font: 800 .62rem/1 'Manrope', sans-serif; letter-spacing: .015em; transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+.guidance-regenerate-button:hover { border-color: var(--rt-clay); background: var(--rt-clay); transform: translateY(-1px); }
+.guidance-regenerate-button:focus-visible { outline: 3px solid rgba(196, 104, 74, .32); outline-offset: 2px; }
 .career-recommendation-container .action-buttons { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .45rem; padding-top: .15rem; }
 .career-recommendation-container .recommendation-content { padding: clamp(1rem, 3vw, 1.6rem); border: 1px solid rgba(64,82,69,.17); border-top: 1px solid var(--rt-line); border-radius: 0 0 1.5rem 1.5rem; background: rgba(255,253,249,.78); box-shadow: var(--rt-shadow-sm); }
 
@@ -52,6 +55,7 @@
   .career-recommendation-container { padding-top: 5.65rem; }
   .career-recommendation-container .recommendation-header { grid-template-columns: 1fr; }
   .guidance-result-count { width: max-content; }
+  .guidance-regenerate-button { margin-left: 0; }
 }
 @media (max-width: 540px) {
   .career-recommendation-container { padding-right: .8rem; padding-left: .8rem; }

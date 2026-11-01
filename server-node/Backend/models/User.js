@@ -77,7 +77,25 @@ const userSchema = new mongoose.Schema(
 
     interests: [{ type: String }],
 
-    onboardingProgress: { type: Number, default: 0 }
+    onboardingProgress: { type: Number, default: 0 },
+
+    // Generated service results are user-owned snapshots. Keeping them
+    // separate from the profile prevents AI output from changing the profile
+    // shape while allowing reloads to be instant and generation to be opt-in.
+    aiServiceResults: {
+      careerGuidance: {
+        result: { type: mongoose.Schema.Types.Mixed },
+        generatedAt: { type: Date }
+      },
+      careerAnalysis: {
+        result: { type: mongoose.Schema.Types.Mixed },
+        generatedAt: { type: Date }
+      },
+      examRecommendations: {
+        result: { type: mongoose.Schema.Types.Mixed },
+        generatedAt: { type: Date }
+      }
+    }
   },
   { timestamps: true }
 );

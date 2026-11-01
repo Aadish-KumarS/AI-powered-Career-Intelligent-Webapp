@@ -169,3 +169,33 @@
   .career-analysis-container .career-analysis-tabs { flex-wrap: nowrap; overflow-x: auto; }
   .career-analysis-container .career-analysis-tabs .tab-button { flex: 0 0 auto; }
 }
+
+/* Result workspace: each report manages its own dense content without collision. */
+.career-analysis-container .career-analysis-content { padding: clamp(1.2rem, 3vw, 2.25rem); }
+.career-analysis-container .career-analysis-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; padding: .55rem; }
+.career-analysis-container .career-analysis-tabs .tab-button { justify-content: center; min-height: 3.15rem; padding: .7rem .9rem; font-size: .82rem; }
+.career-analysis-container .career-analysis-panel { margin-top: 1.15rem; padding: clamp(.9rem, 2.2vw, 1.4rem); border: 1px solid var(--rt-line); border-radius: 1.05rem; background: #fffefa; overflow: hidden; }
+.career-analysis-container .career-analysis-panel > :is(.skill-gap-container, .career-path-container, .job-market-insights) { width: 100%; min-width: 0; }
+.career-analysis-container .career-analysis-panel :is(p, li) { font-size: .89rem; line-height: 1.68; }
+.career-analysis-container .career-analysis-panel :is(button, input, select, textarea) { font-size: .82rem; }
+.career-analysis-container .career-analysis-panel :is(.section-header, .timeline-navigation, .skill-tabs, .insights-nav) { min-width: 0; }
+.career-analysis-container .career-analysis-panel .section-header { min-height: 3.35rem; padding: .78rem .9rem; border-radius: .75rem; }
+.career-analysis-container .career-analysis-panel .section-header h2 { font-size: 1.18rem; }
+.career-analysis-container .career-analysis-panel .timeline-navigation,
+.career-analysis-container .career-analysis-panel .skill-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; padding: .45rem; border-radius: .8rem; }
+.career-analysis-container .career-analysis-panel .timeline-navigation button,
+.career-analysis-container .career-analysis-panel .skill-tabs button { justify-content: center; min-height: 2.75rem; padding: .55rem .6rem; }
+.career-analysis-container .career-analysis-panel .insights-nav { overflow-x: auto; padding-bottom: .25rem; scrollbar-width: thin; }
+.career-analysis-container .career-analysis-panel .insights-nav ul { display: flex; flex-wrap: nowrap; min-width: max-content; gap: .45rem; }
+.career-analysis-container .career-analysis-panel .insights-nav button { min-height: 2.6rem; padding: .55rem .72rem; white-space: nowrap; }
+.career-analysis-container .career-analysis-panel :is(.timeline-item, .skill-item, .career-stage, .insights-section, .market-section, .challenge-card) { min-width: 0; }
+.career-analysis-container .career-analysis-panel :is(.skills-grid, .milestones-grid, .insights-grid, .market-overview-grid) { gap: .8rem; }
+
+@media (max-width: 700px) {
+  .career-analysis-container .career-analysis-tabs { grid-template-columns: 1fr; }
+  .career-analysis-container .career-analysis-tabs .tab-button { justify-content: flex-start; }
+  .career-analysis-container .career-analysis-panel .timeline-navigation,
+  .career-analysis-container .career-analysis-panel .skill-tabs { display: flex; overflow-x: auto; }
+  .career-analysis-container .career-analysis-panel .timeline-navigation button,
+  .career-analysis-container .career-analysis-panel .skill-tabs button { flex: 0 0 auto; }
+}

@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 async def save_roadmap(roadmap: Roadmap):
     try:
         # Insert the roadmap into the collection
-        result = await collection.insert_one(roadmap.dict())
+        payload = roadmap.model_dump() if hasattr(roadmap, "model_dump") else roadmap.dict()
+        result = await collection.insert_one(payload)
         logger.info(f"Roadmap saved with ID: {result.inserted_id}")
         # Return the inserted ID as a string
         return str(result.inserted_id)
@@ -43,7 +44,7 @@ async def get_roadmap_by_id(roadmap_id: str):
 async def get_all_roadmaps(user_id: str):
     try:
         # Retrieve all roadmaps from the collection
-        cursor = collection.find({"user_id": user_id})
+        cursor = collection.find({"user_id": user_id}).sort("_id", -1)
         roadmaps = []
         async for doc in cursor:
             doc["id"] = str(doc["_id"])  # Convert ObjectId to string

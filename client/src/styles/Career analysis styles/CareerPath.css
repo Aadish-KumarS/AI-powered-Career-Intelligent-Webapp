@@ -222,6 +222,60 @@
   gap: .75rem;
 }
 
+.career-path-container .soft-skills-intro {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: .4rem;
+  margin: 0;
+  padding: .9rem 1rem;
+  border: 1px solid #dfd1ef;
+  border-left: 4px solid #7654a6;
+  border-radius: .78rem;
+  background: linear-gradient(90deg, #f7f2fc, #fffefa 76%);
+  color: #493168;
+}
+
+.career-path-container .soft-skills-intro span,
+.career-path-container .practice-venues-header > span {
+  color: #7654a6;
+  font: 700 .58rem/1 'DM Mono', monospace;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.career-path-container .soft-skills-intro p {
+  margin: 0;
+  color: #493168;
+  font-size: .84rem;
+  font-weight: 650;
+  line-height: 1.62;
+}
+
+.skill-importance{width: auto !important; max-width: none !important;}
+.soft-skill-card-header {display: flex; flex-direction: column;}
+.career-path-container .soft-skill-card { display: grid; align-content: start; gap: .8rem; border-top: 3px solid #7654a6; }
+.career-path-container .soft-skill-card.priority-high { border-top-color: var(--rt-clay); }
+.career-path-container .soft-skill-card.priority-medium { border-top-color: var(--rt-gold); }
+.career-path-container .soft-skill-card-header { display: flex; align-items: start; justify-content: space-between; gap: .7rem; }
+.career-path-container .soft-skill-title-group { display: flex; min-width: 0; align-items: center; gap: .55rem; }
+.career-path-container .soft-skill-title-group h3 { margin: 0; }
+.career-path-container .soft-skill-number { display: grid; flex: 0 0 auto; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: .55rem; background: #eee8f7; color: #553a87; font: 700 .64rem/1 'DM Mono', monospace; }
+.career-path-container .soft-skill-card .skill-importance { flex: 0 0 auto; max-width: 8.5rem; padding: .32rem .48rem; border: 1px solid #d7cbed; border-radius: 999px; background: #f3eff9; color: #553a87; text-align: center; }
+.career-path-container .soft-skill-card.priority-high .skill-importance { border-color: #edc2b8; background: #fff0ec; color: #9a402d; }
+.career-path-container .soft-skill-card.priority-medium .skill-importance { border-color: #e7d399; background: #fff8e5; color: #745716; }
+.career-path-container .soft-skill-approach { margin: 0 !important; min-height: 0; }
+.career-path-container .soft-skill-card .practice-venues { padding-top: .8rem; border-top: 1px solid var(--rt-line); }
+.career-path-container .practice-venues-header { display: grid; gap: .35rem; margin-bottom: .6rem; }
+.career-path-container .practice-venues-header h4 { margin: 0; }
+.career-path-container .soft-skill-card .practice-venues-list { display: grid; gap: .42rem; padding-left: 0; list-style: none; }
+.career-path-container .soft-skill-card .practice-venues-list li { position: relative; padding-left: 1.1rem; }
+.career-path-container .soft-skill-card .practice-venues-list li::before { position: absolute; top: .42rem; left: 0; width: .45rem; height: .45rem; border-radius: 50%; background: #7654a6; content: ''; }
+
+@media (max-width: 480px) {
+  .career-path-container .soft-skill-card-header { align-items: flex-start; flex-direction: column; }
+  .career-path-container .soft-skill-card .skill-importance { max-width: none; }
+}
+
 .career-path-container .skill-card h3,
 .career-path-container .challenge-card h3,
 .career-path-container .milestone-content h3 {

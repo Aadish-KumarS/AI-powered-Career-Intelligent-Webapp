@@ -74,9 +74,9 @@ class SkillProgress(BaseModel):
     start_date: datetime = Field(default_factory=datetime.now)
     target_completion_date: Optional[datetime] = None
     last_updated: datetime = Field(default_factory=datetime.now)
-    resources_progress: List[ResourceProgress] = []
+    resources_progress: List[ResourceProgress] = Field(default_factory=list)
     notes: str = ""
-    completed_milestones: List[str] = []
+    completed_milestones: List[str] = Field(default_factory=list)
     
 class CreateSkillRequest(BaseModel):
     skill_name: str

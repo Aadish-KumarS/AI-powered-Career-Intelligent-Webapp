@@ -8,6 +8,7 @@ import {
   FiLayers, FiBarChart2, FiPieChart, FiActivity, FiEdit
 } from 'react-icons/fi';
 import { gsap } from 'gsap';
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../../styles/Global Styles/service-theme.css';
 import '../../styles/Global Styles/guidance-workspace.css';
 import '../../styles/CareerGuid Styles/CareerRecommendation.css';
@@ -15,11 +16,14 @@ import Navbar from '../../components/LandingPageComponents/Navbar'
 import { careerRecommendationMockData } from '../../constants/mockData';
 import { careerProfileMockData } from '../../constants/mockData';
 import { API_BASE_URL, CAREER_API_BASE_URL } from '../../config/api';
+import { AI_REQUEST_TIMEOUT_MS, USE_LIVE_AI } from '../../config/aiRuntime';
+import { getSessionAiResult, getSessionProfile, setSessionAiResult, setSessionProfile } from '../../utils/profileSession';
 
 const CareerRecommendation = () => {
   const [userData, setUserData] = useState(null);
   const [recommendation, setRecommendation] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingSavedResult, setLoadingSavedResult] = useState(true);
   const [error, setError] = useState(null);
   const [activePathIndex, setActivePathIndex] = useState(0);
   const [currentView, setCurrentView] = useState('overview');
@@ -36,6 +40,8 @@ const CareerRecommendation = () => {
   const timelineRef = useRef(null);
   const chartsRef = useRef(null);
   const recommendationRequestInFlightRef = useRef(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
  // Parse career paths from recommendation string
   const parseRecommendation = (recData) => {
@@ -119,9 +125,9 @@ const CareerRecommendation = () => {
         // Remove ** markdown if present
         name = name.replace(/\*\*/g, '');
         
-        // Generate a random proficiency level (1-5) for visualization
-        // In a real app, this would come from actual data
-        const proficiency = Math.floor(Math.random() * 3) + 3; // 3-5 range to show reasonably developed skills
+        // Keep the visual estimate stable for a saved recommendation. Random
+        // values made the same persisted result look different after reload.
+        const proficiency = 3 + [...name].reduce((sum, character) => sum + character.charCodeAt(0), 0) % 3;
         
         return { name, description, proficiency };
       });
@@ -269,23 +275,29 @@ const CareerRecommendation = () => {
       .map(line => line.replace('- ', '').trim());
   };
 
-  // Fetch user data from backend
-  const fetchUserData = async () => {
+  const applyRecommendation = (result) => {
+    const paths = parseRecommendation(result);
+    if (paths.length < 3) return false;
+    setRecommendation(result);
+    setCareerPaths(paths);
+    return true;
+  };
+
+  const persistRecommendation = async (result) => {
+    setSessionAiResult('careerGuidance', result);
     const token = sessionStorage.getItem('authToken');
+    if (!token) return;
+
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/users/profile`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      await axios.put(
+        `${API_BASE_URL}/api/users/ai-results/careerGuidance`,
+        { result },
+        { headers: { Authorization: `Bearer ${token}` }, timeout: 15_000 }
       );
-      
-      setUserData(response.data);
-    } catch (error) {
-      console.error('Error fetching the data', error);
-      setUserData(careerProfileMockData);
+    } catch (saveError) {
+      // The result remains visible; a persistence issue must not force another
+      // expensive generation attempt.
+      console.warn('Unable to save career guidance result.', saveError);
     }
   };
 
@@ -314,16 +326,20 @@ const CareerRecommendation = () => {
         "career_stage" : userData.careerInfo?.careerStage || '',
         "desired_roles" : userData.careerInfo?.desiredRoles || [],
       };
-      let response;
-      try {
+      let response = { data: careerRecommendationMockData };
+      if (USE_LIVE_AI) {
+        try {
         response = await axios.post(
           `${CAREER_API_BASE_URL}/api/v1/recommend-career`,
           resData,
-          { headers: { 'Content-Type': 'application/json' } }
+          {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: AI_REQUEST_TIMEOUT_MS
+          }
         );
-      } catch (requestError) {
-        console.warn('Career recommendation service unavailable; using mock data.', requestError);
-        response = { data: careerRecommendationMockData };
+        } catch (requestError) {
+          console.warn('Career recommendation service unavailable; using mock data.', requestError);
+        }
       }
 
       /* Previous temporary hardcoded response retained below for reference.
@@ -439,33 +455,80 @@ The transition requires moving from descriptive reporting to predictive thinking
       //   }
       // });
       const paths = parseRecommendation(response.data);
-      const usableResponse = paths.length ? response.data : careerRecommendationMockData;
-      if (!paths.length) {
-        console.warn('Career recommendation format was unusable; using mock data.');
+      const usableResponse = paths.length >= 3 ? response.data : careerRecommendationMockData;
+      if (paths.length < 3) {
+        console.warn('Career recommendation response did not include three usable paths; using mock data.');
       }
-      setRecommendation(usableResponse);
-      setCareerPaths(parseRecommendation(usableResponse));
+      applyRecommendation(usableResponse);
+      await persistRecommendation(usableResponse);
       
     } catch (error) {
-      setError('Error fetching career recommendation');
-      console.error(error);
+      console.error('Career recommendation could not be processed; using mock data.', error);
+      applyRecommendation(careerRecommendationMockData);
+      await persistRecommendation(careerRecommendationMockData);
     } finally {
       setLoading(false);
       recommendationRequestInFlightRef.current = false;
     }
   };
 
-  // Call fetchUserData on component mount
+  // Load the profile and the latest stored result on entry. Generation is
+  // intentionally never triggered by a page load or refresh.
   useEffect(() => {
-    fetchUserData();
+    let cancelled = false;
+    const loadWorkspace = async () => {
+      const token = sessionStorage.getItem('authToken');
+      try {
+        const cachedProfile = getSessionProfile();
+        const cachedResult = getSessionAiResult('careerGuidance');
+        const [profileOutcome, savedOutcome] = await Promise.allSettled([
+          cachedProfile
+            ? Promise.resolve({ data: cachedProfile })
+            : axios.get(`${API_BASE_URL}/api/users/profile`, {
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 15_000,
+            }),
+          cachedResult
+            ? Promise.resolve({ data: { result: cachedResult } })
+            : axios.get(`${API_BASE_URL}/api/users/ai-results/careerGuidance`, {
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 15_000,
+            }),
+        ]);
+
+        if (cancelled) return;
+        const profile = profileOutcome.status === 'fulfilled' ? profileOutcome.value.data : careerProfileMockData;
+        if (!cachedProfile && profileOutcome.status === 'fulfilled') setSessionProfile(profile);
+        setUserData(profile);
+        if (savedOutcome.status === 'fulfilled') {
+          const savedResult = savedOutcome.value.data?.result;
+          if (!cachedResult && savedResult) setSessionAiResult('careerGuidance', savedResult);
+          applyRecommendation(savedResult);
+        }
+    } catch {
+      if (!cancelled) setUserData(careerProfileMockData);
+      } finally {
+        if (!cancelled) setLoadingSavedResult(false);
+      }
+    };
+
+    loadWorkspace();
+    return () => { cancelled = true; };
+    // applyRecommendation parses the response snapshot loaded above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Call getCareerRecommendation when userData is fetched
+  // Completing the explicit regeneration flow in onboarding returns here with
+  // a one-time signal. The final onboarding submit is the user's generation
+  // action; ordinary reloads do not carry this state.
   useEffect(() => {
-    if (userData) {
+    if (location.state?.generate && userData && !loadingSavedResult) {
+      navigate(location.pathname, { replace: true, state: null });
       getCareerRecommendation();
     }
-  }, [userData]);
+    // getCareerRecommendation intentionally reads the current profile snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.state, loadingSavedResult, navigate, userData]);
 
   // Parse recommendation data when recommendation changes
   useEffect(() => {
@@ -479,6 +542,8 @@ The transition requires moving from descriptive reporting to predictive thinking
         setAnimateSkills(true);
       }, 500);
     }
+    // Parsing is tied to the received response; the helper is recreated per render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recommendation]);
 
   // Apply animations when recommendation is loaded
@@ -558,7 +623,7 @@ The transition requires moving from descriptive reporting to predictive thinking
   }, [currentView]);
 
   // Handle copy to clipboard
-  const copyToClipboard = () => {
+  const _copyToClipboard = () => {
     // Create formatted text version
     const paths = careerPaths;
     let formattedText = "# Career Recommendations\n\n";
@@ -592,7 +657,7 @@ The transition requires moving from descriptive reporting to predictive thinking
   };
 
   // Handle download as text file
-  const downloadRecommendationAsText = () => {
+  const _downloadRecommendationAsText = () => {
     // Create formatted text version (same as copy)
     const paths = careerPaths;
     let formattedText = "# Career Recommendations\n\n";
@@ -919,7 +984,7 @@ The transition requires moving from descriptive reporting to predictive thinking
   };
 
 // Handle regenerate recommendation
-const regenerateRecommendation = () => {
+const _regenerateRecommendation = () => {
   getCareerRecommendation();
   toast.info('Regenerating career recommendation...');
   
@@ -940,7 +1005,7 @@ const regenerateRecommendation = () => {
 };
 
 // Handle save recommendation
-const saveRecommendation = () => {
+const _saveRecommendation = () => {
   localStorage.setItem('careerRecommendation', JSON.stringify(recommendation));
   
   // Save animation
@@ -1536,25 +1601,43 @@ const renderCareerDetails = (careerPath) => {
 // Render formatted content
 const renderFormattedContent = (content) => {
   if (!content) return null;
-  
-  const lines = content.split('\n');
-  
-  return (
-    <div className="formatted-content">
-      {lines.map((line, index) => {
-        // Handle bullet points
-        if (line.trim().startsWith('- ')) {
-          return <li key={index}>{line.replace('- ', '')}</li>;
-        }
-        // Handle empty lines as spacing
-        if (line.trim() === '') {
-          return <div key={index} className="content-space"></div>;
-        }
-        // Regular text
-        return <p key={index}>{line}</p>;
-      })}
-    </div>
-  );
+
+  const blocks = [];
+  let bulletItems = [];
+
+  const cleanText = (value) => value
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1')
+    .trim();
+
+  const flushBullets = () => {
+    if (!bulletItems.length) return;
+    blocks.push(
+      <ul className="formatted-list" key={`list-${blocks.length}`}>
+        {bulletItems.map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}
+      </ul>
+    );
+    bulletItems = [];
+  };
+
+  content.split('\n').forEach((line) => {
+    const text = cleanText(line);
+    if (!text) {
+      flushBullets();
+      return;
+    }
+
+    if (text.startsWith('- ')) {
+      bulletItems.push(cleanText(text.slice(2)));
+      return;
+    }
+
+    flushBullets();
+    blocks.push(<p key={`paragraph-${blocks.length}`}>{text}</p>);
+  });
+  flushBullets();
+
+  return <div className="formatted-content">{blocks}</div>;
 };
 
 const profileHighlights = [
@@ -1578,7 +1661,7 @@ return (
   <div className="career-recommendation-container">
     <Navbar variant="app" />
     <main className="guidance-workspace">
-    {loading && (
+    {(loading || loadingSavedResult) && (
       <section className="guidance-state loading-container" aria-live="polite">
         <div className="loading-animation">
           <div className="loading-circle"></div>
@@ -1586,12 +1669,12 @@ return (
           <div className="loading-circle"></div>
         </div>
         <p className="workspace-eyebrow">AI career guidance</p>
-        <h1 className="loading-text">Finding directions with real fit.</h1>
-        <p className="loading-subtext">We are weighing your profile, ambitions, and practical entry points to surface three worthwhile paths.</p>
+        <h1 className="loading-text">{loading ? 'Finding directions with real fit.' : 'Opening your saved guidance.'}</h1>
+        <p className="loading-subtext">{loading ? 'We are weighing your profile, ambitions, and practical entry points to surface three worthwhile paths.' : 'Retrieving your latest saved career recommendations.'}</p>
       </section>
     )}
     
-    {error && (
+    {!loadingSavedResult && error && (
       <section className="guidance-state guidance-state--error error-message" role="alert">
         <p className="workspace-eyebrow">Something interrupted the search</p>
         <p>{error}</p>
@@ -1602,7 +1685,7 @@ return (
       </section>
     )}
 
-    {!loading && !error && careerPaths.length > 0 && (
+    {!loading && !loadingSavedResult && !error && careerPaths.length > 0 && (
       <div className="recommendation-container" ref={cardRef}>
         <div className="recommendation-header">
           <div className="header-content">
@@ -1623,33 +1706,15 @@ return (
           <aside className="guidance-result-count" aria-label={`${careerPaths.length} career recommendations`}>
             <span>{String(careerPaths.length).padStart(2, '0')}</span>
             <small>considered<br />directions</small>
+            <button
+              type="button"
+              className="guidance-regenerate-button"
+              onClick={() => navigate('/services/career-guid/onboarding', { state: { regenerate: true } })}
+            >
+              <FiRefreshCw aria-hidden="true" /> Regenerate
+            </button>
           </aside>
           
-          <div className="action-buttons" ref={actionButtonsRef}>
-            <button className="action-button save-button" onClick={saveRecommendation} title="Save Recommendation">
-              <FiSave className="button-icon" /> Save
-            </button>
-            <button className="action-button copy-button" onClick={copyToClipboard} title="Copy to Clipboard">
-              <FiCopy className="button-icon" /> Copy
-            </button>
-            <div className="download-dropdown">
-              <button className="action-button download-button" title="Download Options">
-                <FiDownload className="button-icon" /> Download
-                <FiChevronDown className="dropdown-icon" />
-              </button>
-              <div className="download-options">
-                <button onClick={downloadRecommendationAsText}>
-                  <FiFileText className="option-icon" /> Text File
-                </button>
-                {/* <button onClick={downloadRecommendationAsPDF}>
-                  <FiFileText className="option-icon" /> PDF Report
-                </button> */}
-              </div>
-            </div>
-            <button className="action-button regenerate-button" onClick={regenerateRecommendation} title="Regenerate Recommendation">
-              <FiRefreshCw className="button-icon" /> Regenerate
-            </button>
-          </div>
         </div>
         
         <div className="recommendation-content">
@@ -1657,11 +1722,14 @@ return (
         </div>
       </div>
     )}
-    {!loading && !error && careerPaths.length === 0 && (
+    {!loading && !loadingSavedResult && !error && careerPaths.length === 0 && (
       <section className="guidance-state guidance-state--waiting">
         <p className="workspace-eyebrow">Career guidance</p>
-        <h1>Your next direction starts with your profile.</h1>
-        <p>Complete your guidance profile, then come back here for three considered options.</p>
+        <h1>Your next direction is ready when you are.</h1>
+        <p>Generate a fresh set of three recommendations from the profile you have already built.</p>
+        <button type="button" className="retry-button" onClick={getCareerRecommendation} disabled={!userData}>
+          <FiRefreshCw className="retry-icon" /> Generate recommendations
+        </button>
       </section>
     )}
     </main>

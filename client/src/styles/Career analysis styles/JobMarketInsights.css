@@ -112,6 +112,11 @@
   border-top: 3px solid var(--rt-sage-deep);
 }
 
+.job-market-insights .skills-section .grid-item:nth-child(1) { border-top-color: #3b9d76; }
+.job-market-insights .skills-section .grid-item:nth-child(2) { border-top-color: #d58a35; }
+.job-market-insights .skills-section .grid-item:nth-child(3) { border-top-color: #7250a8; }
+.job-market-insights .skills-section .grid-item:nth-child(4) { border-top-color: var(--rt-clay); }
+
 .job-market-insights .role-card {
   border-top: 3px solid var(--rt-clay);
 }
@@ -200,6 +205,15 @@
   background: var(--rt-clay);
 }
 
+.job-market-insights .growth-bar { background: #6c54a4; }
+
+.job-market-insights .metric-meter {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 1fr) auto;
+  align-items: center;
+  gap: .45rem;
+}
+
 .job-market-insights .demand-rating,
 .job-market-insights .growth-percentage,
 .job-market-insights .rate-value {
@@ -209,10 +223,13 @@
 
 .job-market-insights .demand-rating,
 .job-market-insights .growth-percentage {
-  position: absolute;
-  top: 50%;
-  right: .35rem;
-  transform: translateY(-50%);
+  position: static;
+  min-width: 2.5rem;
+  padding: .32rem .38rem;
+  border: 1px solid currentColor;
+  border-radius: .4rem;
+  background: #fffefa;
+  text-align: center;
 }
 
 .job-market-insights .role-stats {
@@ -300,10 +317,11 @@
   background: var(--rt-sage-deep);
 }
 
-.job-market-insights .distribution-segment:nth-child(2) { background: var(--rt-gold); }
-.job-market-insights .distribution-segment:nth-child(3) { background: var(--rt-clay); }
-.job-market-insights .distribution-segment:nth-child(4) { background: #5e7368; }
-.job-market-insights .segment-label { overflow: hidden; color: var(--rt-paper); font-size: .56rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.job-market-insights .distribution-segment:nth-child(2) { background: #f0c64a; }
+.job-market-insights .distribution-segment:nth-child(3) { background: #cc6548; }
+.job-market-insights .distribution-segment:nth-child(4) { background: #4c8d72; }
+.job-market-insights .segment-label { overflow: hidden; color: #fff; font-size: .59rem; font-weight: 800; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,.38); white-space: nowrap; }
+.job-market-insights .distribution-segment:nth-child(2) .segment-label { color: #3b2f09; text-shadow: none; }
 
 .job-market-insights .sectors-list.growing .sector-item { border-left: 3px solid #557a63; }
 .job-market-insights .sectors-list.declining .sector-item { border-left: 3px solid var(--rt-clay); }
@@ -339,6 +357,28 @@
   font-weight: 800;
   white-space: nowrap;
 }
+
+.job-market-insights .hotspots-coming-soon {
+  display: grid;
+  gap: .6rem;
+  min-height: 9rem;
+  align-content: center;
+  padding: 1.15rem;
+  border: 1px dashed #bca46e;
+  border-radius: .75rem;
+  background: linear-gradient(135deg, #fff8e8, #fffefa);
+}
+.job-market-insights .hotspots-coming-soon span {
+  width: max-content;
+  padding: .3rem .5rem;
+  border-radius: 999px;
+  background: #7b5a17;
+  color: #fff;
+  font: 800 .62rem/1 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.job-market-insights .hotspots-coming-soon p { max-width: 44rem; margin: 0; color: var(--rt-ink-soft); font-size: .84rem; line-height: 1.65; }
 
 .job-market-insights .stages-timeline {
   display: grid;

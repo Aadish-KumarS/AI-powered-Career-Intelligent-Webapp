@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/location', async (req, res) => {
   try {
-    const { data } = await axios.get('https://ipapi.co/json/');
+    const { data } = await axios.get('https://ipapi.co/json/', { timeout: 8_000 });
 
     if (!data) {
       return res.status(404).json({ message: 'Location data not found' }); 

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  skillGapResultMoackData,
-  careerPathResultMoackData,
-  jobMarketResultMoackData
+  getCareerAnalysisMockResults
 } from '../../constants/mockData';
 import { careerProfileMockData } from '../../constants/mockData';
 import SkillGapResult from './SkillGapResult';
@@ -15,6 +13,8 @@ import { FiActivity, FiArrowUpRight, FiBarChart2, FiCompass, FiMap } from 'react
 import analysisIllustration from '../../assets/svg/ai.svg';
 import Navbar from '../../components/LandingPageComponents/Navbar'
 import { API_BASE_URL, CAREER_API_BASE_URL } from '../../config/api';
+import { AI_REQUEST_TIMEOUT_MS, USE_LIVE_AI } from '../../config/aiRuntime';
+import { getSessionAiResult, getSessionProfile, setSessionAiResult, setSessionProfile } from '../../utils/profileSession';
 
 const CareerAnalysis = () => {
   const [userProfile, setUserProfile] = useState(null);
@@ -22,42 +22,92 @@ const CareerAnalysis = () => {
   const [careerPathResults, setCareerPathResults] = useState(null);
   const [jobMarketResults, setJobMarketResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingSavedResult, setLoadingSavedResult] = useState(true);
   const [error, setError] = useState(null);
   const [tabErrors, setTabErrors] = useState({});
   const [activeTab, setActiveTab] = useState('skillGap');
 
-  // Fetch the user's profile (already stored in the backend)
+  const applyAnalysisResult = (result) => {
+    if (!result || typeof result !== 'object') return false;
+
+    const { skillGap, careerPath, jobMarket, tabErrors: savedTabErrors = {} } = result;
+    if (!skillGap && !careerPath && !jobMarket) return false;
+
+    setSkillGapResults(skillGap || null);
+    setCareerPathResults(careerPath || null);
+    setJobMarketResults(jobMarket || null);
+    setTabErrors(savedTabErrors && typeof savedTabErrors === 'object' ? savedTabErrors : {});
+    return true;
+  };
+
+  const persistAnalysisResult = async (result) => {
+    setSessionAiResult('careerAnalysis', result);
+    const token = sessionStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+      await axios.put(
+        `${API_BASE_URL}/api/users/ai-results/careerAnalysis`,
+        { result },
+        { headers: { Authorization: `Bearer ${token}` }, timeout: 15_000 }
+      );
+    } catch (saveError) {
+      // Rendering a completed analysis is more useful than making a user run
+      // an expensive generation again when storage is briefly unavailable.
+      console.warn('Unable to save career analysis result.', saveError);
+    }
+  };
+
+  // Hydrate the workspace from the latest saved report. Loading this page is
+  // read-only: AI generation happens only from the explicit button below.
   useEffect(() => {
-
-
-    const fetchUserProfile = async () => {
+    let cancelled = false;
+    const loadWorkspace = async () => {
       const token = sessionStorage.getItem('authToken');
       if (!token) {
-        setError('Authentication token is missing.');
+        if (!cancelled) {
+          setUserProfile(careerProfileMockData);
+          setLoadingSavedResult(false);
+        }
         return;
       }
 
-      setLoading(true);
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/users/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        
-        setUserProfile(response.data);
-      } catch (err) {
-        console.error('Error fetching the data', err);
-        setUserProfile(careerProfileMockData);
+        const cachedProfile = getSessionProfile();
+        const cachedResult = getSessionAiResult('careerAnalysis');
+        const [profileOutcome, savedOutcome] = await Promise.allSettled([
+          cachedProfile
+            ? Promise.resolve({ data: cachedProfile })
+            : axios.get(`${API_BASE_URL}/api/users/profile`, {
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 15_000,
+            }),
+          cachedResult
+            ? Promise.resolve({ data: { result: cachedResult } })
+            : axios.get(`${API_BASE_URL}/api/users/ai-results/careerAnalysis`, {
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 15_000,
+            }),
+        ]);
+
+        if (cancelled) return;
+        const profile = profileOutcome.status === 'fulfilled' ? profileOutcome.value.data : careerProfileMockData;
+        if (!cachedProfile && profileOutcome.status === 'fulfilled') setSessionProfile(profile);
+        setUserProfile(profile);
+        if (savedOutcome.status === 'fulfilled') {
+          const savedResult = savedOutcome.value.data?.result;
+          if (!cachedResult && savedResult) setSessionAiResult('careerAnalysis', savedResult);
+          applyAnalysisResult(savedResult);
+        }
+      } catch {
+        if (!cancelled) setUserProfile(careerProfileMockData);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoadingSavedResult(false);
       }
     };
 
-    fetchUserProfile();
+    loadWorkspace();
+    return () => { cancelled = true; };
   }, []);
 
   // Handle the career analysis process
@@ -72,10 +122,24 @@ const CareerAnalysis = () => {
   setJobMarketResults(null);
 
   const requestData = transformUserDataToRequest(userProfile);
+  const fallbacks = getCareerAnalysisMockResults();
 
   try {
+    if (!USE_LIVE_AI) {
+      const generatedResult = {
+        skillGap: fallbacks.skillGap,
+        careerPath: fallbacks.careerPath,
+        jobMarket: fallbacks.jobMarket,
+        tabErrors: {},
+      };
+      applyAnalysisResult(generatedResult);
+      await persistAnalysisResult(generatedResult);
+      return;
+    }
+
     const requestOptions = {
-      headers: { 'X-Request-ID': `req-${Date.now()}` }
+      headers: { 'X-Request-ID': `req-${Date.now()}` },
+      timeout: AI_REQUEST_TIMEOUT_MS
     };
 
     const endpoints = [
@@ -84,29 +148,17 @@ const CareerAnalysis = () => {
       ['jobMarket', '/generator/career/job-market-insights']
     ];
 
-    // Run one analysis at a time. The three analyses share the same LLM
-    // provider and parallel requests can exhaust a provider's rate limit.
-    const settled = [];
-    for (const [, path] of endpoints) {
-      try {
-        const value = await axios.post(
-          `${CAREER_API_BASE_URL}${path}`,
-          requestData,
-          requestOptions
-        );
-        settled.push({ status: 'fulfilled', value });
-      } catch (reason) {
-        settled.push({ status: 'rejected', reason });
-      }
-    }
+    // Send independent analyses together. The API uses a small bounded
+    // concurrency pool, so one slow report no longer delays the other tabs.
+    const settled = await Promise.allSettled(
+      endpoints.map(([key, path]) => axios.post(
+        `${CAREER_API_BASE_URL}${path}`,
+        requestData,
+        { ...requestOptions, headers: { ...requestOptions.headers, 'X-Request-ID': `${requestOptions.headers['X-Request-ID']}-${key}` } }
+      ))
+    );
 
     const nextErrors = {};
-    const fallbacks = {
-      skillGap: skillGapResultMoackData,
-      careerPath: careerPathResultMoackData,
-      jobMarket: jobMarketResultMoackData
-    };
-
     const normalizeResponse = (response) => ({
       ...response.data,
       result: typeof response.data?.result === 'string'
@@ -114,14 +166,19 @@ const CareerAnalysis = () => {
         : response.data?.result
     });
 
+    const generatedResult = {
+      skillGap: null,
+      careerPath: null,
+      jobMarket: null,
+      tabErrors: nextErrors,
+    };
+
     settled.forEach((outcome, index) => {
       const [key] = endpoints[index];
 
       if (outcome.status === 'rejected') {
         nextErrors[key] = 'Live analysis is temporarily unavailable. Showing a sample result.';
-        if (key === 'skillGap') setSkillGapResults(fallbacks[key]);
-        if (key === 'careerPath') setCareerPathResults(fallbacks[key]);
-        if (key === 'jobMarket') setJobMarketResults(fallbacks[key]);
+        generatedResult[key] = fallbacks[key];
         return;
       }
 
@@ -130,28 +187,20 @@ const CareerAnalysis = () => {
 
         if (!data.result) {
           nextErrors[key] = 'The analysis response was empty. Showing a sample result.';
-          if (key === 'skillGap') setSkillGapResults(fallbacks[key]);
-          if (key === 'careerPath') setCareerPathResults(fallbacks[key]);
-          if (key === 'jobMarket') setJobMarketResults(fallbacks[key]);
+          generatedResult[key] = fallbacks[key];
           return;
         }
 
-        if (key === 'skillGap') setSkillGapResults(data);
-        if (key === 'careerPath') setCareerPathResults(data);
-        if (key === 'jobMarket') setJobMarketResults(data);
+        generatedResult[key] = data;
       } catch {
         nextErrors[key] = 'The analysis response could not be read. Showing a sample result.';
-        if (key === 'skillGap') setSkillGapResults(fallbacks[key]);
-        if (key === 'careerPath') setCareerPathResults(fallbacks[key]);
-        if (key === 'jobMarket') setJobMarketResults(fallbacks[key]);
+        generatedResult[key] = fallbacks[key];
       }
     });
 
-    setTabErrors(nextErrors);
+    applyAnalysisResult(generatedResult);
+    await persistAnalysisResult(generatedResult);
 
-    if (Object.keys(nextErrors).length === endpoints.length) {
-      setError('Career analysis could not be generated. Please try again.');
-    }
   } finally {
     setLoading(false);
   }
@@ -228,11 +277,11 @@ const CareerAnalysis = () => {
   };
 
   const renderTabContent = () => {
-    if (loading) {
+    if (loading || loadingSavedResult) {
       return (
         <div className="career-loading">
           <div className="loading-spinner"></div>
-          <p>Analyzing your career data...</p>
+          <p>{loading ? 'Analyzing your career data...' : 'Opening your saved analysis...'}</p>
         </div>
       );
     }
@@ -291,11 +340,11 @@ const CareerAnalysis = () => {
             <button
               className={`analyze-btn ${loading ? 'loading' : ''}`}
               onClick={analyzeCareer}
-              disabled={loading || !userProfile}
+              disabled={loading || loadingSavedResult || !userProfile}
             >
               <FiActivity aria-hidden="true" />
-              {loading ? 'Reading your profile…' : 'Analyze my career'}
-              {!loading && <FiArrowUpRight aria-hidden="true" />}
+              {loading ? 'Analyzing your career…' : skillGapResults ? 'Regenerate analysis' : 'Generate analysis'}
+              {!loading && !loadingSavedResult && <FiArrowUpRight aria-hidden="true" />}
             </button>
           </div>
           <aside className="analysis-promise" aria-label="What the analysis includes">

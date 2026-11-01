@@ -241,6 +241,38 @@
   margin-top: 1.25rem;
 }
 
+.view-profile-container .profile-story-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+  margin-top: 1.25rem;
+}
+
+.view-profile-container .profile-story-card {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--rt-line);
+  border-radius: 1rem;
+  background: #fffefa;
+  box-shadow: 0 7px 18px rgba(48,60,47,.04);
+}
+
+.view-profile-container .profile-story-card:nth-child(2) { border-top: 3px solid var(--rt-clay); }
+.view-profile-container .profile-story-card:nth-child(3) { border-top: 3px solid #7560ad; }
+.view-profile-container .profile-story-card:nth-child(4) { border-top: 3px solid var(--rt-gold); }
+
+.view-profile-container .profile-story-heading { display: flex; align-items: flex-start; gap: .7rem; padding-bottom: .85rem; border-bottom: 1px solid var(--rt-line); }
+.view-profile-container .profile-story-icon { display: grid; flex: 0 0 auto; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: .7rem; background: var(--rt-ink); color: var(--rt-gold); }
+.view-profile-container .profile-story-card:nth-child(2) .profile-story-icon { background: var(--rt-clay); color: #fff; }
+.view-profile-container .profile-story-card:nth-child(3) .profile-story-icon { background: #665099; color: #fff; }
+.view-profile-container .profile-story-card:nth-child(4) .profile-story-icon { background: #f2ce85; color: #503f13; }
+.view-profile-container .profile-story-heading p { margin: 0 0 .3rem; color: var(--rt-muted); font: 800 .57rem/1 'DM Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+.view-profile-container .profile-story-heading h3 { margin: 0; color: var(--rt-ink); font: 400 1.35rem/1.05 'DM Serif Display', Georgia, serif; letter-spacing: -.03em; }
+.view-profile-container .profile-story-list { display: grid; gap: .65rem; margin: .9rem 0 0; }
+.view-profile-container .profile-story-list > div { display: grid; grid-template-columns: minmax(6.5rem, .42fr) minmax(0, 1fr); gap: .65rem; align-items: start; }
+.view-profile-container .profile-story-list dt { color: var(--rt-muted); font: 800 .58rem/1.35 'DM Mono', monospace; letter-spacing: .055em; text-transform: uppercase; }
+.view-profile-container .profile-story-list dd { min-width: 0; margin: 0; overflow-wrap: anywhere; color: var(--rt-ink-soft); font-size: .8rem; font-weight: 650; line-height: 1.52; }
+
 .view-profile-container .profile-detail-card {
   display: grid;
   align-content: start;
@@ -251,7 +283,14 @@
   border: 1px solid var(--rt-line);
   border-radius: .85rem;
   background: #fffefa;
+  border-top: 3px solid var(--rt-sage-deep);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
+
+.view-profile-container .profile-detail-card:nth-child(2n) { border-top-color: var(--rt-gold); }
+.view-profile-container .profile-detail-card:nth-child(3n) { border-top-color: var(--rt-clay); }
+.view-profile-container .profile-detail-card:nth-child(4n) { border-top-color: #7560ad; }
+.view-profile-container .profile-detail-card:hover { transform: translateY(-2px); box-shadow: 0 10px 19px rgba(48,60,47,.09); }
 
 .view-profile-container .profile-detail-card > svg {
   width: 1.1rem;
@@ -269,7 +308,7 @@
 .view-profile-container .profile-detail-card strong {
   overflow-wrap: anywhere;
   color: var(--rt-ink);
-  font: 400 1.2rem/1.13 'DM Serif Display', Georgia, serif;
+  font: 400 1.2rem/1.22 'DM Serif Display', Georgia, serif;
   letter-spacing: -.02em;
 }
 
@@ -408,6 +447,8 @@
   .view-profile-container .profile-hero, .view-profile-container .profile-content-card { border-radius: 1rem; }
   .view-profile-container .profile-identity { align-items: flex-start; flex-direction: column; }
   .view-profile-container .profile-details-grid { grid-template-columns: 1fr; }
+  .view-profile-container .profile-story-grid { grid-template-columns: 1fr; }
+  .view-profile-container .profile-story-list > div { grid-template-columns: 1fr; gap: .16rem; }
   .view-profile-container .profile-detail-card { min-height: auto; }
   .view-profile-container .profile-detail-footer, .view-profile-container .focus-guidance, .view-profile-container .profile-empty-note { align-items: flex-start; flex-direction: column; }
   .view-profile-container .profile-tabs { flex-wrap: nowrap; overflow-x: auto; }

@@ -3,6 +3,8 @@ import gsap from "gsap";
 import { getIsFirstTime } from "./helper";
 import { API_BASE_URL } from "../config/api";
 import { toast } from 'react-toastify';
+import { setSessionProfile } from './profileSession';
+import { clearSessionAiResults } from './profileSession';
 
 axios.defaults.withCredentials = true;
 
@@ -99,7 +101,11 @@ export const handleSubmitLogin = async ( e, setLoading, setError, formData, navi
     const { token } = response.data;
 
     if (token) {
+      // Do not reuse a profile from a previous account in this browser tab.
+      sessionStorage.removeItem('userData');
+      clearSessionAiResults();
       sessionStorage.setItem("authToken", token);
+      window.dispatchEvent(new Event('auth-updated'));
 
       const isFirstTime = await getIsFirstTime(token, API_BASE_URL);
       
@@ -239,6 +245,7 @@ export const handleSubmitCreateProfile = async (e,profileData,setError,BASE_URL,
     );
 
     if (response.status === 200) {
+      setSessionProfile(response.data?.user || profileData);
       gsap.to(formRef.current, {
         scale: 1.05,
         duration: 0.3,
@@ -265,16 +272,15 @@ export const handleSubmitCreateProfile = async (e,profileData,setError,BASE_URL,
 //LOGOUT 
 export const logoutUser = async (navigate) => {
   try {
-    await axios.get("/api/logout", { withCredentials: true });
-    sessionStorage.removeItem('authToken'); 
-    sessionStorage.removeItem('user'); 
-
-    setTimeout(() => {
-      navigate("/signup", { replace: true });
-    }, 100);
-    
+    await axios.get(`${API_BASE_URL}/api/auth/logout`, { withCredentials: true });
   } catch (error) {
     console.error("Logout failed:", error);
+  } finally {
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('userData');
+    clearSessionAiResults();
+    window.dispatchEvent(new Event('auth-updated'));
     navigate("/signup", { replace: true });
   }
 };

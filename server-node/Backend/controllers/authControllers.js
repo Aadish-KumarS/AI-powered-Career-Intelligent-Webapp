@@ -10,12 +10,23 @@ import crypto from 'crypto';
 dotenv.config();
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const normalizeEmail = (email = '') => email.trim().toLowerCase();
+
+const publicUser = (user) => {
+  const userObject = user.toObject ? user.toObject() : user;
+  const { password, googleId, __v, ...safeUser } = userObject;
+  return safeUser;
+};
+
+const createAuthToken = (userId) => jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
 // REGISTER / SIGNUP
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name?.trim() || !email?.trim() || !password || password.length < 8) {
+    const { password } = req.body;
+    const name = req.body.name?.trim();
+    const email = normalizeEmail(req.body.email);
+    if (!name || !email || !password || password.length < 8) {
       return res.status(400).json({ message: "Name, email, and an 8-character password are required" });
     }
     
@@ -29,16 +40,11 @@ export const register = async (req, res) => {
     const otpExpiration = new Date();
     otpExpiration.setMinutes(otpExpiration.getMinutes() + 10);
 
-    const existingOtp =await OTP.findOne({email});
-
-    if(existingOtp){
-      existingOtp.otp = otp;
-      existingOtp.expiration = otpExpiration;
-      await existingOtp.save();
-    }else{
-      const otpEntry = new OTP({ email, otp, expiration: otpExpiration });
-      await otpEntry.save();
-    }
+    await OTP.findOneAndUpdate(
+      { email },
+      { $set: { otp, expiration: otpExpiration } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
     
     res.cookie('email', email, {
       httpOnly: true,
@@ -55,7 +61,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      verified: false,
+      isVerified: false,
     });
     
     await newUser.save();
@@ -63,7 +69,8 @@ export const register = async (req, res) => {
     res.status(201).json({ message: "User registered! Check your email for OTP verification." });
 
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
+    console.error('Registration failed:', error);
+    res.status(500).json({ message: "Unable to create your account right now" });
   }
 };
 
@@ -72,17 +79,19 @@ export const register = async (req, res) => {
 export const logout = (req, res) => {
   try {
     res.clearCookie("token");
-    req.logout(() => {});
+    res.clearCookie('email');
+    res.clearCookie('passwordResetToken', { path: '/api/auth/reset-password' });
     res.json({ message: "Logged out successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Logout failed", error: error.message });
+    res.status(500).json({ message: "Logout failed" });
   }
 };
 
 //EMAIL & PASSWORD LOGIN
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const password = req.body.password;
+    const email = normalizeEmail(req.body.email);
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
@@ -103,17 +112,23 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Please verify your email before logging in." });
     }
 
+    if (!user.password) {
+      return res.status(400).json({ message: 'This account uses Google sign-in. Continue with Google instead.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.json({ token, user });
+    user.lastLogin = new Date();
+    await user.save();
+    const token = createAuthToken(user._id);
+    res.json({ token, user: publicUser(user) });
 
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ message: "Server Error", error: error.message });
+    res.status(500).json({ message: "Unable to sign in right now" });
   }
 };
 
@@ -125,20 +140,30 @@ export const login = async (req, res) => {
 export const googleLogin = async (req, res) => {
   try {
     const { tokenId } = req.body;
+    if (!tokenId) return res.status(400).json({ message: 'Google credential is required' });
     const ticket = await client.verifyIdToken({ idToken: tokenId, audience: process.env.GOOGLE_CLIENT_ID });
-    const { name, email, sub: googleId } = ticket.getPayload();
+    const { name, email: profileEmail, picture, sub: googleId } = ticket.getPayload();
+    const email = normalizeEmail(profileEmail);
+    if (!email) return res.status(400).json({ message: 'Google did not return an email address' });
 
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ $or: [{ email }, { googleId }] });
 
     if (!user) {
-      user = new User({ name, email, googleId, isVerified: true });
+      user = new User({ name, email, googleId, profilePicture: picture || '', provider: 'google', isVerified: true });
+      await user.save();
+    } else if (!user.googleId) {
+      user.googleId = googleId;
+      user.provider = 'google';
+      user.isVerified = true;
+      if (!user.profilePicture && picture) user.profilePicture = picture;
       await user.save();
     }
 
-    const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const jwtToken = createAuthToken(user._id);
 
-    res.json({ token: jwtToken, user });
+    res.json({ token: jwtToken, user: publicUser(user) });
   } catch (error) {
-    res.status(500).json({ message: "Google Login Failed", error });
+    console.error('Google login failed:', error);
+    res.status(500).json({ message: "Google sign-in could not be completed" });
   }
 };

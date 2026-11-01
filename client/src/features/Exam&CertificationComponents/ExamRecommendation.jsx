@@ -5,6 +5,8 @@ import "../../styles/Exam styles/ExamRecommendation.css";
 import Navbar from "../../components/LandingPageComponents/Navbar";
 import { API_BASE_URL, CAREER_API_BASE_URL } from '../../config/api';
 import { examRecommendationMockData } from '../../constants/mockData';
+import { fetchWithAiTimeout, USE_LIVE_AI } from '../../config/aiRuntime';
+import { getSessionAiResult, getSessionProfile, setSessionAiResult, setSessionProfile } from '../../utils/profileSession';
 
 const ExamRecommendation = () => {
   // State management
@@ -31,65 +33,134 @@ const ExamRecommendation = () => {
     setSavedRecommendations(saved);
   }, []);
 
-  // Fetch backend recommendations
+  const persistRecommendations = async (result) => {
+    setSessionAiResult('examRecommendations', result);
+    const token = sessionStorage.getItem('authToken');
+    if (!token) return;
+
+    try {
+      const response = await fetchWithAiTimeout(`${API_BASE_URL}/api/users/ai-results/examRecommendations`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ result }),
+      });
+      if (!response.ok) throw new Error(`Unable to save recommendations: ${response.status}`);
+    } catch (saveError) {
+      console.warn('Unable to save exam recommendations.', saveError);
+    }
+  };
+
+  // Hydrate the last generated result without asking the LLM for another
+  // response. Generation is opt-in through generateRecommendations.
   useEffect(() => {
-    const fetchRecommendations = async () => {
+    let cancelled = false;
+    const loadSavedRecommendations = async () => {
       setIsLoading(true);
-      setError(null);
+      const token = sessionStorage.getItem('authToken');
+      const cachedRecommendations = getSessionAiResult('examRecommendations');
+      if (Array.isArray(cachedRecommendations)) {
+        if (!cancelled) {
+          setRecommendations(cachedRecommendations);
+          setIsLoading(false);
+        }
+        return;
+      }
+      if (!token) {
+        if (!cancelled) setIsLoading(false);
+        return;
+      }
+
       try {
-        const token = sessionStorage.getItem('authToken');
-        const profileResponse = await fetch(`${API_BASE_URL}/api/users/profile`, {
+        const response = await fetchWithAiTimeout(`${API_BASE_URL}/api/users/ai-results/examRecommendations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        if (!cancelled && Array.isArray(payload?.result)) {
+          setRecommendations(payload.result);
+          setSessionAiResult('examRecommendations', payload.result);
+        }
+      } catch (loadError) {
+        console.warn('Unable to load saved exam recommendations.', loadError);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    loadSavedRecommendations();
+    return () => { cancelled = true; };
+  }, []);
+
+  const generateRecommendations = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if (!USE_LIVE_AI) {
+        setRecommendations(examRecommendationMockData);
+        await persistRecommendations(examRecommendationMockData);
+        return;
+      }
+
+      const token = sessionStorage.getItem('authToken');
+      if (!token) throw new Error('Sign in to generate exam recommendations.');
+      let profile = getSessionProfile();
+      if (!profile) {
+        const profileResponse = await fetchWithAiTimeout(`${API_BASE_URL}/api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!profileResponse.ok) throw new Error('Unable to load profile');
-
-        const profile = await profileResponse.json();
-        const res = await fetch(`${CAREER_API_BASE_URL}/api/v1/recommend-exams`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            education: {
-              highestLevel: profile.education?.highestLevel || null,
-              fieldOfStudy: profile.education?.fieldOfStudy || null,
-              institution: profile.education?.institution || null,
-              graduationYear: profile.education?.graduationYear || null,
-            },
-            skills: {
-              technicalSkills: profile.skills?.technicalSkills || [],
-              softSkills: profile.skills?.softSkills || [],
-            },
-            careerInfo: {
-              careerGoals: profile.careerInfo?.careerGoals || [],
-              desiredIndustries: profile.careerInfo?.desiredIndustries || [],
-            },
-            experience: {
-              currentRole: profile.experience?.currentRole || null,
-              yearsOfExperience: Number(profile.experience?.yearsOfExperience) || 0,
-            },
-            preferences: { personalityType: profile.preferences?.personalityType || null },
-          }),
-        });
-        if (!res.ok) throw new Error(`Exam recommendation request failed: ${res.status}`);
-        const data = await res.json();
-        if (Array.isArray(data.recommendations) && data.recommendations.length) {
-          setRecommendations(data.recommendations);
-        } else {
-          throw new Error(data.error || 'The service returned no recommendations');
-        }
-        
-        setIsLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch recommendations", err);
-        setRecommendations(examRecommendationMockData);
-        setIsLoading(false);
-        
+        profile = await profileResponse.json();
+        setSessionProfile(profile);
       }
-    };
-    
-    fetchRecommendations();
-  }, []);
+      const res = await fetchWithAiTimeout(`${CAREER_API_BASE_URL}/api/v1/recommend-exams`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          education: {
+            highestLevel: profile.education?.highestLevel || null,
+            fieldOfStudy: profile.education?.fieldOfStudy || null,
+            institution: profile.education?.institution || null,
+            graduationYear: profile.education?.graduationYear || null,
+          },
+          skills: {
+            technicalSkills: profile.skills?.technicalSkills || [],
+            softSkills: profile.skills?.softSkills || [],
+          },
+          careerInfo: {
+            careerGoals: profile.careerInfo?.careerGoals || [],
+            desiredIndustries: profile.careerInfo?.desiredIndustries || [],
+          },
+          experience: {
+            currentRole: profile.experience?.currentRole || null,
+            yearsOfExperience: Number(profile.experience?.yearsOfExperience) || 0,
+          },
+          preferences: { personalityType: profile.preferences?.personalityType || null },
+        }),
+      });
+      if (!res.ok) throw new Error(`Exam recommendation request failed: ${res.status}`);
+      const data = await res.json();
+      if (!Array.isArray(data.recommendations) || !data.recommendations.length) {
+        throw new Error(data.error || 'The service returned no recommendations');
+      }
+
+      setRecommendations(data.recommendations);
+      await persistRecommendations(data.recommendations);
+    } catch (generationError) {
+      console.error("Failed to generate recommendations", generationError);
+      // A failure must still leave a complete, useful response visible and
+      // persist it for the next visit, just like a live response.
+      setRecommendations(examRecommendationMockData);
+      await persistRecommendations(examRecommendationMockData);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // GSAP animations
   useEffect(() => {
@@ -308,6 +379,14 @@ const ExamRecommendation = () => {
           <p className="section-description">
             Based on your profile and career goals, these certifications may advance your career path.
           </p>
+          <button
+            type="button"
+            className="generate-ai-button"
+            onClick={generateRecommendations}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Preparing recommendations…' : recommendations.length ? 'Regenerate recommendations' : 'Generate recommendations'}
+          </button>
         </div>
 
         {isLoading ? (
@@ -318,7 +397,12 @@ const ExamRecommendation = () => {
         ) : error ? (
           <div className="error-message">{error}</div>
         ) : recommendations.length === 0 ? (
-          <p className="no-data">No recommendations available.</p>
+          <div className="no-data">
+            <p>Your saved certification guidance will appear here.</p>
+            <button type="button" className="generate-ai-button" onClick={generateRecommendations}>
+              Generate recommendations
+            </button>
+          </div>
         ) : (
           <div className="cards-grid">
             {recommendations.map((rec, index) => (

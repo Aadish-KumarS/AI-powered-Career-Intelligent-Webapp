@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiArrowUpRight, FiBarChart2, FiBookOpen, FiCompass, FiEdit2, FiMail, FiMapPin, FiUserCheck } from 'react-icons/fi';
+import { FiArrowUpRight, FiBarChart2, FiBookOpen, FiCompass, FiEdit2, FiMapPin, FiUserCheck } from 'react-icons/fi';
 import '../../styles/Global Styles/profile-theme.css';
 import '../../styles/UserProfile Styles/UserProfile.css';
 import Navbar from '../LandingPageComponents/Navbar';
@@ -28,6 +28,12 @@ export default function UserProfileView() {
       graduationYear: '',
       fieldOfStudy: '',
     },
+    personalInfo: { currentOccupation: '' },
+    skills: { selectedSkills: [], technicalSkills: [], softSkills: [] },
+    careerInfo: { careerStage: '', careerGoals: [], desiredIndustries: [], desiredRoles: [] },
+    preferences: { personalityType: '', workEnvironment: '', workStyle: [] },
+    experience: { currentRole: '', yearsOfExperience: '', pastRoles: [] },
+    insights: { careerMotivation: '', careerChallenges: '', fiveYearGoal: '' },
   });
   const navigate = useNavigate();
   const token = sessionStorage.getItem('authToken');
@@ -41,9 +47,14 @@ export default function UserProfileView() {
       userData.name,
       userData.location,
       userData.education?.fieldOfStudy,
-      userData.interests?.length,
+      userData.skills?.selectedSkills?.length || userData.skills?.technicalSkills?.length || userData.skills?.softSkills?.length,
+      userData.careerInfo?.careerStage,
+      userData.careerInfo?.desiredRoles?.length,
+      userData.preferences?.workEnvironment,
+      userData.experience?.currentRole || userData.experience?.yearsOfExperience,
+      userData.insights?.fiveYearGoal,
     ].filter(Boolean).length;
-    return Math.round((completedFields / 4) * 100);
+    return Math.round((completedFields / 9) * 100);
   }, [userData]);
 
   const educationSummary = [
@@ -51,6 +62,56 @@ export default function UserProfileView() {
     userData.education?.highestLevel,
   ].filter(Boolean).join(' · ');
   const initial = userData.name?.trim().charAt(0).toUpperCase() || 'U';
+  const formatList = (items, fallback = 'Not added yet') => {
+    const values = (Array.isArray(items) ? items : []).map((item) => {
+      if (typeof item === 'string') return item;
+      return item?.name || item?.skill || item?.title || '';
+    }).filter(Boolean);
+    return values.length ? values.join(' · ') : fallback;
+  };
+  const allSkills = [
+    ...(userData.skills?.selectedSkills || []),
+    ...(userData.skills?.technicalSkills || []),
+    ...(userData.skills?.softSkills || []),
+  ];
+  const profileSections = [
+    {
+      icon: <FiBookOpen aria-hidden="true" />, eyebrow: 'Foundation', title: 'Where you are starting from',
+      details: [
+        ['Education', educationSummary || 'Not added yet'],
+        ['Institution', [userData.education?.institution, userData.education?.graduationYear].filter(Boolean).join(' · ') || 'Not added yet'],
+        ['Location', userData.location || 'Not added yet'],
+        ['Contact', userData.email || 'Not available'],
+      ]
+    },
+    {
+      icon: <FiCompass aria-hidden="true" />, eyebrow: 'Direction', title: 'The work you are aiming for',
+      details: [
+        ['Career stage', userData.careerInfo?.careerStage || 'Not added yet'],
+        ['Target roles', formatList(userData.careerInfo?.desiredRoles)],
+        ['Industries', formatList(userData.careerInfo?.desiredIndustries)],
+        ['Career goals', formatList(userData.careerInfo?.careerGoals)],
+      ]
+    },
+    {
+      icon: <FiBarChart2 aria-hidden="true" />, eyebrow: 'Capability', title: 'Experience and skills to build on',
+      details: [
+        ['Current role', userData.experience?.currentRole || userData.personalInfo?.currentOccupation || 'Early career'],
+        ['Experience', userData.experience?.yearsOfExperience ? `${userData.experience.yearsOfExperience} years` : 'Not added yet'],
+        ['Skills', formatList(allSkills)],
+        ['Past roles', formatList(userData.experience?.pastRoles)],
+      ]
+    },
+    {
+      icon: <FiUserCheck aria-hidden="true" />, eyebrow: 'Working style', title: 'How you want your career to feel',
+      details: [
+        ['Environment', userData.preferences?.workEnvironment || 'Not added yet'],
+        ['Work style', formatList(userData.preferences?.workStyle)],
+        ['Motivation', userData.insights?.careerMotivation || 'Not added yet'],
+        ['Five-year goal', userData.insights?.fiveYearGoal || 'Not added yet'],
+      ]
+    },
+  ];
   const actions = [
     {
       icon: <FiCompass aria-hidden="true" />,
@@ -132,23 +193,20 @@ export default function UserProfileView() {
           <h2>Profile details</h2>
           <p>A clear record of the information guiding your career experience.</p>
         </div>
-        <div className="profile-details-grid">
-          <article className="profile-detail-card">
-            <FiMapPin aria-hidden="true" />
-            <span>Location</span>
-            <strong>{userData.location || 'Not added yet'}</strong>
-          </article>
-          <article className="profile-detail-card">
-            <FiBookOpen aria-hidden="true" />
-            <span>Education</span>
-            <strong>{educationSummary || 'Not added yet'}</strong>
-            {userData.education?.institution && <small>{userData.education.institution}</small>}
-          </article>
-          <article className="profile-detail-card">
-            <FiMail aria-hidden="true" />
-            <span>Email</span>
-            <strong>{userData.email || 'Not available'}</strong>
-          </article>
+        <div className="profile-story-grid">
+          {profileSections.map(({ icon, eyebrow, title, details }) => (
+            <article className="profile-story-card" key={title}>
+              <div className="profile-story-heading">
+                <span className="profile-story-icon">{icon}</span>
+                <div><p>{eyebrow}</p><h3>{title}</h3></div>
+              </div>
+              <dl className="profile-story-list">
+                {details.map(([label, value]) => (
+                  <div key={label}><dt>{label}</dt><dd>{value}</dd></div>
+                ))}
+              </dl>
+            </article>
+          ))}
         </div>
         <div className="profile-detail-footer">
           <span>{userData.interests?.length || 0} saved interest{userData.interests?.length === 1 ? '' : 's'}</span>
@@ -174,6 +232,7 @@ export default function UserProfileView() {
               <div className="profile-meta">
                 {userData.location && <span><FiMapPin aria-hidden="true" /> {userData.location}</span>}
                 {userData.education?.fieldOfStudy && <span><FiBookOpen aria-hidden="true" /> {userData.education.fieldOfStudy}</span>}
+                {userData.careerInfo?.desiredRoles?.[0] && <span><FiCompass aria-hidden="true" /> {userData.careerInfo.desiredRoles[0]}</span>}
               </div>
             </div>
           </div>

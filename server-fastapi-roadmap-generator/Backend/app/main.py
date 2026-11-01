@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
@@ -8,6 +8,7 @@ import httpx
 import time
 import logging
 import re
+import asyncio
 
 from app.models.roadmapModel import Roadmap
 from app.crud.roadmapCRUD import save_roadmap
@@ -41,14 +42,18 @@ app.add_middleware(
 
 # 📦 Request model
 class RoadmapRequest(BaseModel):
-    goal: str
+    goal: str = Field(min_length=2, max_length=160)
 
 class RoadmapSaveRequest(BaseModel):
     roadmap: dict
 
 # 📄 Load API Key and model from env
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-LLM_MODEL = os.getenv("LLM_MODEL", "llama3-8b-8192")
+# The former llama3-8b-8192 default is retired. Deployments can still supply a
+# preferred model through LLM_MODEL without any prompt or response changes.
+LLM_MODEL = os.getenv("LLM_MODEL", "openai/gpt-oss-20b")
+MAX_COMPLETION_TOKENS = max(1024, int(os.getenv("ROADMAP_MAX_COMPLETION_TOKENS", "12000")))
+MAX_PROVIDER_RETRIES = 2
 
 # Logger setup
 logging.basicConfig(level=logging.INFO)
@@ -109,7 +114,7 @@ def parse_roadmap_json(content: object) -> dict:
 @app.post("/generate-roadmap")
 async def generate_roadmap(req: RoadmapRequest, _: str = Depends(get_current_user_id)):
     if not GROQ_API_KEY:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Missing GROQ_API_KEY in .env")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Roadmap generation is not configured")
 
     prompt = f"""
     You are an expert career path architect. Create a detailed, step-by-step progressive roadmap for becoming a {req.goal}.
@@ -198,36 +203,53 @@ async def generate_roadmap(req: RoadmapRequest, _: str = Depends(get_current_use
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.3,
-            "max_completion_tokens": 20000,
+            "max_completion_tokens": MAX_COMPLETION_TOKENS,
             "response_format": {"type": "json_object"}
         }
 
-        async with httpx.AsyncClient(timeout=httpx.Timeout(90.0, connect=10.0)) as client:
-            response = await client.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=30.0
-            )
+        async with httpx.AsyncClient(timeout=httpx.Timeout(75.0, connect=10.0)) as client:
+            for attempt in range(MAX_PROVIDER_RETRIES + 1):
+                response = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                )
+                if response.status_code not in {429, 500, 502, 503, 504}:
+                    response.raise_for_status()
+                    break
+                if attempt == MAX_PROVIDER_RETRIES:
+                    response.raise_for_status()
+                retry_after = response.headers.get("Retry-After")
+                try:
+                    delay = min(max(float(retry_after), 0.25), 4.0) if retry_after else min(2 ** attempt, 4.0)
+                except ValueError:
+                    delay = min(2 ** attempt, 4.0)
+                await asyncio.sleep(delay)
 
         elapsed = time.time() - start_time
         logger.info(f"⚡ LLM response took {elapsed:.2f} seconds")
 
         response.raise_for_status()
         result = response.json()
-        content = result["choices"][0]["message"]["content"]
+        content = result.get("choices", [{}])[0].get("message", {}).get("content")
 
         return parse_roadmap_json(content)
 
     except httpx.HTTPStatusError as e:
-        logger.error("Roadmap provider returned %s", e.response.status_code)
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The roadmap provider could not complete the request")
+        provider_status = e.response.status_code
+        logger.error("Roadmap provider returned %s", provider_status)
+        response_status = (
+            status.HTTP_503_SERVICE_UNAVAILABLE
+            if provider_status == 429 or provider_status >= 500
+            else status.HTTP_502_BAD_GATEWAY
+        )
+        raise HTTPException(status_code=response_status, detail="The roadmap provider could not complete the request")
 
     except httpx.RequestError as e:
         logger.error("Roadmap provider request failed: %s", e)
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="The roadmap provider is temporarily unavailable")
 
-    except Exception as e:
+    except (KeyError, IndexError, TypeError, ValueError) as e:
         logger.exception("Roadmap generation failed")
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="The generated roadmap was incomplete. Please try again.")
 

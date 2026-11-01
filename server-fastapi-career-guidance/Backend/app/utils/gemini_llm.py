@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 try:
     import google.generativeai as genai
 except ImportError:  # Optional integration; the core API still runs without it.
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 from typing import Dict, Any, List
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 class GeminiService:
     def __init__(self):
@@ -93,8 +95,8 @@ class GeminiService:
             # If we got here, something went wrong with parsing
             raise ValueError("Could not parse LLM response as JSON")
             
-        except Exception as e:
-            print(f"Gemini API Error: {e}")
+        except Exception:
+            logger.exception("Gemini recommendation request failed")
             return []
     
     def generate_skill_documentation(self, skill: str) -> Dict[str, Any]:
@@ -160,8 +162,8 @@ class GeminiService:
                     return json.loads(json_text)
                 raise ValueError("Could not parse LLM response as JSON")
                 
-        except Exception as e:
-            print(f"Gemini API Error: {e}")
+        except Exception:
+            logger.exception("Gemini documentation request failed")
             return {
                 "skill_name": skill,
                 "description": "Error generating documentation",

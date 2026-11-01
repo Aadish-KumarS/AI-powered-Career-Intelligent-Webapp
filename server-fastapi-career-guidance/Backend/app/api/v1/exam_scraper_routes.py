@@ -1,6 +1,7 @@
+import asyncio
+
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict, Any
-from fastapi_cache.decorator import cache
 
 # Import your scraper
 from app.scrapers.exam_scraper import ExamScraper
@@ -20,9 +21,11 @@ async def get_upcoming_exams():
         scraper = ExamScraper()
         
         # Combine results from different sources
-        nta_exams = scraper.scrape_nta_exams()
-        upsc_exams = scraper.scrape_upsc_exams()
-        aws_certs = scraper.scrape_aws_certifications()
+        nta_exams, upsc_exams, aws_certs = await asyncio.gather(
+            asyncio.to_thread(scraper.scrape_nta_exams),
+            asyncio.to_thread(scraper.scrape_upsc_exams),
+            asyncio.to_thread(scraper.scrape_aws_certifications),
+        )
         
         all_exams = nta_exams + upsc_exams + aws_certs
         
@@ -34,8 +37,8 @@ async def get_upcoming_exams():
         
         return all_exams
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching exams: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=502, detail="Exam sources are temporarily unavailable. Please retry shortly.")
 
 @router.get("/source/{source}", response_model=List[Dict[str, Any]])
 # @cache(expire=3600)  # Cache for 1 hour
@@ -44,17 +47,19 @@ async def get_exams_by_source(source: str):
     try:
         scraper = ExamScraper()
         
-        if source.lower() == "nta":
-            return scraper.scrape_nta_exams()
-        elif source.lower() == "upsc":
-            return scraper.scrape_upsc_exams()
-        elif source.lower() == "aws":
-            return scraper.scrape_aws_certifications()
-        else:
+        source_fetchers = {
+            "nta": scraper.scrape_nta_exams,
+            "upsc": scraper.scrape_upsc_exams,
+            "aws": scraper.scrape_aws_certifications,
+        }
+        fetcher = source_fetchers.get(source.lower())
+        if not fetcher:
             raise HTTPException(status_code=404, detail=f"Source {source} not supported")
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching exams: {str(e)}")
+        return await asyncio.to_thread(fetcher)
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=502, detail="Exam source is temporarily unavailable. Please retry shortly.")
 
 @router.get("/store", response_model=Dict[str, Any])
 async def store_exams_in_db(db=Depends(get_database)):
@@ -63,9 +68,11 @@ async def store_exams_in_db(db=Depends(get_database)):
         scraper = ExamScraper()
         
         # Fetch from all sources
-        nta_exams = scraper.scrape_nta_exams()
-        upsc_exams = scraper.scrape_upsc_exams()
-        aws_certs = scraper.scrape_aws_certifications()
+        nta_exams, upsc_exams, aws_certs = await asyncio.gather(
+            asyncio.to_thread(scraper.scrape_nta_exams),
+            asyncio.to_thread(scraper.scrape_upsc_exams),
+            asyncio.to_thread(scraper.scrape_aws_certifications),
+        )
         
         all_exams = nta_exams + upsc_exams + aws_certs
         
@@ -77,5 +84,5 @@ async def store_exams_in_db(db=Depends(get_database)):
         else:
             return {"status": "success", "inserted": 0}
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error storing exams: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=502, detail="Unable to refresh exam data right now. Please retry shortly.")

@@ -5,7 +5,7 @@ import Navbar from '../components/LandingPageComponents/Navbar';
 import '../styles/Dashboard.css';
 
 const tools = [
-  { icon: FiCompass, title: 'Career guidance', copy: 'Find the three roles that best fit your profile.', to: '/services/career-guid/onboarding', tag: 'Start here' },
+  { icon: FiCompass, title: 'Career guidance', copy: 'Find the three roles that best fit your profile.', to: '/services/career-guid/career-recommendation', tag: 'Explore' },
   { icon: FiBarChart2, title: 'Career analysis', copy: 'Understand strengths, skill gaps, and the market around you.', to: '/services/career-guid/career-analysis', tag: 'Explore' },
   { icon: FiMap, title: 'Roadmap generator', copy: 'Turn a goal into a practical, paced learning plan.', to: '/services/generate-roadmap', tag: 'Build a plan' },
 ];
@@ -19,7 +19,7 @@ export default function Dashboard() {
           <p className="dashboard-kicker">Your career workspace</p>
           <h1>Make your next move<br /><em>with clarity.</em></h1>
           <p className="dashboard-copy">Use one focused step at a time. We’ll keep your direction, evidence, and next actions in one place.</p>
-          <Link className="dashboard-primary-link" to="/services/career-guid/onboarding">Start my career guidance <FiArrowUpRight /></Link>
+          <Link className="dashboard-primary-link" to="/services/career-guid/career-recommendation">Open career guidance <FiArrowUpRight /></Link>
         </section>
 
         <section className="dashboard-rail" aria-label="Getting started">

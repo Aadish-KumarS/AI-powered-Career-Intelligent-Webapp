@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import HTTPException,APIRouter
 from typing import List, Optional
 
@@ -13,6 +15,7 @@ from app.db.learning_path_db import SkillDatabase
 from app.utils.gemini_llm import GeminiService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Create the optional provider lazily. A missing Gemini key must not prevent
 # career analysis, exams, and authentication routes from starting.
@@ -45,8 +48,8 @@ async def create_skill(request: CreateSkillRequest):
         if documentation:
             doc_model = SkillDocumentation(**documentation)
             db.save_skill_documentation(skill_id, doc_model)
-    except Exception as e:
-        print(f"Error generating documentation: {e}")
+    except Exception:
+        logger.exception("Error generating learning-path documentation")
         # Continue even if documentation generation fails
     
     # Get learning recommendations
@@ -55,8 +58,8 @@ async def create_skill(request: CreateSkillRequest):
         recommendations = service.get_learning_recommendations(request.skill_name) if service else []
         if recommendations:
             db.save_recommendations(skill_id, recommendations)
-    except Exception as e:
-        print(f"Error generating recommendations: {e}")
+    except Exception:
+        logger.exception("Error generating learning-path recommendations")
         # Continue even if recommendations generation fails
     
     return db.get_skill(skill_id)

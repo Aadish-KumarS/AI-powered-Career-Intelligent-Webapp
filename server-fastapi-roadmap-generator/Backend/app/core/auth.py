@@ -1,4 +1,5 @@
 import base64
+import binascii
 import hashlib
 import hmac
 import json
@@ -23,6 +24,9 @@ async def get_current_user_id(authorization: Optional[str] = Header(default=None
     token = authorization.removeprefix('Bearer ')
     try:
         header, payload, signature = token.split('.')
+        token_header = json.loads(_decode_part(header))
+        if token_header.get('alg') != 'HS256':
+            raise ValueError('Unsupported signing algorithm')
         expected_signature = hmac.new(
             secret.encode(), f'{header}.{payload}'.encode(), hashlib.sha256
         ).digest()
@@ -33,5 +37,5 @@ async def get_current_user_id(authorization: Optional[str] = Header(default=None
         if claims.get('exp', 0) < __import__('time').time() or not claims.get('id'):
             raise ValueError('Expired or invalid token')
         return claims['id']
-    except (ValueError, KeyError, json.JSONDecodeError):
+    except (ValueError, KeyError, json.JSONDecodeError, binascii.Error):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid or expired token')

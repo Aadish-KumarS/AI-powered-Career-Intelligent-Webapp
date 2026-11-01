@@ -5,6 +5,11 @@ from typing import List, Dict, Any, Optional
 import json
 from app.models.learning_path_model import SkillProgress, ResourceProgress, SkillDocumentation
 
+
+def _model_json(model: Any) -> str:
+    """Support the project's FastAPI/Pydantic v1 and v2 dependency ranges."""
+    return model.model_dump_json() if hasattr(model, "model_dump_json") else model.json()
+
 class SkillDatabase:
     def __init__(self, db_path: str = "skills_db"):
         self.db_path = db_path
@@ -30,7 +35,7 @@ class SkillDatabase:
         # Save to file
         file_path = os.path.join(self.skills_dir, f"{skill_id}.json")
         with open(file_path, 'w') as f:
-            f.write(skill_progress.model_dump_json())
+            f.write(_model_json(skill_progress))
         
         return skill_id
     
@@ -117,7 +122,7 @@ class SkillDatabase:
         # Save updated skill
         file_path = os.path.join(self.skills_dir, f"{skill_id}.json")
         with open(file_path, 'w') as f:
-            f.write(skill.model_dump_json())
+            f.write(_model_json(skill))
         
         return True
     
@@ -126,7 +131,7 @@ class SkillDatabase:
         file_path = os.path.join(self.docs_dir, f"{skill_id}.json")
         
         with open(file_path, 'w') as f:
-            f.write(documentation.model_dump_json())
+            f.write(_model_json(documentation))
         
         return True
     
@@ -176,7 +181,7 @@ class SkillDatabase:
             # Save updated skill
             file_path = os.path.join(self.skills_dir, f"{skill_id}.json")
             with open(file_path, 'w') as f:
-                f.write(skill.model_dump_json())
+                f.write(_model_json(skill))
         
         return True
 

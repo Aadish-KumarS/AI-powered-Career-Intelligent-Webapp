@@ -3,8 +3,9 @@ import gsap from 'gsap';
 import '../../styles/CareerGuid Styles/OnBoarding.css';
 import { handleAddPastRole, handleAddSkill, handleInputChange, handleMultiSelectChange, handlePrevious, handleRemoveSkill, handleSelectChange, selectSuggestion, toggleSection } from '../../utils/MVPformHanderls.js';
 import Navbar from '../../components/LandingPageComponents/Navbar.jsx';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
+import { getSessionProfile, setSessionProfile } from '../../utils/profileSession';
 
 const FORM_STEPS = [
   { name: 'Your Profile', sections: ['personalInfo', 'education'] },
@@ -69,6 +70,8 @@ const OnboardingForm = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const isRegenerationFlow = Boolean(location.state?.regenerate);
   
   const formRef = useRef(null);
   const nextBtnRef = useRef(null);
@@ -208,7 +211,19 @@ const OnboardingForm = () => {
           }
           throw new Error(body.message || 'Unable to save onboarding data');
         }
-        navigate('/services/career-guid/career-recommendation')
+        const savedPayload = await response.json().catch(() => ({}));
+        setSessionProfile(savedPayload.user || {
+          ...formData,
+          onboardingProgress: 100,
+          isFirstTime: false,
+        });
+        navigate('/services/career-guid/career-recommendation', {
+          replace: true,
+          // Only a deliberate regeneration journey should trigger a new
+          // request after the profile is saved. A normal onboarding save
+          // returns to the persisted result and never generates on reload.
+          state: isRegenerationFlow ? { generate: true } : null,
+        });
   
         if (formRef.current) {
           gsap.to(formRef.current, {
@@ -261,6 +276,22 @@ const OnboardingForm = () => {
     const token = sessionStorage.getItem('authToken');
     if (!token) return undefined;
 
+    const cachedProfile = getSessionProfile();
+    if (cachedProfile) {
+      setFormData(prev => ({
+        ...prev,
+        ...cachedProfile,
+        personalInfo: { ...prev.personalInfo, ...(cachedProfile.personalInfo || {}) },
+        education: { ...prev.education, ...(cachedProfile.education || {}) },
+        skills: { ...prev.skills, ...(cachedProfile.skills || {}) },
+        careerInfo: { ...prev.careerInfo, ...(cachedProfile.careerInfo || {}) },
+        preferences: { ...prev.preferences, ...(cachedProfile.preferences || {}) },
+        experience: { ...prev.experience, ...(cachedProfile.experience || {}) },
+        insights: { ...prev.insights, ...(cachedProfile.insights || {}) },
+      }));
+      return undefined;
+    }
+
     let cancelled = false;
     const loadExistingProfile = async () => {
       try {
@@ -270,6 +301,7 @@ const OnboardingForm = () => {
         if (!response.ok) return;
         const profile = await response.json();
         if (cancelled) return;
+        setSessionProfile(profile);
 
         setFormData(prev => ({
           ...prev,

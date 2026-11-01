@@ -361,3 +361,13 @@
   .career-recommendation-container .career-paths-container { display: block !important; }
   .career-recommendation-container .career-content-container { border: 0 !important; }
 }
+
+/* Formatted AI response content stays readable whether it came from the API or fallback data. */
+.career-recommendation-container .formatted-content { display: grid; gap: .7rem; }
+.career-recommendation-container .formatted-content p { margin: 0; color: var(--rt-ink-soft); font-size: .91rem; line-height: 1.72; }
+.career-recommendation-container .formatted-list { display: grid; gap: .58rem; margin: 0; padding: 0; list-style: none; }
+.career-recommendation-container .formatted-list li { position: relative; margin: 0; padding: .72rem .82rem .72rem 2.05rem; border: 1px solid var(--rt-line); border-radius: .72rem; background: #fffefa; color: var(--rt-ink-soft); font-size: .88rem; line-height: 1.62; }
+.career-recommendation-container .formatted-list li::before { position: absolute; top: 1.25rem; left: .85rem; width: .46rem; height: .46rem; border-radius: 50%; background: var(--rt-clay); content: ''; }
+.career-recommendation-container .career-content-container :is(.overview-text, .learning-curve-text, .timeline-description, .strategy-description, .growth-description) { font-size: .89rem; line-height: 1.7; }
+.career-recommendation-container .career-content-container :is(.nav-tab, .path-selector-card, .action-button, .compare-careers-button) { font-size: .8rem; }
+.career-recommendation-container .career-content-container .skill-description { font-size: .84rem; line-height: 1.62; }

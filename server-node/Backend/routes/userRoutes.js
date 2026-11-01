@@ -1,11 +1,13 @@
 import express from "express";
-import validatePassword, { getUserProfile, updateUserProfile, deleteUserAccount, updateOnboarding } from "../controllers/userControllers.js";
+import validatePassword, { getUserProfile, updateUserProfile, deleteUserAccount, updateOnboarding, getAiServiceResult, saveAiServiceResult } from "../controllers/userControllers.js";
 import { authenticateUser } from "../middleware/authMiddleware.js";
 import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
 router.get("/profile", authenticateUser, getUserProfile);
+router.get('/ai-results/:service', authenticateUser, getAiServiceResult);
+router.put('/ai-results/:service', authenticateUser, saveAiServiceResult);
 router.put("/create-profile", authenticateUser, updateUserProfile);
 router.put("/update-profile", authenticateUser, updateUserProfile);
 router.delete("/delete-account", authenticateUser, deleteUserAccount);

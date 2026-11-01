@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../../styles/Career analysis styles/SkillGapResult.css';
 import AppState from '../../components/AppState';
 
@@ -8,15 +8,8 @@ const asRecord = (value) => value && typeof value === 'object' && !Array.isArray
 const SkillGapResult = ({ analysisData }) => {
   // State for expandable sections
   const [expandedSections, setExpandedSections] = useState({
-    strengths: false,
-    skillLevels: false,
-    transferableSkills: false,
     skillGaps: {},
     learningPath: {},
-    insights: false,
-    career: false,
-    networking: false,
-    portfolio: false
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -26,25 +19,22 @@ const SkillGapResult = ({ analysisData }) => {
     
     const result = asRecord(analysisData?.result);
     const assessment = asRecord(result.skill_assessment);
-    const skillGaps = Object.keys(asRecord(assessment.skill_gaps)).reduce((sections, roleKey) => {
-      sections[roleKey] = false;
+    const skillGaps = Object.keys(asRecord(assessment.skill_gaps)).reduce((sections, roleKey, index) => {
+      // Surface one concrete next step immediately; further role detail stays
+      // available without making the report feel like a wall of open panels.
+      sections[roleKey] = index === 0;
       return sections;
     }, {});
     const learningPath = Object.keys(asRecord(result.learning_path)).reduce((sections, pathKey) => {
-      sections[pathKey] = false;
+      // Learning resources are part of the reading flow, so they are visible
+      // immediately. Users can still collapse an individual resource group.
+      sections[pathKey] = true;
       return sections;
     }, {});
 
     setExpandedSections({
-      strengths: false,
-      skillLevels: false,
-      transferableSkills: false,
       skillGaps,
       learningPath,
-      insights: false,
-      career: false,
-      networking: false,
-      portfolio: false
     });
     setIsLoading(false);
   }, [analysisData]);
@@ -57,11 +47,6 @@ const SkillGapResult = ({ analysisData }) => {
           ...prev[section],
           [subsection]: !prev[section][subsection]
         }
-      }));
-    } else {
-      setExpandedSections(prev => ({
-        ...prev,
-        [section]: !prev[section]
       }));
     }
   };
@@ -98,47 +83,53 @@ const SkillGapResult = ({ analysisData }) => {
   };
   const networking_recommendations = asArray(result.networking_recommendations);
   const portfolio_recommendations = asArray(result.portfolio_recommendations);
+  const roleGapEntries = Object.entries(skill_assessment.skill_gaps);
+  const learningPathEntries = Object.entries(learning_path);
 
   return (
     <div className="skill-gap-container">
       <h1 className="skill-gap-title">Your Skill Assessment Results</h1>
+
+      <section className="skill-gap-overview" aria-label="Skill assessment summary">
+        <div className="overview-stat overview-stat--strengths">
+          <span>{String(skill_assessment.current_strengths.length).padStart(2, '0')}</span>
+          <small>strengths to build on</small>
+        </div>
+        <div className="overview-stat overview-stat--gaps">
+          <span>{String(roleGapEntries.length).padStart(2, '0')}</span>
+          <small>career directions assessed</small>
+        </div>
+        <div className="overview-stat overview-stat--paths">
+          <span>{String(learningPathEntries.length).padStart(2, '0')}</span>
+          <small>learning tracks ready</small>
+        </div>
+      </section>
       
       {/* Current Strengths Section */}
       <div className="skill-gap-section">
-        <div 
-          className="section-header" 
-          onClick={() => toggleSection('strengths')}
-        >
+        <div className="section-header">
           <h2>Current Strengths</h2>
-          <span className={`expand-icon ${expandedSections.strengths ? 'expanded' : ''}`}>+</span>
         </div>
         
-        {expandedSections.strengths && (
-          <div className="section-content strengths-content">
-            <ul className="skills-list">
-              {skill_assessment.current_strengths.map((strength, index) => (
-                <li key={index} className="strength-item">
-                  <span className="strength-badge">{strength}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="section-content strengths-content">
+          <ul className="skills-list">
+            {skill_assessment.current_strengths.map((strength, index) => (
+              <li key={index} className="strength-item">
+                <span className="strength-badge">{strength}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {/* Current Skill Levels Section */}
       <div className="skill-gap-section">
-        <div 
-          className="section-header" 
-          onClick={() => toggleSection('skillLevels')}
-        >
+        <div className="section-header">
           <h2>Current Skill Levels</h2>
-          <span className={`expand-icon ${expandedSections.skillLevels ? 'expanded' : ''}`}>+</span>
         </div>
         
-        {expandedSections.skillLevels && (
-          <div className="section-content">
-            {Object.entries(skill_assessment.current_skill_levels).map(([skill, description], index) => {
+        <div className="section-content">
+          {Object.entries(skill_assessment.current_skill_levels).map(([skill, description], index) => {
               const skillDescription = typeof description === 'string'
                 ? description
                 : String(description?.description || '');
@@ -156,30 +147,23 @@ const SkillGapResult = ({ analysisData }) => {
                   <p className="skill-description">{cleanDescription}</p>
                 </div>
               );
-            })}
-          </div>
-        )}
+          })}
+        </div>
       </div>
 
       {/* Transferable Skills Section */}
       <div className="skill-gap-section">
-        <div 
-          className="section-header" 
-          onClick={() => toggleSection('transferableSkills')}
-        >
+        <div className="section-header">
           <h2>Transferable Skills</h2>
-          <span className={`expand-icon ${expandedSections.transferableSkills ? 'expanded' : ''}`}>+</span>
         </div>
         
-        {expandedSections.transferableSkills && (
-          <div className="section-content">
-            <ul className="transferable-skills-list">
-              {skill_assessment.transferable_skills.map((skill, index) => (
-                <li key={index} className="transferable-skill-item">{skill}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="section-content">
+          <ul className="transferable-skills-list">
+            {skill_assessment.transferable_skills.map((skill, index) => (
+              <li key={index} className="transferable-skill-item">{skill}</li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {/* Skill Gaps Section */}
@@ -189,22 +173,24 @@ const SkillGapResult = ({ analysisData }) => {
         </div>
         
         {/* Render each role's skill gaps */}
-        {Object.entries(skill_assessment.skill_gaps).map(([roleKey, roleData], index) => {
+        {roleGapEntries.map(([roleKey, roleData], index) => {
           const safeRoleData = asRecord(roleData);
           const role = roleKey.replace(/_/g, ' ');
           const priorityLevel = String(safeRoleData.priority_level || safeRoleData.priority || 'Medium');
           return (
             <div key={index} className="role-gap-container">
-              <div 
+              <button
+                type="button"
                 className="role-header" 
                 onClick={() => toggleSection('skillGaps', roleKey)}
+                aria-expanded={expandedSections.skillGaps[roleKey]}
               >
                 <h3>{role}</h3>
                 <span className={`priority-badge ${priorityLevel.toLowerCase()}`}>
                   Priority: {priorityLevel}
                 </span>
                 <span className={`expand-icon ${expandedSections.skillGaps[roleKey] ? 'expanded' : ''}`}>+</span>
-              </div>
+              </button>
               
               {expandedSections.skillGaps[roleKey] && (
                 <div className="role-content">
@@ -260,18 +246,20 @@ const SkillGapResult = ({ analysisData }) => {
         </div>
         
         {/* Render each learning path */}
-        {Object.entries(learning_path).map(([pathKey, pathData], index) => {
+        {learningPathEntries.map(([pathKey, pathData], index) => {
           const safePathData = asRecord(pathData);
           const pathName = pathKey.replace(/_/g, ' ');
           return (
             <div key={index} className="learning-path-container">
-              <div 
+              <button
+                type="button"
                 className="path-header" 
                 onClick={() => toggleSection('learningPath', pathKey)}
+                aria-expanded={expandedSections.learningPath[pathKey]}
               >
                 <h3>{pathName}</h3>
                 <span className={`expand-icon ${expandedSections.learningPath[pathKey] ? 'expanded' : ''}`}>+</span>
-              </div>
+              </button>
               
               {expandedSections.learningPath[pathKey] && (
                 <div className="path-content">
@@ -328,17 +316,12 @@ const SkillGapResult = ({ analysisData }) => {
 
       {/* Industry Insights Section */}
       <div className="skill-gap-section">
-        <div 
-          className="section-header" 
-          onClick={() => toggleSection('insights')}
-        >
+        <div className="section-header">
           <h2>Industry Insights</h2>
-          <span className={`expand-icon ${expandedSections.insights ? 'expanded' : ''}`}>+</span>
         </div>
         
-        {expandedSections.insights && (
-          <div className="section-content">
-            <div className="insights-container">
+        <div className="section-content">
+          <div className="insights-container">
               <div className="insight-column">
                 <h3>Market Trends</h3>
                 <ul>
@@ -365,24 +348,18 @@ const SkillGapResult = ({ analysisData }) => {
                   ))}
                 </ul>
               </div>
-            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Career Trajectory Section */}
       <div className="skill-gap-section">
-        <div 
-          className="section-header" 
-          onClick={() => toggleSection('career')}
-        >
+        <div className="section-header">
           <h2>Career Trajectory</h2>
-          <span className={`expand-icon ${expandedSections.career ? 'expanded' : ''}`}>+</span>
         </div>
         
-        {expandedSections.career && (
-          <div className="section-content">
-            <div className="trajectory-container">
+        <div className="section-content">
+          <div className="trajectory-container">
               <div className="goal-column">
                 <h3>Short Term Goals</h3>
                 <ul className="goal-list">
@@ -409,56 +386,43 @@ const SkillGapResult = ({ analysisData }) => {
                   ))}
                 </ul>
               </div>
-            </div>
-            
-            <div className="timeline">
-              <h3>Estimated Timeline</h3>
-              <p>{career_trajectory.estimated_timeline}</p>
-            </div>
           </div>
-        )}
+
+          <div className="timeline">
+            <h3>Estimated Timeline</h3>
+            <p>{career_trajectory.estimated_timeline}</p>
+          </div>
+        </div>
       </div>
 
       {/* Networking Recommendations Section */}
       <div className="skill-gap-section">
-        <div 
-          className="section-header" 
-          onClick={() => toggleSection('networking')}
-        >
+        <div className="section-header">
           <h2>Networking Recommendations</h2>
-          <span className={`expand-icon ${expandedSections.networking ? 'expanded' : ''}`}>+</span>
         </div>
         
-        {expandedSections.networking && (
-          <div className="section-content">
-            <ul className="networking-list">
-              {networking_recommendations.map((recommendation, index) => (
-                <li key={index} className="networking-item">{recommendation}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="section-content">
+          <ul className="networking-list">
+            {networking_recommendations.map((recommendation, index) => (
+              <li key={index} className="networking-item">{recommendation}</li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {/* Portfolio Recommendations Section */}
       <div className="skill-gap-section">
-        <div 
-          className="section-header" 
-          onClick={() => toggleSection('portfolio')}
-        >
+        <div className="section-header">
           <h2>Portfolio Recommendations</h2>
-          <span className={`expand-icon ${expandedSections.portfolio ? 'expanded' : ''}`}>+</span>
         </div>
         
-        {expandedSections.portfolio && (
-          <div className="section-content">
-            <ul className="portfolio-list">
-              {portfolio_recommendations.map((recommendation, index) => (
-                <li key={index} className="portfolio-item">{recommendation}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="section-content">
+          <ul className="portfolio-list">
+            {portfolio_recommendations.map((recommendation, index) => (
+              <li key={index} className="portfolio-item">{recommendation}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
